@@ -1,0 +1,23 @@
+.main-container {
+    padding: 2.5rem;
+    width: 100vw;
+    height: calc(100vh - 5rem);
+    display: flex;
+}
+
+.left {
+    height: 500px;
+    width: 200px;
+    background-color: #B6C8D9;
+}
+
+.left, .right {
+    border: solid #0056A3 1px;
+    border-radius: 8px;
+    margin-right: 25px;
+}
+
+.right {
+    height: 100%;
+    width: 100%;
+}
