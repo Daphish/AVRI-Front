@@ -87,8 +87,50 @@
     border-radius: 5px;
     word-break: break-word;
     max-width: 80%;
+    margin-bottom: 10px;
+    display: flex;
 }
 
 .title {
     font-size: 2rem;
+}
+
+.welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.no-welcome {
+    display: none;
+}
+
+.welcome-title, .welcome-body {
+    color: #21405F;
+}
+
+.welcome-title {
+    font-weight: bold;
+    font-size: 3rem;
+}
+
+.welcome-img {
+    height: auto;
+    width: 10rem;
+}
+
+.welcome-body {
+    margin-top: 10px;
+    font-size: 1.5rem;
+}
+
+.system-avatar-container {
+    height: 100%;
+    width: 1.5rem;
+    margin-right: 10px;
+}
+
+.system-avatar {
+    width: 1.5rem;
+    height: auto;
 }

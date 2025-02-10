@@ -4,7 +4,15 @@
     </div>
     <div class="right">
         <div class="chat-container" #chatContainer>
+            <div [ngClass]="{'welcome': messages.length === 0, 'no-welcome': messages.length !== 0}">
+                <div class="welcome-title">¡Bienvenido!</div>
+                <img class="welcome-img" src="/Logo-AVRI.png"/>
+                <div class="welcome-body">¿Cómo puedo ayudar el día de hoy?</div>
+            </div>
             <div *ngFor="let message of messages" [ngClass]="{'message-user': message.sender === 'user', 'message-system': message.sender === 'system'}">
+                <div [ngClass]="{'no-welcome': message.sender === 'user', 'system-avatar-container': message.sender === 'system'}">
+                    <img class="system-avatar" src="/Logo-AVRI.png" alt="avatar">
+                </div>
                 {{ message.text }}
             </div>
         </div>
