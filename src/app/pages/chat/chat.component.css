@@ -30,7 +30,8 @@
     height: 80%;
     width: 60%;
     display: flex;
-    background-color: black;
+    flex-direction: column;
+    overflow-y: auto;
 }
 
 .chat-input {
@@ -68,4 +69,21 @@
 
 .chat-send-button:hover {
     background-color: #2a527a;
+}
+
+.message-user {
+    align-self: flex-end;
+}
+
+.message-system {
+    align-self: flex-start;
+}
+
+.message-user, .message-system {
+    padding: 10px;
+    margin: 5px;
+    background-color: #B6C8D9;
+    border-radius: 5px;
+    word-break: break-word;
+    max-width: 80%;
 }
