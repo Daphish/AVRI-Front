@@ -1,5 +1,7 @@
 <div class="main-container">
-    <div class="left">Hola</div>
+    <div class="left">
+        <div class="title">Chats</div>
+    </div>
     <div class="right">
         <div class="chat-container" #chatContainer>
             <div *ngFor="let message of messages" [ngClass]="{'message-user': message.sender === 'user', 'message-system': message.sender === 'system'}">

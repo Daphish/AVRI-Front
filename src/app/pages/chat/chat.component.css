@@ -9,20 +9,21 @@
     height: 500px;
     width: 200px;
     background-color: #B6C8D9;
+    padding: 10px;
 }
 
 .left, .right {
     border: solid #0056A3 1px;
     border-radius: 8px;
     margin-right: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .right {
     height: 100%;
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     justify-content: end;
 }
 
@@ -73,6 +74,7 @@
 
 .message-user {
     align-self: flex-end;
+    background-color: #B6C8D9;
 }
 
 .message-system {
@@ -82,8 +84,11 @@
 .message-user, .message-system {
     padding: 10px;
     margin: 5px;
-    background-color: #B6C8D9;
     border-radius: 5px;
     word-break: break-word;
     max-width: 80%;
+}
+
+.title {
+    font-size: 2rem;
 }
