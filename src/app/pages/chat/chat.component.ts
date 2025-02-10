@@ -1,11 +1,8 @@
 import { NgClass, NgFor } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject} from '@angular/core';
 import { FormsModule } from '@angular/forms';
-
-type Message = {
-  text: string;
-  sender: 'user' | 'system';
-};
+import { Message } from '../../interfaces/chat.interface';
+import { ChatService } from '../../services/chat.service';
 
 @Component({
   selector: 'app-chat',
@@ -21,13 +18,24 @@ export class ChatComponent {
 
   newMessage: string = '';
 
+  private chatService = inject(ChatService);
+
   addMessage() {
     if (this.newMessage.trim() !== '') {
       this.messages.push({ text: this.newMessage, sender: 'user'});
+      const messageText = this.newMessage;
       this.newMessage = '';
+      
+      this.chatService.getAnswer(messageText);
       setTimeout(() => {
-        this.messages.push({ text: 'Hola, soy AVRI, ¿en qué puedo ayudarte?', sender: 'system' });
+        const systemMessage = this.chatService.message;
+        if (systemMessage.text) {
+          this.messages.push(systemMessage);
+        }
       }, 1000);
+      /* setTimeout(() => {
+        this.messages.push({ text: 'Hola, soy AVRI, ¿en qué puedo ayudarte?', sender: 'system' });
+      }, 1000); */
     }
   }
 }
