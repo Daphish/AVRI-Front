@@ -21,9 +21,11 @@
 .navbar {
     width: 100vw;
     height: 3rem;
-    background-color: #0056A3;
+    background-color: white;
     display: flex;
     justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .navbar-items {
@@ -31,11 +33,37 @@
     margin: 0;
     padding: 0;
     display: flex;
+    height: 100%;
     align-items: center;
 }
 
 .navbar-items li {
-    font-size: 2rem;
-    margin: 1rem;
+    height: 100%; /* Cada botón ocupa todo el alto del navbar */
+    display: flex;
+    align-items: center;
+}
+
+.navbar-items li a {
+    font-size: 1.2rem;
+    color: #0056A3;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 0 1.5rem;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.navbar-items li a:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     color: white;
+    background-color: #0056A3;
+}
+
+.navbar-items li a:active {
+    background-color: rgb(54, 105, 156);
 }
