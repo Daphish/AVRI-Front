@@ -17,3 +17,25 @@
     width: auto;
     height: 5rem;
 }
+
+.navbar {
+    width: 100vw;
+    height: 3rem;
+    background-color: #0056A3;
+    display: flex;
+    justify-content: center;
+}
+
+.navbar-items {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-items li {
+    font-size: 2rem;
+    margin: 1rem;
+    color: white;
+}
