@@ -1,16 +1,19 @@
 <div class="modal-overlay" (click)="closeModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="avatar-circle">
+            <i class="bi bi-person-fill" style="color: white; font-size: 6rem;"></i>
+        </div>
         <h2>Iniciar Sesión</h2>
         
-        <label for="email">Correo Electrónico</label>
+        <label for="email" style="width: 100%;">Correo Electrónico</label>
         <input type="email" id="email" placeholder="Ejemplo: usuario@email.com">
         
-        <label for="password">Contraseña</label>
+        <label for="password" style="width: 100%;">Contraseña</label>
         <input type="password" id="password" placeholder="********">
         
         <div class="modal-actions">
-        <button class="btn cancel" (click)="closeModal()">Cancelar</button>
-        <button class="btn">Iniciar Sesión</button>
+            <button class="btn cancel" (click)="closeModal()">Cancelar</button>
+            <button class="btn login">Iniciar Sesión</button>
         </div>
     </div>
 </div>
