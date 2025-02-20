@@ -1,39 +1,24 @@
-<div class="main-container">
-    <div class="left">
-        <div class="top-left">
-            <img src="/Logo-AVRI-Alt.png">
-            <div class="left-title">
-                Asistente Virtual RI
+<div class="right">
+    <div class="chat-container-space" #chatContainer>
+        <div class="chat-container">
+            <div [ngClass]="{'welcome': messages.length === 0, 'no-welcome': messages.length !== 0}">
+                <div class="welcome-title">¡Bienvenido!</div>
+                <img class="welcome-img" src="/Logo-AVRI.png"/>
+                <div class="welcome-body">¿Cómo puedo ayudar el día de hoy?</div>
             </div>
-        </div>
-        <button class="new-chat-button">Nueva conversación +</button>
-        <div class="left-chats">Aún no hay chats</div>
-        <div class="left-login">
-            <button class="login-button">Iniciar sesión</button>
+            <div *ngFor="let message of messages" [ngClass]="{'message-user': message.sender === 'user', 'message-system': message.sender === 'system'}">
+                <div [ngClass]="{'no-welcome': message.sender === 'user', 'system-avatar-container': message.sender === 'system'}">
+                    <img class="system-avatar" src="/Logo-AVRI.png" alt="avatar">
+                </div>
+                {{ message.text }}
+            </div>
         </div>
     </div>
-    <div class="right">
-        <div class="chat-container-space" #chatContainer>
-            <div class="chat-container">
-                <div [ngClass]="{'welcome': messages.length === 0, 'no-welcome': messages.length !== 0}">
-                    <div class="welcome-title">¡Bienvenido!</div>
-                    <img class="welcome-img" src="/Logo-AVRI.png"/>
-                    <div class="welcome-body">¿Cómo puedo ayudar el día de hoy?</div>
-                </div>
-                <div *ngFor="let message of messages" [ngClass]="{'message-user': message.sender === 'user', 'message-system': message.sender === 'system'}">
-                    <div [ngClass]="{'no-welcome': message.sender === 'user', 'system-avatar-container': message.sender === 'system'}">
-                        <img class="system-avatar" src="/Logo-AVRI.png" alt="avatar">
-                    </div>
-                    {{ message.text }}
-                </div>
-            </div>
+    <div class="chat-input">
+        <input class="chat-input-box" placeholder="Escribe algo al AVRI" [(ngModel)]="newMessage" (keyup.enter)="addMessage()"/>
+        <div class="chat-send-button" (click)="addMessage()">
+            <i class="bi bi-arrow-up" style="color: white;"></i>
         </div>
-        <div class="chat-input">
-            <input class="chat-input-box" placeholder="Escribe algo al AVRI" [(ngModel)]="newMessage" (keyup.enter)="addMessage()"/>
-            <div class="chat-send-button" (click)="addMessage()">
-                <i class="bi bi-arrow-up" style="color: white;"></i>
-            </div>
-        </div>
-        <div class="white-block"></div>
     </div>
+    <div class="white-block"></div>
 </div>
