@@ -3,7 +3,6 @@
     width: 100vw;
     height: calc(100vh - 8rem);
     display: flex;
-    box-sizing: border-box;
 }
 
 ::ng-deep app-chat {
