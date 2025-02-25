@@ -106,3 +106,14 @@ input:focus {
     background-color: #C8D1D9;
     background-size: 20px;
 }
+
+.error-message {
+    background-color: red;
+    height: 50px;
+    color: white;
+    padding: 5px;
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+}

@@ -8,7 +8,13 @@
     <button class="new-chat-button">Nueva conversación +</button>
     <div class="left-chats">Aún no hay chats</div>
     <div class="left-login">
-        <button class="login-button" (click)="openModal()">Iniciar sesión</button>
+        <button [ngClass]="{'login-button': isLoggedIn === false, 'invisible': isLoggedIn === true}" (click)="openModal()">Iniciar sesión</button>
+        <button [ngClass]="{'account-button': isLoggedIn === true, 'invisible': isLoggedIn === false}">
+            <div class="account-circle">
+                D
+            </div>
+            Daphish
+        </button>
     </div>
 </div>
 <app-login-modal *ngIf="isModalOpen" (closeModalEvent)="closeModal()"></app-login-modal>

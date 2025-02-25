@@ -35,7 +35,7 @@
 }
 
 .new-chat-button:hover {
-    background-color: #eeeeee;
+    background-color: #e2e2e2;
 }
 
 .left-chats {
@@ -48,19 +48,50 @@
     padding: 10px;
 }
 
-.login-button {
-    border-radius: 20px;
-    background-color: #0056A3;
-    padding: 10px;
+.login-button, .account-button {
     cursor: pointer;
     border: none;
     color: white;
-    font-weight: bold;
     width: 100%;
     font-size: 1rem;
     transition: all 0.3s ease;
 }
 
+.login-button {
+    border-radius: 20px;
+    background-color: #0056A3;
+    font-weight: bold;
+    padding: 10px;
+}
+
 .login-button:hover {
     background-color: rgb(54, 105, 156);
+}
+
+.account-button {
+    background-color: #607890;
+    font-weight: normal;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 40px;
+    gap: 5px;
+}
+
+.account-button:hover {
+    background-color: #6f8ba7;
+}
+
+.account-circle {
+    border-radius: 50%;
+    height: 80%;
+    aspect-ratio: 1;
+    background-color: #2596BE;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.invisible {
+    display: none;
 }

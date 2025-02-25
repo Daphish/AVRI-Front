@@ -1,6 +1,7 @@
 import { NgIf } from '@angular/common';
 import { Component, EventEmitter, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login-modal',
@@ -10,13 +11,13 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './login-modal.component.css'
 })
 export class LoginModalComponent {
+  constructor(private authService: AuthService){}
 
   username : string = "Daphish";
   truePass : string = "12345";
   
   user : string = "";
   password : string = "";
-  loggedIn : boolean = false;
   error : boolean = false;
 
   @Output() closeModalEvent = new EventEmitter<void>();
@@ -27,10 +28,12 @@ export class LoginModalComponent {
 
   startSession() {
     if (this.user === this.username && this.password === this.truePass){
-      this.loggedIn = true;
+      this.authService.login();
+      this.closeModal();
     } else {
+      this.error = true;
       setTimeout(() => {
-        this.error = true;
+        this.error = false;
       }, 2000);
     }
   }

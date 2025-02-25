@@ -1,4 +1,4 @@
-.right {
+.right, .right-profiler {
     border: solid #0056A3 1px;
     border-radius: 8px;
     display: flex;
@@ -6,7 +6,18 @@
     align-items: center;
     height: 100%;
     width: 100%;
+}
+
+.invisible {
+    display: none;
+}
+
+.right {
     justify-content: end;
+}
+
+.right-profiler {
+    justify-content: center;
 }
 
 .chat-container-space {
@@ -93,10 +104,6 @@
     align-items: center;
 }
 
-.no-welcome {
-    display: none;
-}
-
 .welcome-title, .welcome-body {
     color: #21405F;
 }
@@ -143,4 +150,51 @@
 
 .chat-container-space::-webkit-scrollbar-thumb:hover {
     background: #425263;
+}
+
+.profiler-container {
+    width: 80%;
+    background-color: #21405F;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    padding: 30px;
+}
+
+.profiler-button {
+    padding: 20px;
+    border-radius: 10px;
+    color: white;
+    font-weight: bold;
+    background-color: #0056A3;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.profiler-button:hover {
+    background-color: rgb(54, 105, 156);
+}
+
+.topics-container {
+    display: flex;
+    justify-content: center;
+    overflow-y: auto;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.profiler-buttons {
+    padding: 20px;
+    background-color: white;
+    border-radius: 10px;
+    margin: 10px 2px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.profiler-buttons:hover {
+    background-color: #e2e2e2;
 }
