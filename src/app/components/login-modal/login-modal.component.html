@@ -6,14 +6,18 @@
         <h2>Iniciar Sesión</h2>
         
         <label for="email" style="width: 100%;">Correo Electrónico</label>
-        <input type="email" id="email" placeholder="Ejemplo: usuario@email.com">
+        <input type="email" id="email" placeholder="Ejemplo: usuario@email.com" [(ngModel)]="user">
         
         <label for="password" style="width: 100%;">Contraseña</label>
-        <input type="password" id="password" placeholder="********">
+        <input type="password" id="password" placeholder="********" [(ngModel)]="password">
+
+        <div class="error-message" *ngIf="error">
+            Las credenciales no son correctas
+        </div>
         
         <div class="modal-actions">
             <button class="btn cancel" (click)="closeModal()">Cancelar</button>
-            <button class="btn login">Iniciar Sesión</button>
+            <button class="btn login" (click)="startSession()">Iniciar Sesión</button>
         </div>
     </div>
 </div>
