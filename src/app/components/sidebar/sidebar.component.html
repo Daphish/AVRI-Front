@@ -5,11 +5,11 @@
             Asistente Virtual RI
         </div>
     </div>
-    <button class="new-chat-button">Nueva conversación +</button>
+    <button class="new-chat-button" (click)="viewHome()">Nueva conversación +</button>
     <div class="left-chats">Aún no hay chats</div>
     <div class="left-login">
         <button [ngClass]="{'login-button': isLoggedIn === false, 'invisible': isLoggedIn === true}" (click)="openModal()">Iniciar sesión</button>
-        <button [ngClass]="{'account-button': isLoggedIn === true, 'invisible': isLoggedIn === false}">
+        <button [ngClass]="{'account-button': isLoggedIn === true, 'invisible': isLoggedIn === false}" (click)="viewProfile()">
             <div class="account-circle">
                 D
             </div>

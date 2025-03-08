@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { LoginModalComponent } from "../login-modal/login-modal.component";
 import { NgClass, NgIf } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-sidebar',
@@ -15,7 +16,7 @@ export class SidebarComponent {
   isModalOpen = false;
   isLoggedIn = false;
 
-  constructor(private authService: AuthService){}
+  constructor(private authService: AuthService, private router: Router){}
 
   ngOnInit(){
     this.authService.isLoggedIn$.subscribe(status => {
@@ -29,5 +30,13 @@ export class SidebarComponent {
 
   closeModal() {
     this.isModalOpen = false;
+  }
+
+  viewHome() {
+    this.router.navigate(['home']);
+  }
+
+  viewProfile() {
+    this.router.navigate(['profile']);
   }
 }

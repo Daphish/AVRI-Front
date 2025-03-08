@@ -5,6 +5,10 @@
     display: flex;
 }
 
-::ng-deep app-chat {
+::ng-deep app-chat{
+    width: 100%;
+}
+
+::ng-deep app-profile{
     width: 100%;
 }
