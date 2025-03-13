@@ -12,9 +12,6 @@ import { AuthService } from '../../services/auth.service';
 })
 export class LoginModalComponent {
   constructor(private authService: AuthService){}
-
-  username : string = "Daphish";
-  truePass : string = "12345";
   
   user : string = "";
   password : string = "";
@@ -27,14 +24,15 @@ export class LoginModalComponent {
   }
 
   startSession() {
-    if (this.user === this.username && this.password === this.truePass){
-      this.authService.login();
-      this.closeModal();
-    } else {
-      this.error = true;
-      setTimeout(() => {
-        this.error = false;
-      }, 2000);
-    }
+    this.authService.login(this.user, this.password).then((success) => {
+      if(success) {
+        this.closeModal();
+      } else {
+        this.error = true;
+        setTimeout(() => {
+          this.error = false;
+        }, 2000);
+      }
+    });
   }
 }

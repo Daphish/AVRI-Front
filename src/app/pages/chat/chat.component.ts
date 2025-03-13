@@ -15,27 +15,40 @@ import { AuthService } from '../../services/auth.service';
 
 export class ChatComponent {
   messages: Message[] = [];
+  idChat: number = 0;
   newMessage: string = '';
   topics: string[] = [ 'Ciencias sociales', 'Medicina', 'Química', 'Computación', 'Biología', 'Arquitectura', 'topic'];
   keyWords: string[] = [ 'Ciencias sociales', 'Medicina', 'Química', 'Computación', 'Biología', 'Arquitectura', 'keyWord'];
   profilerDocs: string[] = [ 'Ciencias sociales', 'Medicina', 'Química', 'Computación', 'Biología', 'Arquitectura', 'docName'];
   isLoggedIn = false;
   profilerCounter = 0;
-  constructor(private authService: AuthService){}
+
+  constructor(private authService: AuthService, private chatService: ChatService) {}
 
   ngOnInit() {
     this.authService.isLoggedIn$.subscribe(status => {
       this.isLoggedIn = status;
     });
+
+    this.chatService.chatMessages$.subscribe(chatMessages => {
+      this.messages = chatMessages;
+    });
+
+    this.chatService.idChat$.subscribe(id => {
+      this.idChat = id;
+    });
   }
-  private chatService = inject(ChatService);
 
   @ViewChild('chatContainer') private chatContainer!: ElementRef;
-  private cdr = inject(ChangeDetectorRef); 
+  private cdr = inject(ChangeDetectorRef);
 
   addMessage() {
     if (this.newMessage.trim() !== '') {
-      this.messages.push({ text: this.newMessage, sender: 'user' });
+      this.messages.push({
+        idChat: this.idChat,
+        type: "user",
+        text: this.newMessage
+      });
       const messageText = this.newMessage;
       this.newMessage = '';
       this.cdr.detectChanges();

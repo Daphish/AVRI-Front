@@ -40,6 +40,8 @@
 
 .left-chats {
     height: 100%;
+    width: 100%;
+    padding: 5px 10px;
     margin-top: 10px;
 }
 
@@ -94,4 +96,23 @@
 
 .invisible {
     display: none;
+}
+
+.no-chats-message {
+    width: 100%;
+    text-align: center;
+}
+
+.sidebar-chat {
+    display: flex;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sidebar-chat:hover {
+    background-color: #e2e2e2;
 }

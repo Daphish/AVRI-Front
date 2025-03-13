@@ -1,4 +1,11 @@
 export interface Message {
+  idChat: number;
+  type: 'user' | 'system';
   text: string;
-  sender: 'user' | 'system';
 };
+
+export interface Chat {
+  id: number;
+  idUser: number;
+  name: string; 
+}

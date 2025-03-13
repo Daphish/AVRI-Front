@@ -15,9 +15,7 @@ app.post('/api/chat', (req, res) => {
         return res.status(400).json({ error: 'El mensaje no puede estar vacío' });
     }
 
-    console.log(`Mensaje recibido: ${text}`);
-
-    res.json({ text: `Recibí tu mensaje "${text}"`, sender: 'system' });
+    res.json({ text: `Recibí tu mensaje "${text}"`, type: 'system' });
 });
 
 app.listen(PORT, () => {

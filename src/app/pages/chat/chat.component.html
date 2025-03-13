@@ -5,7 +5,7 @@
     <div class="chat-container">
       <div
         [ngClass]="{
-          welcome: messages.length === 0,
+          'welcome': messages.length === 0,
           'invisible': messages.length !== 0
         }"
       >
@@ -16,14 +16,14 @@
       <div
         *ngFor="let message of messages"
         [ngClass]="{
-          'message-user': message.sender === 'user',
-          'message-system': message.sender === 'system'
+          'message-user': message.type === 'user',
+          'message-system': message.type === 'system'
         }"
       >
         <div
           [ngClass]="{
-            'invisible': message.sender === 'user',
-            'system-avatar-container': message.sender === 'system'
+            'invisible': message.type === 'user',
+            'system-avatar-container': message.type === 'system'
           }"
         >
           <img class="system-avatar" src="/Logo-AVRI.png" alt="avatar" />
