@@ -14,6 +14,12 @@ import { AuthService } from '../../services/auth.service';
 })
 
 export class ChatComponent {
+  topicNumber: number = 0;
+  keyWordNumber: number = 0;
+  paperNumber: number = 0;
+  selectedTopics: boolean[] = [];
+  selectedKeyWords: boolean[] = [];
+  selectedDocs: boolean[] = [];
   messages: Message[] = [];
   idChat: number = 0;
   newMessage: string = '';
@@ -37,6 +43,10 @@ export class ChatComponent {
     this.chatService.idChat$.subscribe(id => {
       this.idChat = id;
     });
+
+    this.selectedTopics = new Array(this.topics.length).fill(false);
+    this.selectedKeyWords = new Array(this.keyWords.length).fill(false);
+    this.selectedDocs = new Array(this.profilerDocs.length).fill(false);
   }
 
   @ViewChild('chatContainer') private chatContainer!: ElementRef;
@@ -81,5 +91,53 @@ export class ChatComponent {
 
   finishProfiler() {
     this.isLoggedIn = true;
+  }
+
+  addTopicNum() {
+    this.topicNumber += 1;
+  }
+
+  addKeyWordNum() {
+    this.keyWordNumber += 1;
+  }
+
+  addProfilerDocNum() {
+    this.paperNumber += 1;
+  }
+
+  toggleTopic(index: number) {
+    if(this.selectedTopics[index]) {
+      this.selectedTopics[index] = false;
+      this.topicNumber--;
+    } else {
+      if(this.paperNumber < 5) {
+        this.selectedTopics[index] = true;
+        this.topicNumber++;
+      }
+    }
+  }
+
+  toggleKeyWord(index: number) {
+    if(this.selectedKeyWords[index]) {
+      this.selectedKeyWords[index] = false;
+      this.keyWordNumber--;
+    } else {
+      if(this.paperNumber < 5) {
+        this.selectedKeyWords[index] = true;
+        this.keyWordNumber++;
+      }
+    }
+  }
+
+  toggleProfilerDoc(index: number) {
+    if(this.selectedDocs[index]) {
+      this.selectedDocs[index] = false;
+      this.paperNumber--;
+    } else {
+      if(this.paperNumber < 5) {
+        this.selectedDocs[index] = true;
+        this.paperNumber++;
+      }
+    }
   }
 }

@@ -6,6 +6,7 @@
     align-items: center;
     height: 100%;
     width: 100%;
+    position: relative;
 }
 
 .invisible {
@@ -152,6 +153,53 @@
     background: #425263;
 }
 
+.progress-tracker {
+    position: absolute;
+    top: 5%;
+    left: 50%;
+    transform: translate(-50%);
+    width: 80%;
+    background-color: #21405F;
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    justify-content: center;
+    
+    border-radius: 20px;
+}
+
+.blue-circle-true, .blue-circle-false {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    width: 2rem;
+    aspect-ratio: 1;
+    margin: -5px;
+    z-index: 999;
+}
+
+.blue-circle-true {
+    background-color: #0056A3;
+}
+
+.blue-circle-false {
+    background-color: #B6C8D9;
+}
+
+.progress-union-false, .progress-union-true {
+    width: 40%;
+    height: 0.7rem;
+}
+
+.progress-union-false {
+    background-color: #B6C8D9;
+}
+
+.progress-union-true {
+    background-color: #0056A3;
+}
+
 .profiler-container {
     width: 80%;
     background-color: #21405F;
@@ -159,9 +207,9 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
     gap: 20px;
     padding: 30px;
+    margin-top: 20px;
 }
 
 .profiler-button {
@@ -172,6 +220,7 @@
     background-color: #0056A3;
     cursor: pointer;
     transition: all 0.3s ease;
+    align-self: center;
 }
 
 .profiler-button:hover {
@@ -180,10 +229,10 @@
 
 .topics-container {
     display: flex;
-    justify-content: center;
     overflow-y: auto;
     width: 100%;
     flex-wrap: wrap;
+    justify-content: center;
 }
 
 .profiler-buttons {
@@ -193,8 +242,75 @@
     margin: 10px 2px;
     transition: all 0.3s ease;
     cursor: pointer;
+    width: 45%;
+    height: 27%;
 }
 
 .profiler-buttons:hover {
     background-color: #e2e2e2;
+}
+
+.profiler-buttons.selected {
+    background-color: #0056A3;
+    color: white;
+}
+
+.profiler-buttons.selected:hover {
+    background-color: #004b8d;
+}
+
+.profiler-buttons.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.profiler-buttons-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    height: 100%;
+}
+
+.profiler-title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: white;
+    text-align: center;
+}
+
+.profiler-counter {
+    background-color: white;
+    border-radius: 50%;
+    color: black;
+    font-size: 1.5rem;
+    width: 2rem;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profiler-title-container {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.topics-container::-webkit-scrollbar {
+    width: 10px;
+}
+
+.topics-container::-webkit-scrollbar-track {
+    background: #dddddd;
+    border-radius: 20px;
+}
+  
+.topics-container::-webkit-scrollbar-thumb {
+    background: #607890;
+    border-radius: 20px;
+}
+
+.topics-container::-webkit-scrollbar-thumb:hover {
+    background: #425263;
 }

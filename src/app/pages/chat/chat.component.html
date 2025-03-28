@@ -1,31 +1,22 @@
-<div
-  [ngClass]="{ right: isLoggedIn === true, invisible: isLoggedIn === false }"
->
+<div [ngClass]="{ right: isLoggedIn === true, invisible: isLoggedIn === false }">
   <div class="chat-container-space" #chatContainer>
     <div class="chat-container">
-      <div
-        [ngClass]="{
+      <div [ngClass]="{
           'welcome': messages.length === 0,
           'invisible': messages.length !== 0
-        }"
-      >
+        }">
         <div class="welcome-title">¡Bienvenido!</div>
         <img class="welcome-img" src="/Logo-AVRI.png" />
         <div class="welcome-body">¿Cómo puedo ayudar el día de hoy?</div>
       </div>
-      <div
-        *ngFor="let message of messages"
-        [ngClass]="{
+      <div *ngFor="let message of messages" [ngClass]="{
           'message-user': message.type === 'user',
           'message-system': message.type === 'system'
-        }"
-      >
-        <div
-          [ngClass]="{
+        }">
+        <div [ngClass]="{
             'invisible': message.type === 'user',
             'system-avatar-container': message.type === 'system'
-          }"
-        >
+          }">
           <img class="system-avatar" src="/Logo-AVRI.png" alt="avatar" />
         </div>
         {{ message.text }}
@@ -33,31 +24,39 @@
     </div>
   </div>
   <div class="chat-input">
-    <input
-      class="chat-input-box"
-      placeholder="Escribe algo al AVRI"
-      [(ngModel)]="newMessage"
-      (keyup.enter)="addMessage()"
-    />
+    <input class="chat-input-box" placeholder="Escribe algo al AVRI" [(ngModel)]="newMessage"
+      (keyup.enter)="addMessage()" />
     <div class="chat-send-button" (click)="addMessage()">
       <i class="bi bi-arrow-up" style="color: white"></i>
     </div>
   </div>
   <div class="white-block"></div>
 </div>
-<div
-  [ngClass]="{
+<div [ngClass]="{
     'right-profiler': isLoggedIn === false,
     invisible: isLoggedIn === true
-  }"
->
-  <div
-    [ngClass]="{
-      'profiler-container': profilerCounter === 0,
-      invisible: profilerCounter !== 0
-    }"
-  >
-    <div style="font-size: 2rem; font-weight: bold; color: white; text-align: center;">¡Bienvenido!</div>
+  }">
+  <div [ngClass]="{
+    'progress-tracker': profilerCounter !== 0,
+    invisible: profilerCounter === 0
+  }">
+  <div class="blue-circle-true">
+    1
+  </div>
+  <div [ngClass]="{'progress-union-true': profilerCounter > 1, 'progress-union-false': profilerCounter < 2}"></div>
+  <div [ngClass]="{'blue-circle-true': profilerCounter > 1, 'blue-circle-false': profilerCounter < 2}">
+    2
+  </div>
+  <div [ngClass]="{'progress-union-true': profilerCounter > 2, 'progress-union-false': profilerCounter < 3}"></div>
+  <div [ngClass]="{'blue-circle-true': profilerCounter > 2, 'blue-circle-false': profilerCounter < 3}">
+    3
+  </div>
+</div>
+  <div [ngClass]="{
+  'profiler-container': profilerCounter === 0,
+  invisible: profilerCounter !== 0
+}">
+    <div class="profiler-title">¡Bienvenido!</div>
     <div style="color: white; text-align: center;">
       Queremos conocerte mejor y ayudarte a encontrar el conocimiento que
       necesitas, asi que antes de comenzar necesitamos que escojas los temas en
@@ -65,45 +64,63 @@
     </div>
     <div class="profiler-button" (click)="increaseProfilerCounter()">Continuar</div>
   </div>
-  <div
-    [ngClass]="{
-        'profiler-container': profilerCounter === 1,
-        invisible: profilerCounter !== 1
-    }"
-  >
-    <div style="font-size: 2rem; font-weight: bold; color: white; text-align: center;">Selecciona hasta 5 temas de interés</div>
+  <div [ngClass]="{
+    'profiler-container': profilerCounter === 1,
+    invisible: profilerCounter !== 1
+}">
+    <div class="profiler-title-container">
+      <div class="profiler-title">Selecciona hasta 5 temas de
+        interés</div>
+      <div class="profiler-title profiler-counter">
+        {{topicNumber}}
+      </div>
+    </div>
     <div class="topics-container">
-        <div class="profiler-buttons" *ngFor="let topic of topics">
-            {{topic}}
+      <div class="profiler-buttons" *ngFor="let topic of topics; let i = index" (click)="toggleTopic(i)" [ngClass]="{'selected': selectedTopics[i], 'disabled': topicNumber === 5 && !selectedTopics[i]}">
+        <div class="profiler-buttons-text">
+          {{topic}}
         </div>
+      </div>
     </div>
     <div class="profiler-button" (click)="increaseProfilerCounter()">Continuar</div>
   </div>
-  <div
-    [ngClass]="{
-        'profiler-container': profilerCounter === 2,
-        invisible: profilerCounter !== 2
-    }"
-  >
-    <div style="font-size: 2rem; font-weight: bold; color: white; text-align: center;">Selecciona hasta 5 palabras clave</div>
+  <div [ngClass]="{
+    'profiler-container': profilerCounter === 2,
+    invisible: profilerCounter !== 2
+}">
+    <div class="profiler-title-container">
+      <div class="profiler-title">Selecciona hasta 5 palabras
+        clave</div>
+      <div class="profiler-title profiler-counter">
+        {{keyWordNumber}}
+      </div>
+    </div>
     <div class="topics-container">
-        <div class="profiler-buttons" *ngFor="let keyWord of keyWords">
-            {{keyWord}}
+      <div class="profiler-buttons" *ngFor="let keyWord of keyWords; let i = index" (click)="toggleKeyWord(i)" [ngClass]="{'selected': selectedKeyWords[i], 'disabled': keyWordNumber === 5 && !selectedKeyWords[i]}">
+        <div class="profiler-buttons-text">
+          {{keyWord}}
         </div>
+      </div>
     </div>
     <div class="profiler-button" (click)="increaseProfilerCounter()">Continuar</div>
   </div>
-  <div
-    [ngClass]="{
-        'profiler-container': profilerCounter === 3,
-        invisible: profilerCounter !== 3
-    }"
-  >
-    <div style="font-size: 2rem; font-weight: bold; color: white; text-align: center;">Por último, escoge los documentos que te interesan</div>
+  <div [ngClass]="{
+    'profiler-container': profilerCounter === 3,
+    invisible: profilerCounter !== 3
+}">
+    <div class="profiler-title-container">
+      <div class="profiler-title">Por último, escoge los
+        documentos que te interesan</div>
+      <div class="profiler-title profiler-counter">
+        {{paperNumber}}
+      </div>
+    </div>
     <div class="topics-container">
-        <div class="profiler-buttons" *ngFor="let profilerDoc of profilerDocs">
-            {{profilerDoc}}
+      <div class="profiler-buttons" *ngFor="let profilerDoc of profilerDocs; let i = index" (click)="toggleProfilerDoc(i)" [ngClass]="{'selected': selectedDocs[i], 'disabled': paperNumber === 5 && !selectedDocs[i]}">
+        <div class="profiler-buttons-text">
+          {{profilerDoc}}
         </div>
+      </div>
     </div>
     <div class="profiler-button" (click)="finishProfiler()">Guardar preferencias</div>
   </div>
