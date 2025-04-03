@@ -2,24 +2,35 @@
   <div class="chat-container-space" #chatContainer>
     <div class="chat-container">
       <div [ngClass]="{
-          'welcome': messages.length === 0,
+          'column': messages.length === 0,
           'invisible': messages.length !== 0
         }">
         <div class="welcome-title">¡Bienvenido!</div>
         <img class="welcome-img" src="/Logo-AVRI.png" />
         <div class="welcome-body">¿Cómo puedo ayudar el día de hoy?</div>
       </div>
-      <div *ngFor="let message of messages" [ngClass]="{
+      <div *ngFor="let message of messages" class="column">
+        <div [ngClass]="{
           'message-user': message.type === 'user',
           'message-system': message.type === 'system'
         }">
-        <div [ngClass]="{
-            'invisible': message.type === 'user',
-            'system-avatar-container': message.type === 'system'
-          }">
-          <img class="system-avatar" src="/Logo-AVRI.png" alt="avatar" />
+          <div [ngClass]="{
+          'invisible': message.type === 'user',
+          'system-avatar-container': message.type === 'system'
+        }">
+            <img class="system-avatar" src="/Logo-AVRI.png" alt="avatar" />
+          </div>
+          {{ message.text }}
         </div>
-        {{ message.text }}
+        <div *ngIf="message.type === 'system'" class="message-rating">
+          <div class="rating-container">
+            <span *ngFor="let star of stars; let i = index" (mouseenter)="hoverRating(i + 1)"
+              (mouseleave)="resetHover()" (click)="setRating(i + 1)"
+              [ngClass]="{ 'filled': i < hoverValue || i < rating }">
+              &#9733;
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -40,18 +51,18 @@
     'progress-tracker': profilerCounter !== 0,
     invisible: profilerCounter === 0
   }">
-  <div class="blue-circle-true">
-    1
+    <div class="blue-circle-true">
+      1
+    </div>
+    <div [ngClass]="{'progress-union-true': profilerCounter > 1, 'progress-union-false': profilerCounter < 2}"></div>
+    <div [ngClass]="{'blue-circle-true': profilerCounter > 1, 'blue-circle-false': profilerCounter < 2}">
+      2
+    </div>
+    <div [ngClass]="{'progress-union-true': profilerCounter > 2, 'progress-union-false': profilerCounter < 3}"></div>
+    <div [ngClass]="{'blue-circle-true': profilerCounter > 2, 'blue-circle-false': profilerCounter < 3}">
+      3
+    </div>
   </div>
-  <div [ngClass]="{'progress-union-true': profilerCounter > 1, 'progress-union-false': profilerCounter < 2}"></div>
-  <div [ngClass]="{'blue-circle-true': profilerCounter > 1, 'blue-circle-false': profilerCounter < 2}">
-    2
-  </div>
-  <div [ngClass]="{'progress-union-true': profilerCounter > 2, 'progress-union-false': profilerCounter < 3}"></div>
-  <div [ngClass]="{'blue-circle-true': profilerCounter > 2, 'blue-circle-false': profilerCounter < 3}">
-    3
-  </div>
-</div>
   <div [ngClass]="{
   'profiler-container': profilerCounter === 0,
   invisible: profilerCounter !== 0
@@ -76,7 +87,8 @@
       </div>
     </div>
     <div class="topics-container">
-      <div class="profiler-buttons" *ngFor="let topic of topics; let i = index" (click)="toggleTopic(i)" [ngClass]="{'selected': selectedTopics[i], 'disabled': topicNumber === 5 && !selectedTopics[i]}">
+      <div class="profiler-buttons" *ngFor="let topic of topics; let i = index" (click)="toggleTopic(i)"
+        [ngClass]="{'selected': selectedTopics[i], 'disabled': topicNumber === 5 && !selectedTopics[i]}">
         <div class="profiler-buttons-text">
           {{topic}}
         </div>
@@ -96,7 +108,8 @@
       </div>
     </div>
     <div class="topics-container">
-      <div class="profiler-buttons" *ngFor="let keyWord of keyWords; let i = index" (click)="toggleKeyWord(i)" [ngClass]="{'selected': selectedKeyWords[i], 'disabled': keyWordNumber === 5 && !selectedKeyWords[i]}">
+      <div class="profiler-buttons" *ngFor="let keyWord of keyWords; let i = index" (click)="toggleKeyWord(i)"
+        [ngClass]="{'selected': selectedKeyWords[i], 'disabled': keyWordNumber === 5 && !selectedKeyWords[i]}">
         <div class="profiler-buttons-text">
           {{keyWord}}
         </div>
@@ -116,7 +129,9 @@
       </div>
     </div>
     <div class="topics-container">
-      <div class="profiler-buttons" *ngFor="let profilerDoc of profilerDocs; let i = index" (click)="toggleProfilerDoc(i)" [ngClass]="{'selected': selectedDocs[i], 'disabled': paperNumber === 5 && !selectedDocs[i]}">
+      <div class="profiler-buttons" *ngFor="let profilerDoc of profilerDocs; let i = index"
+        (click)="toggleProfilerDoc(i)"
+        [ngClass]="{'selected': selectedDocs[i], 'disabled': paperNumber === 5 && !selectedDocs[i]}">
         <div class="profiler-buttons-text">
           {{profilerDoc}}
         </div>

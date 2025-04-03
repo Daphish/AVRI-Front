@@ -1,4 +1,4 @@
-import { NgClass, NgFor } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, inject, ViewChild, ElementRef, ChangeDetectorRef, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Message } from '../../interfaces/chat.interface';
@@ -8,7 +8,7 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [NgFor, FormsModule, NgClass],
+  imports: [NgFor, FormsModule, NgClass, NgIf],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.css'
 })
@@ -26,6 +26,9 @@ export class ChatComponent {
   topics: string[] = [ 'Ciencias sociales', 'Medicina', 'Química', 'Computación', 'Biología', 'Arquitectura', 'topic'];
   keyWords: string[] = [ 'Ciencias sociales', 'Medicina', 'Química', 'Computación', 'Biología', 'Arquitectura', 'keyWord'];
   profilerDocs: string[] = [ 'Ciencias sociales', 'Medicina', 'Química', 'Computación', 'Biología', 'Arquitectura', 'docName'];
+  stars = Array(5).fill(0);
+  rating = 0;
+  hoverValue = 0;
   isLoggedIn = false;
   profilerCounter = 0;
 
@@ -139,5 +142,17 @@ export class ChatComponent {
         this.paperNumber++;
       }
     }
+  }
+
+  hoverRating(value: number) {
+    this.hoverValue = value;
+  }
+
+  resetHover() {
+    this.hoverValue = 0;
+  }
+
+  setRating(value: number) {
+    this.rating = value;
   }
 }
