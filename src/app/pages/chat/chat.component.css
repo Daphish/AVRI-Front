@@ -200,7 +200,7 @@
     background-color: #0056A3;
 }
 
-.profiler-container {
+.profiler-container, .profiler-container-welcome {
     width: 80%;
     background-color: #21405F;
     border-radius: 20px;
@@ -210,6 +210,10 @@
     gap: 20px;
     padding: 30px;
     margin-top: 20px;
+}
+
+.profiler-container {
+    height: 70%;
 }
 
 .profiler-button {
@@ -313,4 +317,14 @@
 
 .topics-container::-webkit-scrollbar-thumb:hover {
     background: #425263;
+}
+
+.profiler-error {
+    width: 80%;
+    background-color: red;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    padding: 10px 0px;
+    align-self: center;
 }
