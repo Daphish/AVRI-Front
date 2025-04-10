@@ -64,7 +64,7 @@
     </div>
   </div>
   <div [ngClass]="{
-  'profiler-container': profilerCounter === 0,
+  'profiler-container-welcome': profilerCounter === 0,
   invisible: profilerCounter !== 0
 }">
     <div class="profiler-title">¡Bienvenido!</div>
@@ -73,7 +73,7 @@
       necesitas, asi que antes de comenzar necesitamos que escojas los temas en
       los que estas más interesado para personalizar tu búsqueda.
     </div>
-    <div class="profiler-button" (click)="increaseProfilerCounter()">Continuar</div>
+    <div class="profiler-button" (click)="increaseProfilerCounter(0)">Continuar</div>
   </div>
   <div [ngClass]="{
     'profiler-container': profilerCounter === 1,
@@ -94,7 +94,9 @@
         </div>
       </div>
     </div>
-    <div class="profiler-button" (click)="increaseProfilerCounter()">Continuar</div>
+    <div class="profiler-error" *ngIf="noProfilerButtonsSelected === true">Por favor, selecciona al menos una opción
+    </div>
+    <div class="profiler-button" (click)="increaseProfilerCounter(1)">Continuar</div>
   </div>
   <div [ngClass]="{
     'profiler-container': profilerCounter === 2,
@@ -115,7 +117,9 @@
         </div>
       </div>
     </div>
-    <div class="profiler-button" (click)="increaseProfilerCounter()">Continuar</div>
+    <div class="profiler-error" *ngIf="noProfilerButtonsSelected === true">Por favor, selecciona al menos una opción
+    </div>
+    <div class="profiler-button" (click)="increaseProfilerCounter(2)">Continuar</div>
   </div>
   <div [ngClass]="{
     'profiler-container': profilerCounter === 3,
@@ -136,6 +140,8 @@
           {{profilerDoc}}
         </div>
       </div>
+    </div>
+    <div class="profiler-error" *ngIf="noProfilerButtonsSelected === true">Por favor, selecciona al menos una opción
     </div>
     <div class="profiler-button" (click)="finishProfiler()">Guardar preferencias</div>
   </div>

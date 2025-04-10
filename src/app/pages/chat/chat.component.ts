@@ -23,16 +23,17 @@ export class ChatComponent {
   messages: Message[] = [];
   idChat: number = 0;
   newMessage: string = '';
-  topics: string[] = [ 'Ciencias sociales', 'Medicina', 'Química', 'Computación', 'Biología', 'Arquitectura', 'topic'];
-  keyWords: string[] = [ 'Ciencias sociales', 'Medicina', 'Química', 'Computación', 'Biología', 'Arquitectura', 'keyWord'];
-  profilerDocs: string[] = [ 'Ciencias sociales', 'Medicina', 'Química', 'Computación', 'Biología', 'Arquitectura', 'docName'];
+  topics: string[] = ['Ciencias sociales', 'Medicina', 'Química', 'Computación', 'Biología', 'Arquitectura', 'topic'];
+  keyWords: string[] = ['Ciencias sociales', 'Medicina', 'Química', 'Computación', 'Biología', 'Arquitectura', 'keyWord'];
+  profilerDocs: string[] = ['Ciencias sociales', 'Medicina', 'Química', 'Computación', 'Biología', 'Arquitectura', 'docName'];
   stars = Array(5).fill(0);
   rating = 0;
   hoverValue = 0;
   isLoggedIn = false;
   profilerCounter = 0;
+  noProfilerButtonsSelected = false;
 
-  constructor(private authService: AuthService, private chatService: ChatService) {}
+  constructor(private authService: AuthService, private chatService: ChatService) { }
 
   ngOnInit() {
     this.authService.isLoggedIn$.subscribe(status => {
@@ -87,13 +88,33 @@ export class ChatComponent {
     }
   }
 
-  increaseProfilerCounter() {
-    this.profilerCounter++;
-    console.log(this.profilerCounter);
+  increaseProfilerCounter(counter: number) {
+    if (counter === 0) {
+      this.profilerCounter++;
+      this.noProfilerButtonsSelected = false;
+    } else if (counter === 1 && this.selectedTopics.includes(true)) {
+      this.profilerCounter++;
+      this.noProfilerButtonsSelected = false;
+    } else if (counter === 2 && this.selectedKeyWords.includes(true)) {
+      this.profilerCounter++;
+      this.noProfilerButtonsSelected = false;
+    } else {
+      this.noProfilerButtonsSelected = true;
+      setTimeout(() => {
+        this.noProfilerButtonsSelected = false;
+      }, 5000);
+    }
   }
 
   finishProfiler() {
-    this.isLoggedIn = true;
+    if (this.selectedDocs.includes(true)) {
+      this.isLoggedIn = true;
+    } else {
+      this.noProfilerButtonsSelected = true;
+      setTimeout(() => {
+        this.noProfilerButtonsSelected = false;
+      }, 5000);
+    }
   }
 
   addTopicNum() {
@@ -109,11 +130,11 @@ export class ChatComponent {
   }
 
   toggleTopic(index: number) {
-    if(this.selectedTopics[index]) {
+    if (this.selectedTopics[index]) {
       this.selectedTopics[index] = false;
       this.topicNumber--;
     } else {
-      if(this.paperNumber < 5) {
+      if (this.paperNumber < 5) {
         this.selectedTopics[index] = true;
         this.topicNumber++;
       }
@@ -121,11 +142,11 @@ export class ChatComponent {
   }
 
   toggleKeyWord(index: number) {
-    if(this.selectedKeyWords[index]) {
+    if (this.selectedKeyWords[index]) {
       this.selectedKeyWords[index] = false;
       this.keyWordNumber--;
     } else {
-      if(this.paperNumber < 5) {
+      if (this.paperNumber < 5) {
         this.selectedKeyWords[index] = true;
         this.keyWordNumber++;
       }
@@ -133,11 +154,11 @@ export class ChatComponent {
   }
 
   toggleProfilerDoc(index: number) {
-    if(this.selectedDocs[index]) {
+    if (this.selectedDocs[index]) {
       this.selectedDocs[index] = false;
       this.paperNumber--;
     } else {
-      if(this.paperNumber < 5) {
+      if (this.paperNumber < 5) {
         this.selectedDocs[index] = true;
         this.paperNumber++;
       }
