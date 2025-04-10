@@ -22,14 +22,12 @@
           </div>
           {{ message.text }}
         </div>
-        <div *ngIf="message.type === 'system'" class="message-rating">
-          <div class="rating-container">
+        <div *ngIf="message.type === 'system'" class="rating-container">
             <span *ngFor="let star of stars; let i = index" (mouseenter)="hoverRating(i + 1)"
               (mouseleave)="resetHover()" (click)="setRating(i + 1)"
               [ngClass]="{ 'filled': i < hoverValue || i < rating }">
               &#9733;
             </span>
-          </div>
         </div>
       </div>
     </div>
