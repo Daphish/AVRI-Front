@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { LoginModalComponent } from "../login-modal/login-modal.component";
+import { Component, OnInit } from '@angular/core';
+import { LoginModalComponent } from '../login-modal/login-modal.component';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
@@ -11,45 +11,42 @@ import { ChatService } from '../../services/chat.service';
   standalone: true,
   imports: [LoginModalComponent, NgIf, NgClass, NgFor],
   templateUrl: './sidebar.component.html',
-  styleUrl: './sidebar.component.css'
+  styleUrls: ['./sidebar.component.css']
 })
-export class SidebarComponent {
-
+export class SidebarComponent implements OnInit {
   isModalOpen = false;
   isLoggedIn = false;
   chats: Chat[] = [];
 
-  constructor(private authService: AuthService, private chatService: ChatService, private router: Router){}
+  constructor(
+    private authService: AuthService,
+    private chatService: ChatService,
+    private router: Router
+  ) {}
 
-  ngOnInit(){
-    this.authService.isLoggedIn$.subscribe(status => {
-      this.isLoggedIn = status;
-    });
-
-    this.authService.chats$.subscribe(chats => {
-      this.chats = chats;
-    });
-  }
-
-  openModal() {
-    this.isModalOpen = true;
-  }
-
-  closeModal() {
-    this.isModalOpen = false;
+  ngOnInit() {
+    // 1) Estado de login
+    this.authService.isLoggedIn$.subscribe(flag => this.isLoggedIn = flag);
+    // 2) Chats del usuario
+    this.authService.chats$.subscribe(userChats => this.chats = userChats);
+    // 3) Si quieres mostrar TODOS los chats en el sidebar aunque no esté logueado:
+    // this.chatService.loadChats();
+    // this.chatService.chats$.subscribe(list => this.chats = list);
   }
 
   viewHome() {
-    this.router.navigate(['home']);
+    // Llamado desde (click)="viewHome()"
     this.chatService.newChat();
-  }
-
-  viewProfile() {
-    this.router.navigate(['profile']);
+    this.router.navigate(['/home']);
   }
 
   loadMessages(chatId: number) {
-    this.router.navigate(['home']);
-    this.chatService.getMessages(chatId);
+    // Llamado desde (click)="loadMessages(chat.id)"
+    this.chatService.loadMessages(chatId);
+    this.router.navigate(['/home']);
   }
+
+  openModal()   { this.isModalOpen = true; }
+  closeModal()  { this.isModalOpen = false; }
+  viewProfile() { this.router.navigate(['/profile']); }
 }

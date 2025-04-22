@@ -1,15 +1,16 @@
-import { Injectable, inject } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
-import { Observable } from "rxjs";
+// src/app/services/user.service.ts
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { User } from '../interfaces/user.interface';
 
-@Injectable({
-    providedIn: "root"
-})
+@Injectable({ providedIn: 'root' })
 export class UserService {
-    private http = inject(HttpClient);
-    private usersUrl = '/data/users.json';
+  private http = inject(HttpClient);
+  private url = '/api/user/list';
 
-    public getUsers(): Observable<any> {
-        return this.http.get(this.usersUrl);
-    }
+  /** Devuelve la lista de usuarios */
+  getUsers(): Observable<User[]> {
+    return this.http.get<User[]>(this.url);
+  }
 }
