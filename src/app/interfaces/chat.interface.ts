@@ -1,11 +1,13 @@
+export interface Chat {
+  session_id: string;
+  session_name: string;
+  user: number;
+}
+
 export interface Message {
-  idChat: number;
+  id: string;
+  session_id: string;
   type: 'user' | 'system';
   text: string;
-};
-
-export interface Chat {
-  id: number;
-  idUser: number;
-  name: string; 
+  created_at?: string;
 }

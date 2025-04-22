@@ -6,58 +6,53 @@ import { Chat, Message } from '../interfaces/chat.interface';
 @Injectable({ providedIn: 'root' })
 export class ChatService {
   private http = inject(HttpClient);
-  private API = '/api';
 
-  // Subjects internos
+  // URLs de tu API (ajusta según tu proxy)
+  private chatsUrl    = '/api/chat/';
+  private messagesUrl = '/api/chat/';
+  private askUrl      = '/api/chat/'; 
+
+  // === Streams reactivos ===
   private chats$$    = new BehaviorSubject<Chat[]>([]);
+  readonly chats$    = this.chats$$.asObservable();
+
   private messages$$ = new BehaviorSubject<Message[]>([]);
-  private idChat$$   = new BehaviorSubject<number>(0);
+  readonly messages$ = this.messages$$.asObservable();
 
-  // Observables públicos
-  chats$    = this.chats$$.asObservable();
-  messages$ = this.messages$$.asObservable();
-  idChat$   = this.idChat$$.asObservable();
+  private idChat$$   = new BehaviorSubject<string>('');
+  readonly idChat$   = this.idChat$$.asObservable();
 
-  /**  Devuelve el listado de chats desde el backend */
-  getChats(): Observable<Chat[]> {
-    return this.http
-      .get<{ chats: Chat[] }>(`${this.API}/chats`)
-      .pipe(map(res => res.chats));
-  }
+  // === Métodos públicos ===
 
-  /**  Carga todos los chats en el BehaviorSubject */
+  /** Carga todos los chats del usuario */
   loadChats(): void {
-    this.getChats().subscribe(chats => this.chats$$.next(chats));
+    this.http.get<Chat[]>(this.chatsUrl)
+      .pipe(map(chats => chats))
+      .subscribe(this.chats$$);
   }
 
-  /**  Devuelve los mensajes de un chat concreto */
-  getMessages(idChat: number): Observable<Message[]> {
-    return this.http
-      .get<{ messages: Message[] }>(`${this.API}/messages?idChat=${idChat}`)
-      .pipe(map(res => res.messages));
-  }
-
-  /**  Carga mensajes y actualiza idChat$$ */
-  loadMessages(idChat: number): void {
-    this.getMessages(idChat).subscribe(msgs => {
-      this.idChat$$.next(idChat);
-      this.messages$$.next(msgs);
-    });
-  }
-
-  /**  Envía un mensaje de usuario y concatena la respuesta system */
-  sendMessage(idChat: number, text: string): void {
-    this.http
-      .post<Message>(`${this.API}/chat`, { idChat, text })
-      .subscribe(reply => {
-        const updated = [...this.messages$$.value, reply];
-        this.messages$$.next(updated);
-      });
-  }
-
-  /**  Inicia un nuevo chat (limpia estado) */
+  /** Inicia una nueva conversación */
   newChat(): void {
-    this.idChat$$.next(0);
+    // Limpiar mensajes e id de chat
     this.messages$$.next([]);
+    this.idChat$$.next('');
+  }
+
+  /** Selecciona un chat existente y obtiene sus mensajes */
+  selectChat(sessionId: string): void {
+    this.idChat$$.next(sessionId);
+    this.http.get<{ messages: Message[] }>(`${this.messagesUrl}${sessionId}/ask/`)
+      .pipe(map(res => res.messages))
+      .subscribe(this.messages$$);
+  }
+
+  /** Envía un mensaje al chat actual */
+  sendMessage(text: string): void {
+    const sessionId = this.idChat$$.value;
+    this.http.post<Message>(`${this.askUrl}${sessionId}/ask/`, { query: text })
+      .subscribe(reply => {
+        // Append reply al stream actual de mensajes
+        this.messages$$.next([...this.messages$$.value, reply]);
+      });
   }
 }

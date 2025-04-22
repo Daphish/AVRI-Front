@@ -1,38 +1,32 @@
-import { NgIf } from '@angular/common';
 import { Component, EventEmitter, Output } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { FormsModule }  from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login-modal',
   standalone: true,
-  imports: [NgIf, FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './login-modal.component.html',
-  styleUrl: './login-modal.component.css'
+  styleUrls: ['./login-modal.component.css']
 })
 export class LoginModalComponent {
-  constructor(private authService: AuthService){}
-  
-  user : string = "";
-  password : string = "";
-  error : boolean = false;
+  user = '';
+  password = '';
+  error = false;
 
   @Output() closeModalEvent = new EventEmitter<void>();
 
-  closeModal() {
-    this.closeModalEvent.emit();
+  constructor(private auth: AuthService) {}
+
+  async startSession(): Promise<void> {
+    this.error = !(await this.auth.login(this.user, this.password));
+    if (!this.error) {
+      this.closeModalEvent.emit();
+    }
   }
 
-  startSession() {
-    this.authService.login(this.user, this.password).then((success) => {
-      if(success) {
-        this.closeModal();
-      } else {
-        this.error = true;
-        setTimeout(() => {
-          this.error = false;
-        }, 2000);
-      }
-    });
+  closeModal(): void {
+    this.closeModalEvent.emit();
   }
 }
