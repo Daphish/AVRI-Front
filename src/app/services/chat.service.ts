@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, map, Observable } from 'rxjs';
-import { Chat, Message } from '../interfaces/chat.interface';
+import { ChatSession, ChatMessage } from '../interfaces/chat.interface';
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
@@ -9,8 +9,8 @@ export class ChatService {
   private API = '/api';
 
   // Subjects internos
-  private chats$$    = new BehaviorSubject<Chat[]>([]);
-  private messages$$ = new BehaviorSubject<Message[]>([]);
+  private chats$$    = new BehaviorSubject<ChatSession[]>([]);
+  private messages$$ = new BehaviorSubject<ChatMessage[]>([]);
   private idChat$$   = new BehaviorSubject<number>(0);
 
   // Observables públicos
@@ -19,9 +19,9 @@ export class ChatService {
   idChat$   = this.idChat$$.asObservable();
 
   /**  Devuelve el listado de chats desde el backend */
-  getChats(): Observable<Chat[]> {
+  getChats(): Observable<ChatSession[]> {
     return this.http
-      .get<{ chats: Chat[] }>(`${this.API}/chats`)
+      .get<{ chats: ChatSession[] }>(`${this.API}/chats`)
       .pipe(map(res => res.chats));
   }
 
@@ -31,9 +31,9 @@ export class ChatService {
   }
 
   /**  Devuelve los mensajes de un chat concreto */
-  getMessages(idChat: number): Observable<Message[]> {
+  getMessages(idChat: number): Observable<ChatMessage[]> {
     return this.http
-      .get<{ messages: Message[] }>(`${this.API}/messages?idChat=${idChat}`)
+      .get<{ messages: ChatMessage[] }>(`${this.API}/messages?idChat=${idChat}`)
       .pipe(map(res => res.messages));
   }
 
@@ -48,7 +48,7 @@ export class ChatService {
   /**  Envía un mensaje de usuario y concatena la respuesta system */
   sendMessage(idChat: number, text: string): void {
     this.http
-      .post<Message>(`${this.API}/chat`, { idChat, text })
+      .post<ChatMessage>(`${this.API}/chat`, { idChat, text })
       .subscribe(reply => {
         const updated = [...this.messages$$.value, reply];
         this.messages$$.next(updated);

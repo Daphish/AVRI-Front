@@ -8,9 +8,9 @@
     <button class="new-chat-button" (click)="viewHome()">Nueva conversación +</button>
     <div class="left-chats">
         <div [ngClass]="{'no-chats-message': chats.length === 0, 'invisible': chats.length!== 0}">Aún no hay conversaciones</div>
-        <div *ngFor="let chat of chats" class="sidebar-chat" (click)="loadMessages(chat.id)">
+        <div *ngFor="let chat of chats" class="sidebar-chat" (click)="loadMessages(chat.session_id)">
             <i class="bi bi-chat-left" style="color: black; font-size: 1rem; margin-right: 5px;"></i>
-            {{chat.name}}
+            {{chat.session_name}}
         </div>
     </div>
     <div class="left-login">

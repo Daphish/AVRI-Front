@@ -1,11 +1,24 @@
-export interface Message {
-  idChat: number;
-  type: 'user' | 'system';
-  text: string;
-};
+export interface ChatSession {
+  session_id: string;
+  session_name: string;
+}
 
-export interface Chat {
-  id: number;
-  idUser: number;
-  name: string; 
+export interface RawChatMessage {
+  answer: string;
+  reference: {
+    doc_aggs: {
+      doc_id: string;
+      doc_name: string;
+    }[];
+  };
+  session_id: string;
+}
+
+export interface ChatMessage {
+  content: string;
+  role: string;
+  reference?: {
+    document_id: string;
+    document_name: string;
+  }[];
 }

@@ -3,8 +3,9 @@ import { LoginModalComponent } from '../login-modal/login-modal.component';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
-import { Chat } from '../../interfaces/chat.interface';
+import { ChatSession } from '../../interfaces/chat.interface';
 import { ChatService } from '../../services/chat.service';
+import { ApiService } from '../../services/api.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -16,22 +17,22 @@ import { ChatService } from '../../services/chat.service';
 export class SidebarComponent implements OnInit {
   isModalOpen = false;
   isLoggedIn = false;
-  chats: Chat[] = [];
+  chats: ChatSession[] = [];
 
   constructor(
     private authService: AuthService,
     private chatService: ChatService,
+    private api: ApiService,
     private router: Router
   ) {}
 
   ngOnInit() {
-    // 1) Estado de login
-    this.authService.isLoggedIn$.subscribe(flag => this.isLoggedIn = flag);
-    // 2) Chats del usuario
-    this.authService.chats$.subscribe(userChats => this.chats = userChats);
-    // 3) Si quieres mostrar TODOS los chats en el sidebar aunque no esté logueado:
-    // this.chatService.loadChats();
-    // this.chatService.chats$.subscribe(list => this.chats = list);
+    this.isLoggedIn = this.authService.isLoggedIn();
+    if (this.isLoggedIn) {
+      this.api.getChatSessions().subscribe((chats) => {
+        this.chats = chats;
+      })
+    }
   }
 
   viewHome() {
@@ -40,9 +41,10 @@ export class SidebarComponent implements OnInit {
     this.router.navigate(['/home']);
   }
 
-  loadMessages(chatId: number) {
+  loadMessages(chatId: string) {
     // Llamado desde (click)="loadMessages(chat.id)"
-    this.chatService.loadMessages(chatId);
+    // TODO: Guardar el chatSession en el servicio
+    this.api.getChatSession(chatId);
     this.router.navigate(['/home']);
   }
 
