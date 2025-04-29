@@ -1,3 +1,5 @@
+// src/app/components/sidebar/sidebar.component.ts
+
 import { Component, OnInit } from '@angular/core';
 import { LoginModalComponent } from '../login-modal/login-modal.component';
 import { NgClass, NgFor, NgIf } from '@angular/common';
@@ -25,23 +27,35 @@ export class SidebarComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // 1) Estado de login
-    this.authService.isLoggedIn$.subscribe(flag => this.isLoggedIn = flag);
-    // 2) Chats del usuario
-    this.authService.chats$.subscribe(userChats => this.chats = userChats);
-    // 3) Si quieres mostrar TODOS los chats en el sidebar aunque no esté logueado:
-    // this.chatService.loadChats();
-    // this.chatService.chats$.subscribe(list => this.chats = list);
+    // 1) Escuchar cambios en el estado de autenticación
+    this.authService.isLoggedIn$
+      .subscribe((loggedIn: boolean) => {
+        this.isLoggedIn = loggedIn;
+
+        if (loggedIn) {
+          // 2) Cargar sesiones solo cuando ya hay un token válido
+          this.chatService.loadSessions();
+
+          // 3) Suscribirse al stream de sesiones y actualizar el arreglo
+          this.chatService.sessions$
+            .subscribe((userChats: Chat[]) => {
+              this.chats = userChats;
+            });
+        } else {
+          // Limpiar chats si se desloguea
+          this.chats = [];
+        }
+      });
   }
 
+  /** Al hacer clic en "Home": crea nueva sesión y navega */
   viewHome() {
-    // Llamado desde (click)="viewHome()"
-    this.chatService.newChat();
+    this.chatService.createSession();
     this.router.navigate(['/home']);
   }
 
+  /** Al seleccionar un chat del sidebar: cargar mensajes y navegar */
   loadMessages(chatId: number) {
-    // Llamado desde (click)="loadMessages(chat.id)"
     this.chatService.loadMessages(chatId);
     this.router.navigate(['/home']);
   }

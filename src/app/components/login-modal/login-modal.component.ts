@@ -29,9 +29,18 @@ export class LoginModalComponent {
         this.closeModal();
       } else {
         this.error = true;
-        setTimeout(() => {
-          this.error = false;
-        }, 2000);
+        setTimeout(() => { this.error = false; }, 2000);
+      }
+    });
+  }
+
+  continueAsGuest() {
+    this.authService.createAnonymous().then((success) => {
+      if(success) {
+        this.closeModal();
+      } else {
+        this.error = true;
+        setTimeout(() => { this.error = false; }, 2000);
       }
     });
   }

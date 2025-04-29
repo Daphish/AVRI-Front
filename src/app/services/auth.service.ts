@@ -1,56 +1,75 @@
 import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { User } from '../interfaces/user.interface';
-import { UserService } from './user.service';
-import { ChatService } from './chat.service';
-import { Chat } from '../interfaces/chat.interface';
+
+interface TokenResponse { token: string; }
+interface AnonymousResponse { anonymous_id: string; }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private userService = inject(UserService);
-  private chatService = inject(ChatService);
+  private http = inject(HttpClient);
 
-  private noAccountUser: User = {
-    id: -1,
-    email: '',
-    password: '',
-    name: '',
-    first_name: '',
-    last_name: '',
-    education_level: '',
-    field_of_study: ''
-  };
-
-  private currentUser$$ = new BehaviorSubject<User>(this.noAccountUser);
+  private currentUser$$ = new BehaviorSubject<User | null>(null);
   currentUser$ = this.currentUser$$.asObservable();
 
   private loggedIn$$ = new BehaviorSubject<boolean>(false);
   isLoggedIn$ = this.loggedIn$$.asObservable();
 
-  private chatsSubject$$ = new BehaviorSubject<Chat[]>([]);
-  chats$ = this.chatsSubject$$.asObservable();
+  /** Login con usuario registrado */
+  async login(email: string, password: string): Promise<boolean> {
+    try {
+      const resp = await firstValueFrom(
+        this.http.post<TokenResponse>('/api/user/token/', { email, password })
+      );
+      localStorage.setItem('authToken', resp.token);
+      this.loggedIn$$.next(true);
 
-  async login(username: string, password: string): Promise<boolean> {
-    const users = await firstValueFrom(this.userService.getUsers());
-    const user = users.find(u => u.email === username && u.password === password);
-    if (!user) {
+      const user = await firstValueFrom(this.http.get<User>('/api/user/me/'));
+      this.currentUser$$.next(user);
+      return true;
+    } catch {
       return false;
     }
-    this.currentUser$$.next(user);
-    this.loggedIn$$.next(true);
-    const allChats = await firstValueFrom(this.chatService.getChats());
-    this.chatsSubject$$.next(allChats.filter(c => c.idUser === user.id));
-    return true;
   }
 
+  /** Crear usuario anónimo y obtener token */
+  async createAnonymous(): Promise<boolean> {
+    try {
+      // 1) Crear el usuario anónimo
+      const anon = await firstValueFrom(
+        this.http.post<AnonymousResponse>('/api/user/create-anonymous/', {})
+      );
+
+      // 2) Solicitar token para ese anonymous_id
+      const resp = await firstValueFrom(
+        this.http.post<TokenResponse>(
+          '/api/user/token-anonymous/',
+          { anonymous_id: anon.anonymous_id }
+        )
+      );
+      localStorage.setItem('authToken', resp.token);
+      this.loggedIn$$.next(true);
+
+      // (Opcional) Cargar info de usuario si tu endpoint lo devuelve
+      // const user = await firstValueFrom(this.http.get<User>('/api/user/me/'));
+      // this.currentUser$$.next(user);
+
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /** Logout: borra token y estado */
   logout(): void {
-    this.currentUser$$.next(this.noAccountUser);
+    localStorage.removeItem('authToken');
+    this.currentUser$$.next(null);
     this.loggedIn$$.next(false);
-    this.chatsSubject$$.next([]);
-    this.chatService.newChat();
   }
 
-  getUser(): User {
-    return this.currentUser$$.value;
+  /** Recuperar token para el interceptor */
+  getToken(): string | null {
+    return localStorage.getItem('authToken');
   }
 }

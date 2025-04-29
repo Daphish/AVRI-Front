@@ -1,63 +1,70 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, map, Observable } from 'rxjs';
+import { BehaviorSubject, map } from 'rxjs';
 import { Chat, Message } from '../interfaces/chat.interface';
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
   private http = inject(HttpClient);
-  private API = '/api';
+  private BASE = '/api/chat';
 
-  // Subjects internos
-  private chats$$    = new BehaviorSubject<Chat[]>([]);
+  private sessions$$ = new BehaviorSubject<Chat[]>([]);
+  sessions$ = this.sessions$$.asObservable();
+
   private messages$$ = new BehaviorSubject<Message[]>([]);
-  private idChat$$   = new BehaviorSubject<number>(0);
-
-  // Observables públicos
-  chats$    = this.chats$$.asObservable();
   messages$ = this.messages$$.asObservable();
-  idChat$   = this.idChat$$.asObservable();
 
-  /**  Devuelve el listado de chats desde el backend */
-  getChats(): Observable<Chat[]> {
-    return this.http
-      .get<{ chats: Chat[] }>(`${this.API}/chats`)
-      .pipe(map(res => res.chats));
+  private idChat$$ = new BehaviorSubject<string>('');
+  idChat$ = this.idChat$$.asObservable();
+
+  /** Carga todas las sesiones del usuario */
+  loadSessions(): void {
+    this.http.get<Chat[]>(`${this.BASE}/`)
+      .subscribe(list => this.sessions$$.next(list));
   }
 
-  /**  Carga todos los chats en el BehaviorSubject */
-  loadChats(): void {
-    this.getChats().subscribe(chats => this.chats$$.next(chats));
-  }
-
-  /**  Devuelve los mensajes de un chat concreto */
-  getMessages(idChat: number): Observable<Message[]> {
-    return this.http
-      .get<{ messages: Message[] }>(`${this.API}/messages?idChat=${idChat}`)
-      .pipe(map(res => res.messages));
-  }
-
-  /**  Carga mensajes y actualiza idChat$$ */
-  loadMessages(idChat: number): void {
-    this.getMessages(idChat).subscribe(msgs => {
-      this.idChat$$.next(idChat);
-      this.messages$$.next(msgs);
-    });
-  }
-
-  /**  Envía un mensaje de usuario y concatena la respuesta system */
-  sendMessage(idChat: number, text: string): void {
-    this.http
-      .post<Message>(`${this.API}/chat`, { idChat, text })
-      .subscribe(reply => {
-        const updated = [...this.messages$$.value, reply];
-        this.messages$$.next(updated);
+  /** Crea una nueva sesión */
+  createSession(name?: string): void {
+    this.http.post<Chat>(`${this.BASE}/`, { session_name: name })
+      .subscribe(sess => {
+        this.sessions$$.next([sess, ...this.sessions$$.value]);
+        this.idChat$$.next(sess.id.toString());
       });
   }
 
-  /**  Inicia un nuevo chat (limpia estado) */
-  newChat(): void {
-    this.idChat$$.next(0);
-    this.messages$$.next([]);
+  /** Carga los mensajes de una sesión */
+  loadMessages(sessionId: number | string): void {
+    const sid = sessionId.toString();
+    this.http.get<{ data: Message[] }>(`${this.BASE}/${sid}/`)
+      .pipe(map(res => res.data))
+      .subscribe(msgs => {
+        this.idChat$$.next(sid);
+        this.messages$$.next(msgs);
+      });
+  }
+
+  /** Envía una pregunta y agrega la respuesta al stream */
+  sendMessage(sessionId: number | string, text: string): void {
+    const sid = sessionId.toString();
+    this.http.post<Message>(`${this.BASE}/${sid}/ask/`, { query: text })
+      .subscribe(reply => {
+        this.idChat$$.next(sid);
+        this.messages$$.next([...this.messages$$.value, reply]);
+      });
+  }
+
+  /** Elimina una sesión y limpia estados si corresponde */
+  deleteSession(sessionId: number | string): void {
+    const sid = sessionId.toString();
+    this.http.delete(`${this.BASE}/${sid}/`)
+      .subscribe(() => {
+        this.sessions$$.next(
+          this.sessions$$.value.filter(s => s.id.toString() !== sid)
+        );
+        if (this.idChat$$.value === sid) {
+          this.idChat$$.next('');
+          this.messages$$.next([]);
+        }
+      });
   }
 }

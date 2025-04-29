@@ -1,4 +1,10 @@
-import { Component, OnInit, ViewChild, ElementRef, inject } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  ElementRef,
+  inject
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgFor, NgIf, NgClass } from '@angular/common';
 import { ChatService } from '../../services/chat.service';
@@ -15,47 +21,50 @@ import { Message } from '../../interfaces/chat.interface';
 export class ChatComponent implements OnInit {
   @ViewChild('chatContainer') private chatContainer!: ElementRef;
 
-  // — Profiler & rating —
-  topics        = ['Ciencias sociales', 'Medicina', 'Química', 'Computación', 'Biología', 'Arquitectura', 'topic'];
-  keyWords      = ['Ciencias sociales', 'Medicina', 'Química', 'Computación', 'Biología', 'Arquitectura', 'keyWord'];
-  profilerDocs  = ['Doc A', 'Doc B', 'Doc C', 'Doc D', 'Doc E'];
-  selectedTopics: boolean[]    = [];
-  selectedKeyWords: boolean[]  = [];
-  selectedDocs: boolean[]      = [];
-  topicNumber     = 0;
-  keyWordNumber   = 0;
-  paperNumber     = 0;
+  messages: Message[] = [];
+  newMessage = '';
+  idChat = '';
+  isLoggedIn = false;
+
+  // Profiler state (sin cambios)
+  topics = ['Ciencias sociales', 'Medicina', 'Química', 'Computación', 'Biología', 'Arquitectura'];
+  keyWords = [...this.topics];
+  profilerDocs = ['Doc A', 'Doc B', 'Doc C', 'Doc D'];
+  selectedTopics: boolean[] = [];
+  selectedKeyWords: boolean[] = [];
+  selectedDocs: boolean[] = [];
+  topicNumber = 0;
+  keyWordNumber = 0;
+  paperNumber = 0;
   profilerCounter = 0;
   noProfilerButtonsSelected = false;
-
   stars = Array(5).fill(0);
   rating = 0;
   hoverValue = 0;
-
-  // — Chat state —
-  messages: Message[] = [];
-  newMessage = '';
-  idChat = 0;
-  isLoggedIn = false;
 
   private chatService = inject(ChatService);
   private authService = inject(AuthService);
 
   ngOnInit() {
-    // Inicializa arrays del profiler
+    // Inicializar profiler
     this.selectedTopics   = Array(this.topics.length).fill(false);
     this.selectedKeyWords = Array(this.keyWords.length).fill(false);
     this.selectedDocs     = Array(this.profilerDocs.length).fill(false);
 
     // Estado de login
-    this.authService.isLoggedIn$.subscribe(flag => this.isLoggedIn = flag);
+    this.authService.isLoggedIn$
+      .subscribe((flag: boolean) => this.isLoggedIn = flag);
 
-    // Suscribe a mensajes y sesión activa
-    this.chatService.messages$.subscribe(msgs => {
-      this.messages = msgs;
-      setTimeout(() => this.scrollToBottom(), 0);
-    });
-    this.chatService.idChat$.subscribe(id => this.idChat = id);
+    // Mensajes
+    this.chatService.messages$
+      .subscribe((msgs: Message[]) => {
+        this.messages = msgs;
+        setTimeout(() => this.scrollToBottom(), 0);
+      });
+
+    // ID de sesión activa
+    this.chatService.idChat$
+      .subscribe((id: string) => this.idChat = id);
   }
 
   addMessage() {
