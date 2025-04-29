@@ -15,11 +15,13 @@
     </div>
     <div class="left-login">
         <button [ngClass]="{'login-button': isLoggedIn === false, 'invisible': isLoggedIn === true}" (click)="openModal()">Iniciar sesión</button>
-        <button [ngClass]="{'account-button': isLoggedIn === true, 'invisible': isLoggedIn === false}" (click)="viewProfile()">
+        <button
+            [ngClass]="{'account-button': isLoggedIn, 'invisible': !isLoggedIn}"
+            (click)="viewProfile()">
             <div class="account-circle">
-                D
+                {{ currentUserName.charAt(0) }}
             </div>
-            Daphish
+        {{ currentUserName }}
         </button>
     </div>
 </div>

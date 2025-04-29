@@ -7,6 +7,7 @@ import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { Chat } from '../../interfaces/chat.interface';
 import { ChatService } from '../../services/chat.service';
+import { User } from '../../interfaces/user.interface';
 
 @Component({
   selector: 'app-sidebar',
@@ -19,6 +20,7 @@ export class SidebarComponent implements OnInit {
   isModalOpen = false;
   isLoggedIn = false;
   chats: Chat[] = [];
+  currentUserName = 'Invitado';
 
   constructor(
     private authService: AuthService,
@@ -32,29 +34,35 @@ export class SidebarComponent implements OnInit {
       .subscribe((loggedIn: boolean) => {
         this.isLoggedIn = loggedIn;
 
+        // Actualizar nombre
         if (loggedIn) {
-          // 2) Cargar sesiones solo cuando ya hay un token válido
-          this.chatService.loadSessions();
+          this.authService.currentUser$
+            .subscribe(user => {
+              this.currentUserName = user?.first_name
+                                     ? `${user.first_name}`
+                                     : 'Usuario';
+            });
+        } else {
+          this.currentUserName = 'Invitado';
+          this.chats = [];
+        }
 
-          // 3) Suscribirse al stream de sesiones y actualizar el arreglo
+        // Cargar sesiones al loguear
+        if (loggedIn) {
+          this.chatService.loadSessions();
           this.chatService.sessions$
             .subscribe((userChats: Chat[]) => {
               this.chats = userChats;
             });
-        } else {
-          // Limpiar chats si se desloguea
-          this.chats = [];
         }
       });
   }
 
-  /** Al hacer clic en "Home": crea nueva sesión y navega */
   viewHome() {
     this.chatService.createSession();
     this.router.navigate(['/home']);
   }
 
-  /** Al seleccionar un chat del sidebar: cargar mensajes y navegar */
   loadMessages(chatId: number) {
     this.chatService.loadMessages(chatId);
     this.router.navigate(['/home']);
