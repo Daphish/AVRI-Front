@@ -56,9 +56,8 @@ export class ApiService {
   }
 
   sendMessage(sessionId: string, message: string): Observable<any> {
-    return this.http.post<any>(
-      `${this.apiUrl}/chat/${sessionId}/ask/`,
-      message
-    );
+    return this.http.post<any>(`${this.apiUrl}/chat/${sessionId}/ask/`, {
+      query: message,
+    });
   }
 }

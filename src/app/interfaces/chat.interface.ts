@@ -4,14 +4,16 @@ export interface ChatSession {
 }
 
 export interface RawChatMessage {
-  answer: string;
-  reference: {
-    doc_aggs: {
-      doc_id: string;
-      doc_name: string;
-    }[];
+  data: {
+    answer: string;
+    reference: {
+      doc_aggs?: {
+        doc_id: string;
+        doc_name: string;
+      }[];
+    };
+    session_id: string;
   };
-  session_id: string;
 }
 
 export interface ChatMessage {

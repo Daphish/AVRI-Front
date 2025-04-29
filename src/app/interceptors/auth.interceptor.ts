@@ -8,9 +8,14 @@ export const authInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
   next: HttpHandlerFn
 ) => {
-  const userToken = localStorage.getItem('token');
-  const modifiedReq = req.clone({
-    headers: req.headers.set('Authorization', `Token ${userToken}`),
-  });
-  return next(modifiedReq);
+  if (typeof window !== 'undefined' && window.localStorage) {
+    const userToken = localStorage.getItem('token');
+    if (userToken) {
+      const modifiedReq = req.clone({
+        headers: req.headers.set('Authorization', `Token ${userToken}`),
+      });
+      return next(modifiedReq);
+    }
+  }
+  return next(req);
 };

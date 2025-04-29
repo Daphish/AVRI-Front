@@ -12,7 +12,7 @@ import { ApiService } from '../../services/api.service';
   standalone: true,
   imports: [LoginModalComponent, NgIf, NgClass, NgFor],
   templateUrl: './sidebar.component.html',
-  styleUrls: ['./sidebar.component.css']
+  styleUrls: ['./sidebar.component.css'],
 })
 export class SidebarComponent implements OnInit {
   isModalOpen = false;
@@ -31,7 +31,7 @@ export class SidebarComponent implements OnInit {
     if (this.isLoggedIn) {
       this.api.getChatSessions().subscribe((chats) => {
         this.chats = chats;
-      })
+      });
     }
   }
 
@@ -48,7 +48,13 @@ export class SidebarComponent implements OnInit {
     this.router.navigate(['/home']);
   }
 
-  openModal()   { this.isModalOpen = true; }
-  closeModal()  { this.isModalOpen = false; }
-  viewProfile() { this.router.navigate(['/profile']); }
+  openModal() {
+    this.isModalOpen = true;
+  }
+  closeModal() {
+    this.isModalOpen = false;
+  }
+  viewProfile() {
+    this.router.navigate(['/profile']);
+  }
 }

@@ -1,16 +1,16 @@
-import {
-  Component,
-  OnInit,
-  ViewChild,
-  ElementRef,
-} from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgFor, NgIf, NgClass } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
-import { ChatMessage, ChatSession, RawChatMessage } from '../../interfaces/chat.interface';
+import {
+  ChatMessage,
+  ChatSession,
+  RawChatMessage,
+} from '../../interfaces/chat.interface';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../../services/api.service';
 import { makeMessage, parseMessage } from '../../utils/message.utils';
+import { switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-chat',
@@ -69,7 +69,8 @@ export class ChatComponent implements OnInit {
   chats: ChatSession[] = [];
   messages: ChatMessage[] = [];
   messageInput = '';
-  loading = false;
+  loadingMessages = false;
+  loadingSession = false;
   error = '';
 
   ngOnInit() {
@@ -80,16 +81,34 @@ export class ChatComponent implements OnInit {
 
     // Estado de login
     this.isLoggedIn = this.authService.isLoggedIn();
+
     if (!this.isLoggedIn) {
-      this.authService.createAnonymous().subscribe(anonymousUser => {
-        this.authService.loginAnonymous(anonymousUser.id).subscribe({});
+      this.authService
+        .createAnonymous()
+        .pipe(
+          switchMap((anonymousUser) => {
+            return this.authService.loginAnonymous(anonymousUser.anonymous_id);
+          }),
+          switchMap(() => this.api.getChatSessions())
+        )
+        .subscribe({
+          next: (data) => {
+            this.chats = data;
+          },
+          error: (error) => {
+            console.error('Error durante la autenticación anónima:', error);
+          },
+        });
+    } else {
+      this.api.getChatSessions().subscribe({
+        next: (data) => {
+          this.chats = data;
+        },
+        error: (error) => {
+          console.error('Error cargando los chats:', error);
+        },
       });
     }
-
-    // Suscribe a mensajes y sesión activa
-    this.api.getChatSessions().subscribe(data => {
-      this.chats = data;
-    });
   }
 
   addMessage() {
@@ -97,9 +116,12 @@ export class ChatComponent implements OnInit {
     if (!text) return;
     this.messages.push(makeMessage(text));
     this.scrollToBottom();
-    this.api.sendMessage(this.sessionId, text).subscribe((response: RawChatMessage) => {
-      this.messages.push(parseMessage(response));
-    });
+    this.api
+      .sendMessage(this.sessionId, text)
+      .subscribe((response: RawChatMessage) => {
+        this.messages.push(parseMessage(response));
+        console.log(this.messages);
+      });
     this.messageInput = '';
     this.scrollToBottom();
   }
@@ -146,6 +168,38 @@ export class ChatComponent implements OnInit {
   finishProfiler() {
     if (this.paperNumber > 0) {
       this.isLoggedIn = true;
+      this.api.createChatSession('Nuevo Chat').subscribe({
+        next: (sessionChat) => {
+          this.chats.push(sessionChat);
+          this.sessionId = sessionChat.session_id;
+
+          this.api.getChatSession(this.sessionId).subscribe({
+            next: (data) => {
+              this.messages = data.data[0].messages.map(
+                (message: ChatMessage) => {
+                  return {
+                    content: message.content,
+                    role: message.role,
+                    reference: message.reference
+                      ? Array.from(
+                          new Map(
+                            message.reference.map((ref) => [
+                              ref.document_id,
+                              {
+                                document_id: ref.document_id,
+                                document_name: ref.document_name,
+                              },
+                            ])
+                          ).values()
+                        )
+                      : [],
+                  };
+                }
+              );
+            },
+          });
+        },
+      });
     } else {
       this.noProfilerButtonsSelected = true;
       setTimeout(() => (this.noProfilerButtonsSelected = false), 5000);

@@ -27,7 +27,9 @@ export class AuthService {
       .post<{ token: string }>(`${this.apiUrl}/user/token/`, credentials)
       .pipe(
         tap((res) => {
-          localStorage.setItem(this.tokenKey, res.token);
+          if (typeof window !== 'undefined' && window.localStorage) {
+            localStorage.setItem(this.tokenKey, res.token);
+          }
         })
       );
   }
@@ -40,7 +42,9 @@ export class AuthService {
       })
       .pipe(
         tap((res) => {
-          localStorage.setItem(this.tokenKey, res.token);
+          if (typeof window !== 'undefined' && window.localStorage) {
+            localStorage.setItem(this.tokenKey, res.token);
+          }
         })
       );
   }
