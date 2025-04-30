@@ -40,11 +40,36 @@
     background-color: #e2e2e2;
 }
 
+/* === Aquí ajustamos left-chats para scroll interno === */
 .left-chats {
-    height: 100%;
+    /* que crezca y luego haga overflow */
+    flex: 1 1 auto;
+    /* permitir overflow interno */
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* necesario para que el flex-item calcule bien el overflow */
+    min-height: 0;
+
+    /* tus estilos originales */
     width: 100%;
     padding: 5px 10px;
     margin-top: 10px;
+}
+
+/* Puedes personalizar la scrollbar si quieres */
+.left-chats::-webkit-scrollbar {
+    width: 8px;
+}
+.left-chats::-webkit-scrollbar-track {
+    background: #dddddd;
+    border-radius: 4px;
+}
+.left-chats::-webkit-scrollbar-thumb {
+    background: #607890;
+    border-radius: 4px;
+}
+.left-chats::-webkit-scrollbar-thumb:hover {
+    background: #425263;
 }
 
 .left-login {
