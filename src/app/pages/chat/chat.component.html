@@ -3,16 +3,30 @@
 >
   <div class="chat-container-space" #chatContainer>
     <div class="chat-container">
-      <div
-        [ngClass]="{
-          column: messages.length === 0,
-          invisible: messages.length !== 0
-        }"
-      >
-        <div class="welcome-title">¡Bienvenido!</div>
+      <div *ngIf="messages.length === 0 && !showRecommendations"
+       [ngClass]="{ column: true }">
+
+        <div class="welcome-title" *ngIf="messages.length === 0 && !showRecommendations" [ngClass]="{ column: true }">¡Bienvenido!</div>
         <img class="welcome-img" src="/Logo-AVRI.png" />
         <div class="welcome-body">¿Cómo puedo ayudar el día de hoy?</div>
+
       </div>
+
+      <div *ngIf="showRecommendations" class="recommendations-container">
+        <div class="recommendation-title">Recomendaciones para ti</div>
+        <div class="recommendation-grid">
+          <div class="recommendation-card" *ngFor="let doc of recommendedDocs">
+            <div class="doc-title">{{ doc.title }}</div>
+            <div class="doc-author">{{ doc.author }}</div>
+            <div class="doc-icons">
+              <i class="bi bi-file-earmark-text"></i> 
+              <i class="bi bi-quote"></i> 
+            </div>
+          </div>
+        </div>
+      </div>
+      
+
       <div *ngFor="let message of messages" class="column">
         <div
           [ngClass]="{
@@ -44,7 +58,8 @@
       </div>
     </div>
   </div>
-  <div class="chat-input">
+
+  <div class="chat-input" *ngIf="!showRecommendations">
     <input
       class="chat-input-box"
       placeholder="Escribe algo al AVRI"
@@ -220,3 +235,5 @@
     </div>
   </div>
 </div>
+
+

@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, map, Observable } from 'rxjs';
+import { BehaviorSubject, map, Observable, ReplaySubject, Subject } from 'rxjs';
 import { ChatSession, ChatMessage } from '../interfaces/chat.interface';
 
 @Injectable({ providedIn: 'root' })
@@ -12,11 +12,14 @@ export class ChatService {
   private chats$$    = new BehaviorSubject<ChatSession[]>([]);
   private messages$$ = new BehaviorSubject<ChatMessage[]>([]);
   private idChat$$   = new BehaviorSubject<number>(0);
+  private newChatSubject = new ReplaySubject<void>(1); 
+
 
   // Observables públicos
   chats$    = this.chats$$.asObservable();
   messages$ = this.messages$$.asObservable();
   idChat$   = this.idChat$$.asObservable();
+  newChatRequested$ = this.newChatSubject.asObservable();
 
   /**  Devuelve el listado de chats desde el backend */
   getChats(): Observable<ChatSession[]> {
@@ -59,5 +62,11 @@ export class ChatService {
   newChat(): void {
     this.idChat$$.next(0);
     this.messages$$.next([]);
+    this.newChatSubject.next();
   }
+
+  requestNewChat() {
+    this.newChatSubject.next();
+  }
+  
 }

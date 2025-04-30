@@ -353,3 +353,48 @@
     padding: 10px 0px;
     align-self: center;
 }
+
+/*---------------------------------------------------*/
+.recommendations-container {
+    padding: 1rem;
+    background: #f8f9fa;
+  }
+  
+  .recommendation-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+  
+  .recommendation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+  
+  .recommendation-card {
+    background: #cce5ff;
+    padding: 1rem;
+    border-radius: 8px;
+    position: relative;
+  }
+  
+  .doc-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  
+  .doc-author {
+    font-size: 0.9rem;
+    color: #003366;
+  }
+  
+  .doc-icons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    font-size: 1.2rem;
+    color: #003366;
+  }
+  
+  

@@ -11,6 +11,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../../services/api.service';
 import { makeMessage, parseMessage } from '../../utils/message.utils';
 import { switchMap } from 'rxjs';
+import { ChatService } from '../../services/chat.service';
 
 @Component({
   selector: 'app-chat',
@@ -26,8 +27,26 @@ export class ChatComponent implements OnInit {
     private route: ActivatedRoute,
     private api: ApiService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private chatService: ChatService
   ) {}
+
+  // Docs
+  recommendedDocs = [
+    {
+      title: 'Comparar el uso de tramadol vs buprenorfina en el manejo del dolor post operatorio',
+      author: 'Barrón Méndez, Francisco Antonio',
+    },
+    {
+      title: 'Estudio del comportamiento epidemiológico de virus respiratorios durante dos años de la pandemia por SARS-CoV-2',
+      author: 'Barrón Méndez, Francisco Antonio',
+    },
+    {
+      title: 'Comparar el uso de tramadol vs buprenorfina... EMBARGADO. Disponible...',
+      author: 'Barrón Méndez, Francisco Antonio',
+    },
+  ];
+  
 
   // — Profiler & rating —
   topics = [
@@ -73,6 +92,11 @@ export class ChatComponent implements OnInit {
   loadingSession = false;
   error = '';
 
+  //  Tarjetas de recomendación
+  showRecommendations = false;
+  private newChatRequested = false;
+
+
   ngOnInit() {
     // Inicializa arrays del profiler
     this.selectedTopics = Array(this.topics.length).fill(false);
@@ -81,6 +105,14 @@ export class ChatComponent implements OnInit {
 
     // Estado de login
     this.isLoggedIn = this.authService.isLoggedIn();
+
+    this.chatService.newChatRequested$.subscribe(() => {
+      this.messages = [];
+      this.messageInput = '';
+      this.showRecommendations = false;
+
+      this.startNewChatSession();
+    });
 
     if (!this.isLoggedIn) {
       this.authService
@@ -168,6 +200,21 @@ export class ChatComponent implements OnInit {
   finishProfiler() {
     if (this.paperNumber > 0) {
       this.isLoggedIn = true;
+      this.showRecommendations = true;
+  
+      // No crees sesión ni cargues mensajes aquí
+      // Solo activa las tarjetas
+    } else {
+      this.noProfilerButtonsSelected = true;
+      setTimeout(() => (this.noProfilerButtonsSelected = false), 5000);
+    }
+  }
+  
+
+  /*
+  finishProfiler() {
+    if (this.paperNumber > 0) {
+      this.isLoggedIn = true;
       this.api.createChatSession('Nuevo Chat').subscribe({
         next: (sessionChat) => {
           this.chats.push(sessionChat);
@@ -196,6 +243,7 @@ export class ChatComponent implements OnInit {
                   };
                 }
               );
+              this.showRecommendations = true;
             },
           });
         },
@@ -205,6 +253,7 @@ export class ChatComponent implements OnInit {
       setTimeout(() => (this.noProfilerButtonsSelected = false), 5000);
     }
   }
+    */
 
   // — Métodos de rating —
   hoverRating(v: number) {
@@ -216,4 +265,40 @@ export class ChatComponent implements OnInit {
   setRating(v: number) {
     this.rating = v;
   }
+
+  startNewChatSession(sessionName: string = 'Nuevo Chat') {
+    this.showRecommendations = false;
+    this.messages = [];
+
+    this.api.createChatSession(sessionName).subscribe({
+      next: (sessionChat) => {
+        this.chats.push(sessionChat);
+        this.sessionId = sessionChat.session_id;
+  
+        this.api.getChatSession(this.sessionId).subscribe({
+          next: (data) => {
+            this.messages = data.data[0].messages.map((message: ChatMessage) => ({
+              content: message.content,
+              role: message.role,
+              reference: message.reference
+                ? Array.from(
+                    new Map(
+                      message.reference.map((ref) => [
+                        ref.document_id,
+                        {
+                          document_id: ref.document_id,
+                          document_name: ref.document_name,
+                        },
+                      ])
+                    ).values()
+                  )
+                : [],
+            }));
+            this.showRecommendations = false; // Oculta tarjetas al comenzar chat
+          },
+        });
+      },
+    });
+  }
+  
 }

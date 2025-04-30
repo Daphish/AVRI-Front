@@ -38,7 +38,8 @@ export class SidebarComponent implements OnInit {
   viewHome() {
     // Llamado desde (click)="viewHome()"
     this.chatService.newChat();
-    this.router.navigate(['/home']);
+    this.chatService.requestNewChat();
+    //this.router.navigate(['/home']);
   }
 
   loadMessages(chatId: string) {
