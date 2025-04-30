@@ -1,12 +1,29 @@
+// src/app/services/chat.service.ts
+
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, map } from 'rxjs';
-import { Chat, Message } from '../interfaces/chat.interface';
+import { HttpClient }         from '@angular/common/http';
+import { BehaviorSubject, Observable, tap, map } from 'rxjs';
+import { Chat, Message }      from '../interfaces/chat.interface';
+
+interface RawMessage { from_user: boolean; text: string; }
+interface AskResponse {
+  code: number;
+  data: {
+    answer: string;
+    // …otros campos que puedas necesitar…
+  };
+}
+interface GetMessagesResponse {
+  code: number;
+  data: {
+    data: RawMessage[];
+  };
+}
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
-  private http = inject(HttpClient);
-  private BASE = '/api/chat';
+  private http      = inject(HttpClient);
+  private BASE      = '/api/chat';
 
   private sessions$$ = new BehaviorSubject<Chat[]>([]);
   sessions$ = this.sessions$$.asObservable();
@@ -17,49 +34,70 @@ export class ChatService {
   private idChat$$ = new BehaviorSubject<string>('');
   idChat$ = this.idChat$$.asObservable();
 
-  /** Carga todas las sesiones del usuario */
+  /** Carga sesiones */
   loadSessions(): void {
     this.http.get<Chat[]>(`${this.BASE}/`)
       .subscribe(list => this.sessions$$.next(list));
   }
 
-  /** Crea una nueva sesión */
-  createSession(name?: string): void {
-    this.http.post<Chat>(`${this.BASE}/`, { session_name: name })
-      .subscribe(sess => {
+  /** Crea sesión vacía */
+  createSession(name?: string): Observable<Chat> {
+    const payload = { session_name: name ?? 'Chat sin título' };
+    return this.http.post<Chat>(`${this.BASE}/`, payload).pipe(
+      tap(sess => {
         this.sessions$$.next([sess, ...this.sessions$$.value]);
-        this.idChat$$.next(sess.id.toString());
-      });
+        this.idChat$$.next(sess.session_id);
+      })
+    );
   }
 
-  /** Carga los mensajes de una sesión */
+  /** Carga mensajes del servidor y los transforma a Message[] */
   loadMessages(sessionId: number | string): void {
     const sid = sessionId.toString();
-    this.http.get<{ data: Message[] }>(`${this.BASE}/${sid}/`)
-      .pipe(map(res => res.data))
+    this.http
+      .get<GetMessagesResponse>(`${this.BASE}/${sid}/`)
+      .pipe(
+        map(res =>
+          res.data.data.map(m => ({
+            fromUser: m.from_user,
+            text:      m.text
+          }))
+        )
+      )
       .subscribe(msgs => {
-        this.idChat$$.next(sid);
         this.messages$$.next(msgs);
       });
   }
 
-  /** Envía una pregunta y agrega la respuesta al stream */
+  /**
+   * Envía mensaje: primero muestra el tuyo, luego la respuesta del servidor
+   * que viene bajo response.data.answer
+   */
   sendMessage(sessionId: number | string, text: string): void {
     const sid = sessionId.toString();
-    this.http.post<Message>(`${this.BASE}/${sid}/ask/`, { query: text })
-      .subscribe(reply => {
-        this.idChat$$.next(sid);
-        this.messages$$.next([...this.messages$$.value, reply]);
+
+    // 1) Mostrar inmediatamente el mensaje del usuario
+    const userMsg: Message = { fromUser: true, text };
+    this.messages$$.next([...this.messages$$.value, userMsg]);
+
+    // 2) Llamar al backend y luego extraer response.data.answer
+    this.http
+      .post<AskResponse>(`${this.BASE}/${sid}/ask/`, { query: text })
+      .pipe(
+        map(res => ({ fromUser: false, text: res.data.answer } as Message))
+      )
+      .subscribe(botMsg => {
+        this.messages$$.next([...this.messages$$.value, botMsg]);
       });
   }
 
-  /** Elimina una sesión y limpia estados si corresponde */
+  /** Elimina sesión y limpia estado si es necesario */
   deleteSession(sessionId: number | string): void {
     const sid = sessionId.toString();
     this.http.delete(`${this.BASE}/${sid}/`)
       .subscribe(() => {
         this.sessions$$.next(
-          this.sessions$$.value.filter(s => s.id.toString() !== sid)
+          this.sessions$$.value.filter(s => s.session_id !== sid)
         );
         if (this.idChat$$.value === sid) {
           this.idChat$$.next('');

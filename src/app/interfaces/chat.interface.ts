@@ -1,11 +1,18 @@
 export interface Message {
-  idChat: number;
-  type: 'user' | 'system';
+  fromUser: boolean;
   text: string;
-};
+}
 
 export interface Chat {
-  id: number;
-  idUser: number;
-  name: string; 
+  session_id: string;
+  session_name: string;
+  user: number;
+}
+
+export interface RawMessage {
+  answer?:  string;
+  text?:    string;
+  content?: string;
+  query?:   string;
+  from_user: boolean;
 }

@@ -1,28 +1,49 @@
 <div class="left">
     <div class="top-left">
-        <img src="/Logo-AVRI-Alt.png">
-        <div class="left-title">
-            Asistente Virtual RI
-        </div>
+      <img src="/Logo-AVRI-Alt.png" />
+      <div class="left-title">Asistente Virtual RI</div>
     </div>
-    <button class="new-chat-button" (click)="viewHome()">Nueva conversación +</button>
+    <button class="new-chat-button" (click)="viewHome()">
+      Nueva conversación +
+    </button>
+  
     <div class="left-chats">
-        <div [ngClass]="{'no-chats-message': chats.length === 0, 'invisible': chats.length!== 0}">Aún no hay conversaciones</div>
-        <div *ngFor="let chat of chats" class="sidebar-chat" (click)="loadMessages(chat.id)">
-            <i class="bi bi-chat-left" style="color: black; font-size: 1rem; margin-right: 5px;"></i>
-            {{chat.name}}
-        </div>
+      <div
+        [ngClass]="{ 'no-chats-message': chats.length === 0, invisible: chats.length !== 0 }"
+      >
+        Aún no hay conversaciones
+      </div>
+      <div
+        *ngFor="let chat of chats"
+        class="sidebar-chat"
+        (click)="loadMessages(chat.session_id)"
+      >
+        <i class="bi bi-chat-left" style="font-size:1rem; margin-right:5px;"></i>
+        {{ chat.session_name }}
+      </div>
     </div>
+  
     <div class="left-login">
-        <button [ngClass]="{'login-button': isLoggedIn === false, 'invisible': isLoggedIn === true}" (click)="openModal()">Iniciar sesión</button>
-        <button
-            [ngClass]="{'account-button': isLoggedIn, 'invisible': !isLoggedIn}"
-            (click)="viewProfile()">
-            <div class="account-circle">
-                {{ currentUserName.charAt(0) }}
-            </div>
+      <button
+        [ngClass]="{ 'login-button': !isLoggedIn, invisible: isLoggedIn }"
+        (click)="openModal()"
+      >
+        Iniciar sesión
+      </button>
+      <button
+        [ngClass]="{ 'account-button': isLoggedIn, invisible: !isLoggedIn }"
+        (click)="viewProfile()"
+      >
+        <div class="account-circle">
+          {{ currentUserName.charAt(0) }}
+        </div>
         {{ currentUserName }}
-        </button>
+      </button>
     </div>
-</div>
-<app-login-modal *ngIf="isModalOpen" (closeModalEvent)="closeModal()"></app-login-modal>
+  </div>
+  
+  <app-login-modal
+    *ngIf="isModalOpen"
+    (closeModalEvent)="closeModal()"
+  ></app-login-modal>
+  

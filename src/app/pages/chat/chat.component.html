@@ -1,146 +1,42 @@
-<div [ngClass]="{ right: isLoggedIn === true, invisible: isLoggedIn === false }">
-  <div class="chat-container-space" #chatContainer>
-    <div class="chat-container">
-      <div [ngClass]="{
-          'column': messages.length === 0,
-          'invisible': messages.length !== 0
-        }">
-        <div class="welcome-title">¡Bienvenido!</div>
-        <img class="welcome-img" src="/Logo-AVRI.png" />
-        <div class="welcome-body">¿Cómo puedo ayudar el día de hoy?</div>
+<!-- src/app/pages/chat/chat.component.html -->
+<div class="right">
+  <div class="chat-container-space" #msgContainer>
+    <!-- Bienvenida -->
+    <div *ngIf="messages.length === 0" class="column">
+      <div class="welcome-title">¡Bienvenido!</div>
+      <img class="welcome-img" src="/Logo-AVRI.png" alt="logo AVRI"/>
+      <div class="welcome-body">¿Cómo puedo ayudar el día de hoy?</div>
+    </div>
+    <!-- Mensajes -->
+    <div *ngFor="let m of messages" class="column">
+      <div [ngClass]="{'message-user': m.fromUser, 'message-system': !m.fromUser}">
+        <div [ngClass]="{'invisible': m.fromUser, 'system-avatar-container': !m.fromUser}">
+          <img class="system-avatar" src="/Logo-AVRI.png" alt="avatar sistema"/>
+        </div>
+        {{ m.text }}
       </div>
-      <div *ngFor="let message of messages" class="column">
-        <div [ngClass]="{
-          'message-user': message.type === 'user',
-          'message-system': message.type === 'system'
-        }">
-          <div [ngClass]="{
-          'invisible': message.type === 'user',
-          'system-avatar-container': message.type === 'system'
-        }">
-            <img class="system-avatar" src="/Logo-AVRI.png" alt="avatar" />
-          </div>
-          {{ message.text }}
-        </div>
-        <div *ngIf="message.type === 'system'" class="rating-container">
-            <span *ngFor="let star of stars; let i = index" (mouseenter)="hoverRating(i + 1)"
-              (mouseleave)="resetHover()" (click)="setRating(i + 1)"
-              [ngClass]="{ 'filled': i < hoverValue || i < rating }">
-              &#9733;
-            </span>
-        </div>
+      <!-- Rating -->
+      <div *ngIf="!m.fromUser" class="rating-container">
+        <span *ngFor="let star of stars; let i=index"
+              (mouseenter)="hoverRating(i+1)"
+              (mouseleave)="resetHover()"
+              (click)="setRating(i+1)"
+              [ngClass]="{ filled: i < hoverValue || i < rating }">
+          &#9733;
+        </span>
       </div>
     </div>
   </div>
+
+  <!-- Input -->
   <div class="chat-input">
-    <input class="chat-input-box" placeholder="Escribe algo al AVRI" [(ngModel)]="newMessage"
-      (keyup.enter)="addMessage()" />
-    <div class="chat-send-button" (click)="addMessage()">
-      <i class="bi bi-arrow-up" style="color: white"></i>
+    <input class="chat-input-box"
+           placeholder="Escribe algo al AVRI"
+           [(ngModel)]="newText"
+           (keyup.enter)="send()"
+           [disabled]="isSending" />
+    <div class="chat-send-button" (click)="send()" [class.disabled]="isSending">
+      <i class="bi bi-arrow-up"></i>
     </div>
-  </div>
-  <div class="white-block"></div>
-</div>
-<div [ngClass]="{
-    'right-profiler': isLoggedIn === false,
-    invisible: isLoggedIn === true
-  }">
-  <div [ngClass]="{
-    'progress-tracker': profilerCounter !== 0,
-    invisible: profilerCounter === 0
-  }">
-    <div class="blue-circle-true">
-      1
-    </div>
-    <div [ngClass]="{'progress-union-true': profilerCounter > 1, 'progress-union-false': profilerCounter < 2}"></div>
-    <div [ngClass]="{'blue-circle-true': profilerCounter > 1, 'blue-circle-false': profilerCounter < 2}">
-      2
-    </div>
-    <div [ngClass]="{'progress-union-true': profilerCounter > 2, 'progress-union-false': profilerCounter < 3}"></div>
-    <div [ngClass]="{'blue-circle-true': profilerCounter > 2, 'blue-circle-false': profilerCounter < 3}">
-      3
-    </div>
-  </div>
-  <div [ngClass]="{
-  'profiler-container-welcome': profilerCounter === 0,
-  invisible: profilerCounter !== 0
-}">
-    <div class="profiler-title">¡Bienvenido!</div>
-    <div style="color: white; text-align: center;">
-      Queremos conocerte mejor y ayudarte a encontrar el conocimiento que
-      necesitas, asi que antes de comenzar necesitamos que escojas los temas en
-      los que estas más interesado para personalizar tu búsqueda.
-    </div>
-    <div class="profiler-button" (click)="increaseProfilerCounter(0)">Continuar</div>
-  </div>
-  <div [ngClass]="{
-    'profiler-container': profilerCounter === 1,
-    invisible: profilerCounter !== 1
-}">
-    <div class="profiler-title-container">
-      <div class="profiler-title">Selecciona hasta 5 temas de
-        interés</div>
-      <div class="profiler-title profiler-counter">
-        {{topicNumber}}
-      </div>
-    </div>
-    <div class="topics-container">
-      <div class="profiler-buttons" *ngFor="let topic of topics; let i = index" (click)="toggleTopic(i)"
-        [ngClass]="{'selected': selectedTopics[i], 'disabled': topicNumber === 5 && !selectedTopics[i]}">
-        <div class="profiler-buttons-text">
-          {{topic}}
-        </div>
-      </div>
-    </div>
-    <div class="profiler-error" *ngIf="noProfilerButtonsSelected === true">Por favor, selecciona al menos una opción
-    </div>
-    <div class="profiler-button" (click)="increaseProfilerCounter(1)">Continuar</div>
-  </div>
-  <div [ngClass]="{
-    'profiler-container': profilerCounter === 2,
-    invisible: profilerCounter !== 2
-}">
-    <div class="profiler-title-container">
-      <div class="profiler-title">Selecciona hasta 5 palabras
-        clave</div>
-      <div class="profiler-title profiler-counter">
-        {{keyWordNumber}}
-      </div>
-    </div>
-    <div class="topics-container">
-      <div class="profiler-buttons" *ngFor="let keyWord of keyWords; let i = index" (click)="toggleKeyWord(i)"
-        [ngClass]="{'selected': selectedKeyWords[i], 'disabled': keyWordNumber === 5 && !selectedKeyWords[i]}">
-        <div class="profiler-buttons-text">
-          {{keyWord}}
-        </div>
-      </div>
-    </div>
-    <div class="profiler-error" *ngIf="noProfilerButtonsSelected === true">Por favor, selecciona al menos una opción
-    </div>
-    <div class="profiler-button" (click)="increaseProfilerCounter(2)">Continuar</div>
-  </div>
-  <div [ngClass]="{
-    'profiler-container': profilerCounter === 3,
-    invisible: profilerCounter !== 3
-}">
-    <div class="profiler-title-container">
-      <div class="profiler-title">Por último, escoge los
-        documentos que te interesan</div>
-      <div class="profiler-title profiler-counter">
-        {{paperNumber}}
-      </div>
-    </div>
-    <div class="topics-container">
-      <div class="profiler-buttons" *ngFor="let profilerDoc of profilerDocs; let i = index"
-        (click)="toggleProfilerDoc(i)"
-        [ngClass]="{'selected': selectedDocs[i], 'disabled': paperNumber === 5 && !selectedDocs[i]}">
-        <div class="profiler-buttons-text">
-          {{profilerDoc}}
-        </div>
-      </div>
-    </div>
-    <div class="profiler-error" *ngIf="noProfilerButtonsSelected === true">Por favor, selecciona al menos una opción
-    </div>
-    <div class="profiler-button" (click)="finishProfiler()">Guardar preferencias</div>
   </div>
 </div>
