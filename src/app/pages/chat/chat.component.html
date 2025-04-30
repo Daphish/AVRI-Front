@@ -8,21 +8,29 @@
       <div class="welcome-body">¿Cómo puedo ayudar hoy?</div>
     </div>
 
-    <!-- Mensajes de usuario y sistema -->
-    <div *ngFor="let m of messages" class="column">
+    <!-- Mensajes de usuario y sistema filtrados -->
+    <ng-container *ngFor="let m of messages">
       <div
-        class="message-bubble"
-        [ngClass]="m.fromUser ? 'message-user' : 'message-system'"
+        class="column"
+        *ngIf="
+          m.fromUser
+          || ( !m.fromUser && m.text.trim() && m.text !== lastUserText )
+        "
       >
-        <!-- Avatar solo para sistema -->
-        <div *ngIf="!m.fromUser" class="system-avatar-container">
-          <img class="system-avatar" src="/Logo-AVRI.png" alt="avatar sistema" />
-        </div>
-        <div class="message-text">
-          {{ m.text }}
+        <div
+          class="message-bubble"
+          [ngClass]="m.fromUser ? 'message-user' : 'message-system'"
+        >
+          <!-- Avatar solo para sistema -->
+          <div *ngIf="!m.fromUser" class="system-avatar-container">
+            <img src="/Logo-AVRI.png" alt="avatar sistema" class="system-avatar" />
+          </div>
+          <div class="message-text">
+            {{ m.text }}
+          </div>
         </div>
       </div>
-    </div>
+    </ng-container>
 
   </div>
 

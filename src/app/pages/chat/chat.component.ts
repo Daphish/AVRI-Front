@@ -19,12 +19,13 @@ export class ChatComponent implements OnInit {
   sessionId = '';
   messages: Message[] = [];
   newText = '';
+  lastUserText = '';
   isSending = false;
 
   constructor(private chat: ChatService) {}
 
   ngOnInit(): void {
-    // Cuando cambia la sesión activa, actualizar sessionId y cargar su historial
+    // Cuando cambia la sesión activa, cargar historial
     this.chat.idChat$.subscribe(id => {
       this.sessionId = id;
       if (id) {
@@ -32,33 +33,41 @@ export class ChatComponent implements OnInit {
       }
     });
 
-    // Cuando llegan respuestas del sistema, las vamos añadiendo al array local
+    // Añadir respuestas del sistema al array local
     this.chat.messages$.subscribe(systemMsgs => {
       systemMsgs.forEach(sysMsg => {
-        // Evitar duplicados: solo añadir si no existe ya
-        if (!this.messages.some(m => !m.fromUser && m.text === sysMsg.text)) {
-          this.messages.push({ text: sysMsg.text, fromUser: false });
+        // 1) Tomamos el texto crudo
+        const raw = sysMsg.text || '';
+        // 2) Limpiamos todos los patrones ##n$$
+        const cleaned = raw.replace(/##\d+\$\$/g, '').trim();
+        // 3) Si queda texto válido y no es eco ni duplicado, lo añadimos
+        if (
+          cleaned &&
+          cleaned !== this.lastUserText &&
+          !this.messages.some(m => !m.fromUser && m.text === cleaned)
+        ) {
+          this.messages.push({ text: cleaned, fromUser: false });
         }
       });
-      // Hacer scroll al fondo
+      // Mantener scroll al fondo
       setTimeout(() => this.scrollToBottom(), 0);
     });
   }
 
-  /** Envía texto con Enter o clic */
+  /** Envía el mensaje del usuario */
   async send(): Promise<void> {
     const text = this.newText.trim();
     if (!text) return;
 
     this.isSending = true;
+    this.lastUserText = text;
 
-    // 1) Añadir tu propio mensaje al array local
+    // 1) Añadir mensaje de usuario
     this.messages.push({ text, fromUser: true });
 
-    // 2) Si no hay sesión, crearla
+    // 2) Crear sesión si no existe
     if (!this.sessionId) {
       await firstValueFrom(this.chat.createSession());
-      // la suscripción a idChat$ establecerá sessionId
     }
 
     // 3) Enviar al backend
