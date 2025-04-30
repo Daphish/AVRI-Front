@@ -1,41 +1,41 @@
-<!-- src/app/pages/chat/chat.component.html -->
-<div class="right">
-  <div class="chat-container-space" #msgContainer>
-    <!-- Bienvenida -->
-    <div *ngIf="messages.length === 0" class="column">
+<div class="chat-container">
+  <div class="messages" #msgContainer>
+
+    <!-- Pantalla de bienvenida -->
+    <div *ngIf="messages.length === 0" class="column welcome-block">
       <div class="welcome-title">¡Bienvenido!</div>
-      <img class="welcome-img" src="/Logo-AVRI.png" alt="logo AVRI"/>
-      <div class="welcome-body">¿Cómo puedo ayudar el día de hoy?</div>
+      <img class="welcome-img" src="/Logo-AVRI.png" alt="logo AVRI" />
+      <div class="welcome-body">¿Cómo puedo ayudar hoy?</div>
     </div>
-    <!-- Mensajes -->
+
+    <!-- Mensajes de usuario y sistema -->
     <div *ngFor="let m of messages" class="column">
-      <div [ngClass]="{'message-user': m.fromUser, 'message-system': !m.fromUser}">
-        <div [ngClass]="{'invisible': m.fromUser, 'system-avatar-container': !m.fromUser}">
-          <img class="system-avatar" src="/Logo-AVRI.png" alt="avatar sistema"/>
+      <div
+        class="message-bubble"
+        [ngClass]="m.fromUser ? 'message-user' : 'message-system'"
+      >
+        <!-- Avatar solo para sistema -->
+        <div *ngIf="!m.fromUser" class="system-avatar-container">
+          <img class="system-avatar" src="/Logo-AVRI.png" alt="avatar sistema" />
         </div>
-        {{ m.text }}
-      </div>
-      <!-- Rating -->
-      <div *ngIf="!m.fromUser" class="rating-container">
-        <span *ngFor="let star of stars; let i=index"
-              (mouseenter)="hoverRating(i+1)"
-              (mouseleave)="resetHover()"
-              (click)="setRating(i+1)"
-              [ngClass]="{ filled: i < hoverValue || i < rating }">
-          &#9733;
-        </span>
+        <div class="message-text">
+          {{ m.text }}
+        </div>
       </div>
     </div>
+
   </div>
 
-  <!-- Input -->
+  <!-- Área de entrada -->
   <div class="chat-input">
-    <input class="chat-input-box"
-           placeholder="Escribe algo al AVRI"
-           [(ngModel)]="newText"
-           (keyup.enter)="send()"
-           [disabled]="isSending" />
-    <div class="chat-send-button" (click)="send()" [class.disabled]="isSending">
+    <input
+      class="chat-input-box"
+      placeholder="Escribe algo al AVRI"
+      [(ngModel)]="newText"
+      (keyup.enter)="send()"
+      [disabled]="isSending"
+    />
+    <div class="chat-send-button" (click)="send()">
       <i class="bi bi-arrow-up"></i>
     </div>
   </div>

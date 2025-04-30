@@ -1,97 +1,87 @@
-// src/app/services/chat.service.ts
-
 import { Injectable, inject } from '@angular/core';
 import { HttpClient }         from '@angular/common/http';
 import { BehaviorSubject, Observable, tap, map } from 'rxjs';
-import { Chat, Message }      from '../interfaces/chat.interface';
+import { Chat, Message, RawMessage }            from '../interfaces/chat.interface';
 
-interface RawMessage { from_user: boolean; text: string; }
 interface AskResponse {
   code: number;
-  data: {
-    answer: string;
-    // …otros campos que puedas necesitar…
-  };
-}
-interface GetMessagesResponse {
-  code: number;
-  data: {
-    data: RawMessage[];
-  };
+  data: RawMessage;
 }
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
-  private http      = inject(HttpClient);
-  private BASE      = '/api/chat';
+  private http        = inject(HttpClient);
+  private BASE        = '/api/chat';
 
-  private sessions$$ = new BehaviorSubject<Chat[]>([]);
-  sessions$ = this.sessions$$.asObservable();
+  private sessions$$  = new BehaviorSubject<Chat[]>([]);
+  sessions$          = this.sessions$$.asObservable();
 
-  private messages$$ = new BehaviorSubject<Message[]>([]);
-  messages$ = this.messages$$.asObservable();
+  private messages$$  = new BehaviorSubject<Message[]>([]);
+  messages$          = this.messages$$.asObservable();
 
-  private idChat$$ = new BehaviorSubject<string>('');
-  idChat$ = this.idChat$$.asObservable();
+  private idChat$$    = new BehaviorSubject<string>('');
+  idChat$            = this.idChat$$.asObservable();
 
-  /** Carga sesiones */
+  /** Carga las sesiones del usuario */
   loadSessions(): void {
     this.http.get<Chat[]>(`${this.BASE}/`)
       .subscribe(list => this.sessions$$.next(list));
   }
 
-  /** Crea sesión vacía */
-  createSession(name?: string): Observable<Chat> {
-    const payload = { session_name: name ?? 'Chat sin título' };
-    return this.http.post<Chat>(`${this.BASE}/`, payload).pipe(
-      tap(sess => {
-        this.sessions$$.next([sess, ...this.sessions$$.value]);
-        this.idChat$$.next(sess.session_id);
-      })
-    );
+  /** Crea una nueva sesión (evita 400 al mandar siempre session_name) */
+  createSession(name: string = 'Chat sin título'): Observable<Chat> {
+    return this.http
+      .post<Chat>(`${this.BASE}/`, { session_name: name })
+      .pipe(
+        tap(sess => {
+          this.sessions$$.next([sess, ...this.sessions$$.value]);
+          this.idChat$$.next(sess.session_id);
+        })
+      );
   }
 
-  /** Carga mensajes del servidor y los transforma a Message[] */
+  /** Carga los mensajes y los adapta a nuestro modelo */
   loadMessages(sessionId: number | string): void {
     const sid = sessionId.toString();
-    this.http
-      .get<GetMessagesResponse>(`${this.BASE}/${sid}/`)
+    this.http.get<{ data: RawMessage[] }>(`${this.BASE}/${sid}/`)
       .pipe(
         map(res =>
-          res.data.data.map(m => ({
+          res.data.map(m => ({
             fromUser: m.from_user,
-            text:      m.text
+            // <-- incluimos m.query para las preguntas de usuario
+            text:      m.text ?? m.answer ?? m.content ?? m.query ?? ''
           }))
         )
       )
-      .subscribe(msgs => {
-        this.messages$$.next(msgs);
-      });
+      .subscribe(msgs => this.messages$$.next(msgs));
   }
 
-  /**
-   * Envía mensaje: primero muestra el tuyo, luego la respuesta del servidor
-   * que viene bajo response.data.answer
-   */
+  /** Envía un mensaje (usuario + respuesta) */
   sendMessage(sessionId: number | string, text: string): void {
     const sid = sessionId.toString();
 
-    // 1) Mostrar inmediatamente el mensaje del usuario
-    const userMsg: Message = { fromUser: true, text };
-    this.messages$$.next([...this.messages$$.value, userMsg]);
+    // 1) Mostrar el mensaje del usuario localmente
+    this.messages$$.next([
+      ...this.messages$$.value,
+      { fromUser: true, text }
+    ]);
 
-    // 2) Llamar al backend y luego extraer response.data.answer
+    // 2) Llamar al backend y mostrar la respuesta
     this.http
       .post<AskResponse>(`${this.BASE}/${sid}/ask/`, { query: text })
       .pipe(
-        map(res => ({ fromUser: false, text: res.data.answer } as Message))
+        map(res => res.data),
+        map(m => ({
+          fromUser: m.from_user,
+          text:      m.text ?? m.answer ?? m.content ?? m.query ?? ''
+        }))
       )
-      .subscribe(botMsg => {
-        this.messages$$.next([...this.messages$$.value, botMsg]);
+      .subscribe(reply => {
+        this.messages$$.next([...this.messages$$.value, reply]);
       });
   }
 
-  /** Elimina sesión y limpia estado si es necesario */
+  /** Borra una sesión y limpia estado si estaba activa */
   deleteSession(sessionId: number | string): void {
     const sid = sessionId.toString();
     this.http.delete(`${this.BASE}/${sid}/`)

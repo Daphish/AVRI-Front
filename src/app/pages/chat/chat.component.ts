@@ -1,8 +1,7 @@
-// src/app/pages/chat/chat.component.ts
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { FormsModule }   from '@angular/forms';
-import { NgFor, NgIf, NgClass } from '@angular/common';
-import { firstValueFrom }       from 'rxjs';
+import { FormsModule }           from '@angular/forms';
+import { NgFor, NgIf, NgClass }  from '@angular/common';
+import { firstValueFrom }        from 'rxjs';
 
 import { ChatService } from '../../services/chat.service';
 import { Message }     from '../../interfaces/chat.interface';
@@ -12,25 +11,20 @@ import { Message }     from '../../interfaces/chat.interface';
   standalone: true,
   imports: [FormsModule, NgIf, NgFor, NgClass],
   templateUrl: './chat.component.html',
-  styleUrls:   ['./chat.component.css']
+  styleUrls: ['./chat.component.css']
 })
 export class ChatComponent implements OnInit {
   @ViewChild('msgContainer') private msgContainer!: ElementRef<HTMLDivElement>;
 
-  sessionId  = '';
-  messages:  Message[] = [];
-  newText    = '';
-  isSending  = false;
-
-  /* rating */
-  stars = Array(5).fill(0);
-  rating = 0;
-  hoverValue = 0;
+  sessionId = '';
+  messages: Message[] = [];
+  newText = '';
+  isSending = false;
 
   constructor(private chat: ChatService) {}
 
   ngOnInit(): void {
-    /* Cambio de sesión -> cargar mensajes */
+    // Cuando cambia la sesión activa, actualizar sessionId y cargar su historial
     this.chat.idChat$.subscribe(id => {
       this.sessionId = id;
       if (id) {
@@ -38,10 +32,16 @@ export class ChatComponent implements OnInit {
       }
     });
 
-    /* Stream de mensajes -> render y auto-scroll */
-    this.chat.messages$.subscribe(msgs => {
-      this.messages = msgs;
-      this.scrollToBottom();
+    // Cuando llegan respuestas del sistema, las vamos añadiendo al array local
+    this.chat.messages$.subscribe(systemMsgs => {
+      systemMsgs.forEach(sysMsg => {
+        // Evitar duplicados: solo añadir si no existe ya
+        if (!this.messages.some(m => !m.fromUser && m.text === sysMsg.text)) {
+          this.messages.push({ text: sysMsg.text, fromUser: false });
+        }
+      });
+      // Hacer scroll al fondo
+      setTimeout(() => this.scrollToBottom(), 0);
     });
   }
 
@@ -52,15 +52,20 @@ export class ChatComponent implements OnInit {
 
     this.isSending = true;
 
-    /* si no hay sesión, crear una nueva nombrada */
+    // 1) Añadir tu propio mensaje al array local
+    this.messages.push({ text, fromUser: true });
+
+    // 2) Si no hay sesión, crearla
     if (!this.sessionId) {
-      await firstValueFrom(
-        this.chat.createSession('Nueva conversación')
-      );
+      await firstValueFrom(this.chat.createSession());
+      // la suscripción a idChat$ establecerá sessionId
     }
 
+    // 3) Enviar al backend
     this.chat.sendMessage(this.sessionId, text);
-    this.newText   = '';
+
+    // 4) Limpiar input y bandera
+    this.newText = '';
     this.isSending = false;
   }
 
@@ -70,9 +75,4 @@ export class ChatComponent implements OnInit {
       el.scrollTop = el.scrollHeight;
     } catch {}
   }
-
-  /* rating helpers */
-  hoverRating(v: number) { this.hoverValue = v; }
-  resetHover()           { this.hoverValue = 0; }
-  setRating(v: number)   { this.rating = v; }
 }
