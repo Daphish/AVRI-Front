@@ -1,40 +1,31 @@
 <div class="chat-container">
   <div class="messages" #msgContainer>
 
-    <!-- Pantalla de bienvenida -->
+    <!-- Bienvenida si no hay mensajes -->
     <div *ngIf="messages.length === 0" class="column welcome-block">
       <div class="welcome-title">¡Bienvenido!</div>
       <img class="welcome-img" src="/Logo-AVRI.png" alt="logo AVRI" />
       <div class="welcome-body">¿Cómo puedo ayudar hoy?</div>
     </div>
 
-    <!-- Mensajes de usuario y sistema filtrados -->
+    <!-- Renderizado del historial completo -->
     <ng-container *ngFor="let m of messages">
-      <div
-        class="column"
-        *ngIf="
-          m.fromUser
-          || ( !m.fromUser && m.text.trim() && m.text !== lastUserText )
-        "
-      >
+      <div class="column">
         <div
           class="message-bubble"
           [ngClass]="m.fromUser ? 'message-user' : 'message-system'"
         >
-          <!-- Avatar solo para sistema -->
           <div *ngIf="!m.fromUser" class="system-avatar-container">
             <img src="/Logo-AVRI.png" alt="avatar sistema" class="system-avatar" />
           </div>
-          <div class="message-text">
-            {{ m.text }}
-          </div>
+          <div class="message-text">{{ m.text }}</div>
         </div>
       </div>
     </ng-container>
 
   </div>
 
-  <!-- Área de entrada -->
+  <!-- Input de nuevo mensaje -->
   <div class="chat-input">
     <input
       class="chat-input-box"

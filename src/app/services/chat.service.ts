@@ -1,98 +1,151 @@
+// src/app/services/chat.service.ts
+
 import { Injectable, inject } from '@angular/core';
 import { HttpClient }         from '@angular/common/http';
-import { BehaviorSubject, Observable, tap, map } from 'rxjs';
-import { Chat, Message, RawMessage }            from '../interfaces/chat.interface';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { map, tap }           from 'rxjs/operators';
+import { Chat, Message }      from '../interfaces/chat.interface';
+
+interface SessionHistory {
+  chat_id: string;
+  messages: Array<{
+    content:   string;
+    role:      'user' | 'assistant';
+    reference?: any[];
+  }>;
+}
 
 interface AskResponse {
-  code: number;
-  data: RawMessage;
+  data: {
+    content: string;
+    role:    'user' | 'assistant';
+  };
 }
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
-  private http        = inject(HttpClient);
-  private BASE        = '/api/chat';
+  private http     = inject(HttpClient);
+  private BASE_URL = '/api/chat';
 
-  private sessions$$  = new BehaviorSubject<Chat[]>([]);
-  sessions$          = this.sessions$$.asObservable();
+  //
+  // ——— Sesiones ——————————————————————————————————————————————
+  //
 
-  private messages$$  = new BehaviorSubject<Message[]>([]);
-  messages$          = this.messages$$.asObservable();
+  /** Flujo de la lista de sesiones */
+  private sessions$$ = new BehaviorSubject<Chat[]>([]);
+  readonly sessions$ = this.sessions$$.asObservable();
 
-  private idChat$$    = new BehaviorSubject<string>('');
-  idChat$            = this.idChat$$.asObservable();
-
-  /** Carga las sesiones del usuario */
+  /** Obtener todas las sesiones (GET /api/chat/) */
   loadSessions(): void {
-    this.http.get<Chat[]>(`${this.BASE}/`)
+    this.http
+      .get<Chat[]>(`${this.BASE_URL}/`)
       .subscribe(list => this.sessions$$.next(list));
   }
 
-  /** Crea una nueva sesión (evita 400 al mandar siempre session_name) */
+  /** Crear nueva sesión (POST /api/chat/) */
   createSession(name: string = 'Chat sin título'): Observable<Chat> {
     return this.http
-      .post<Chat>(`${this.BASE}/`, { session_name: name })
+      .post<Chat>(`${this.BASE_URL}/`, { session_name: name })
       .pipe(
-        tap(sess => {
-          this.sessions$$.next([sess, ...this.sessions$$.value]);
-          this.idChat$$.next(sess.session_id);
+        tap(newSession => {
+          // Añadir al frente de la lista y activar
+          this.sessions$$.next([newSession, ...this.sessions$$.value]);
+          this.idChat$$.next(newSession.session_id);
         })
       );
   }
 
-  /** Carga los mensajes y los adapta a nuestro modelo */
-  loadMessages(sessionId: number | string): void {
-    const sid = sessionId.toString();
-    this.http.get<{ data: RawMessage[] }>(`${this.BASE}/${sid}/`)
-      .pipe(
-        map(res =>
-          res.data.map(m => ({
-            fromUser: m.from_user,
-            // <-- incluimos m.query para las preguntas de usuario
-            text:      m.text ?? m.answer ?? m.content ?? m.query ?? ''
-          }))
-        )
-      )
-      .subscribe(msgs => this.messages$$.next(msgs));
+  /** Eliminar sesión (DELETE /api/chat/{id}/) */
+  deleteSession(sessionId: string): void {
+    this.http
+      .delete(`${this.BASE_URL}/${sessionId}/`)
+      .subscribe(() => {
+        // Quitar de la lista
+        const updated = this.sessions$$.value.filter(
+          s => s.session_id !== sessionId
+        );
+        this.sessions$$.next(updated);
+
+        // Si era la sesión activa, limpiar
+        if (this.idChat$$.value === sessionId) {
+          this.idChat$$.next('');
+          this.messages$$.next([]);
+        }
+      });
   }
 
-  /** Envía un mensaje (usuario + respuesta) */
-  sendMessage(sessionId: number | string, text: string): void {
-    const sid = sessionId.toString();
+  //
+  // ——— Mensajes ——————————————————————————————————————————————
+  //
 
-    // 1) Mostrar el mensaje del usuario localmente
+  /** Flujo de mensajes para el chat activo */
+  private messages$$ = new BehaviorSubject<Message[]>([]);
+  readonly messages$ = this.messages$$.asObservable();
+
+  /** Flujo del sessionId activo */
+  private idChat$$ = new BehaviorSubject<string>('');
+  readonly idChat$ = this.idChat$$.asObservable();
+
+  /**
+   * Carga el historial completo de una sesión:
+   * 1) emite el nuevo sessionId
+   * 2) llama a GET /api/chat/{sessionId}/
+   */
+  loadMessages(sessionId: string): void {
+    // 1) Cambiar sesión activa
+    this.idChat$$.next(sessionId);
+
+    // 2) Recuperar historial del backend
+    this.http
+      .get<{ data: SessionHistory[] }>(
+        `${this.BASE_URL}/${sessionId}/`
+      )
+      .pipe(
+        map(res => {
+          // Tomamos data[0].messages
+          const hist = res.data[0]?.messages || [];
+          return hist.map(m => ({
+            fromUser: m.role === 'user',
+            text:     m.content.replace(/##\d+\$\$/g, '').trim()
+          })) as Message[];
+        })
+      )
+      .subscribe(msgs => {
+        this.messages$$.next(msgs);
+      });
+  }
+
+  /**
+   * Envía un mensaje al asistente y añade la respuesta:
+   * - Publica el mensaje del usuario inmediatamente
+   * - POST /api/chat/{sessionId}/ask/
+   * - Añade la respuesta recibida
+   */
+  sendMessage(sessionId: string, text: string): void {
+    // Mostrar mensaje del usuario
     this.messages$$.next([
       ...this.messages$$.value,
       { fromUser: true, text }
     ]);
 
-    // 2) Llamar al backend y mostrar la respuesta
+    // Llamada al backend
     this.http
-      .post<AskResponse>(`${this.BASE}/${sid}/ask/`, { query: text })
+      .post<AskResponse>(
+        `${this.BASE_URL}/${sessionId}/ask/`,
+        { query: text }
+      )
       .pipe(
         map(res => res.data),
         map(m => ({
-          fromUser: m.from_user,
-          text:      m.text ?? m.answer ?? m.content ?? m.query ?? ''
+          fromUser: m.role === 'user',
+          text:     m.content.replace(/##\d+\$\$/g, '').trim()
         }))
       )
       .subscribe(reply => {
-        this.messages$$.next([...this.messages$$.value, reply]);
-      });
-  }
-
-  /** Borra una sesión y limpia estado si estaba activa */
-  deleteSession(sessionId: number | string): void {
-    const sid = sessionId.toString();
-    this.http.delete(`${this.BASE}/${sid}/`)
-      .subscribe(() => {
-        this.sessions$$.next(
-          this.sessions$$.value.filter(s => s.session_id !== sid)
-        );
-        if (this.idChat$$.value === sid) {
-          this.idChat$$.next('');
-          this.messages$$.next([]);
-        }
+        this.messages$$.next([
+          ...this.messages$$.value,
+          reply
+        ]);
       });
   }
 }

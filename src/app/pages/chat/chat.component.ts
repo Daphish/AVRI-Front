@@ -18,38 +18,21 @@ export class ChatComponent implements OnInit {
 
   sessionId = '';
   messages: Message[] = [];
-  newText = '';
-  lastUserText = '';
+  newText   = '';
   isSending = false;
 
   constructor(private chat: ChatService) {}
 
   ngOnInit(): void {
-    // Cuando cambia la sesión activa, cargar historial
+    // 1) Al cambiar de sesión, limpiar el historial actual
     this.chat.idChat$.subscribe(id => {
       this.sessionId = id;
-      if (id) {
-        this.chat.loadMessages(id);
-      }
+      this.messages  = [];
     });
 
-    // Añadir respuestas del sistema al array local
-    this.chat.messages$.subscribe(systemMsgs => {
-      systemMsgs.forEach(sysMsg => {
-        // 1) Tomamos el texto crudo
-        const raw = sysMsg.text || '';
-        // 2) Limpiamos todos los patrones ##n$$
-        const cleaned = raw.replace(/##\d+\$\$/g, '').trim();
-        // 3) Si queda texto válido y no es eco ni duplicado, lo añadimos
-        if (
-          cleaned &&
-          cleaned !== this.lastUserText &&
-          !this.messages.some(m => !m.fromUser && m.text === cleaned)
-        ) {
-          this.messages.push({ text: cleaned, fromUser: false });
-        }
-      });
-      // Mantener scroll al fondo
+    // 2) Al llegar el nuevo historial, reemplazar todo el array
+    this.chat.messages$.subscribe(msgs => {
+      this.messages = msgs;
       setTimeout(() => this.scrollToBottom(), 0);
     });
   }
@@ -60,24 +43,21 @@ export class ChatComponent implements OnInit {
     if (!text) return;
 
     this.isSending = true;
-    this.lastUserText = text;
 
-    // 1) Añadir mensaje de usuario
-    this.messages.push({ text, fromUser: true });
-
-    // 2) Crear sesión si no existe
+    // 1) Crear sesión si aún no existe
     if (!this.sessionId) {
       await firstValueFrom(this.chat.createSession());
     }
 
-    // 3) Enviar al backend
+    // 2) Enviar el texto
     this.chat.sendMessage(this.sessionId, text);
 
-    // 4) Limpiar input y bandera
-    this.newText = '';
+    // 3) Limpiar input y estado
+    this.newText   = '';
     this.isSending = false;
   }
 
+  /** Hace scroll al final del contenedor */
   private scrollToBottom(): void {
     try {
       const el = this.msgContainer.nativeElement;
