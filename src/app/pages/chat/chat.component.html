@@ -1,14 +1,14 @@
 <div class="chat-container">
   <div class="messages" #msgContainer>
 
-    <!-- Bienvenida si no hay mensajes -->
+    <!-- Bienvenida -->
     <div *ngIf="messages.length === 0" class="column welcome-block">
       <div class="welcome-title">¡Bienvenido!</div>
       <img class="welcome-img" src="/Logo-AVRI.png" alt="logo AVRI" />
       <div class="welcome-body">¿Cómo puedo ayudar hoy?</div>
     </div>
 
-    <!-- Renderizado del historial completo -->
+    <!-- Mensajes + mini-referencias -->
     <ng-container *ngFor="let m of messages">
       <div class="column">
         <div
@@ -16,16 +16,30 @@
           [ngClass]="m.fromUser ? 'message-user' : 'message-system'"
         >
           <div *ngIf="!m.fromUser" class="system-avatar-container">
-            <img src="/Logo-AVRI.png" alt="avatar sistema" class="system-avatar" />
+            <img src="/Logo-AVRI.png" class="system-avatar" alt="avatar sistema" />
           </div>
           <div class="message-text">{{ m.text }}</div>
+        </div>
+
+        <!-- Mini-referencias -->
+        <div
+          *ngIf="!m.fromUser && m.references?.length"
+          class="message-references"
+        >
+          <span
+            *ngFor="let ref of m.references"
+            class="ref-badge"
+            (click)="openDocument(ref.document_id)"
+          >
+            {{ ref.document_name }}
+          </span>
         </div>
       </div>
     </ng-container>
 
   </div>
 
-  <!-- Input de nuevo mensaje -->
+  <!-- Input -->
   <div class="chat-input">
     <input
       class="chat-input-box"

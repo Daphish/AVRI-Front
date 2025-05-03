@@ -164,3 +164,28 @@
 .rating-container span.filled {
   color: gold;
 }
+
+/* ============================= */
+/* Mini-referencias bajo mensajes */
+/* ============================= */
+.message-references {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 4px 0 0 1.5rem; /* separa un poco de la burbuja y alínea con el texto */
+}
+
+.ref-badge {
+  background-color: #f0f0f0;
+  color: #555;
+  font-size: 0.75rem;       /* más pequeño que el texto principal */
+  padding: 2px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.ref-badge:hover {
+  background-color: #e0e0e0;
+}

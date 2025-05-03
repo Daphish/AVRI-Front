@@ -24,13 +24,13 @@ export class ChatComponent implements OnInit {
   constructor(private chat: ChatService) {}
 
   ngOnInit(): void {
-    // 1) Al cambiar de sesión, limpiar el historial actual
+    // Limpiar cuando cambia de sesión
     this.chat.idChat$.subscribe(id => {
       this.sessionId = id;
       this.messages  = [];
     });
 
-    // 2) Al llegar el nuevo historial, reemplazar todo el array
+    // Reemplazar con el historial cargado
     this.chat.messages$.subscribe(msgs => {
       this.messages = msgs;
       setTimeout(() => this.scrollToBottom(), 0);
@@ -44,20 +44,24 @@ export class ChatComponent implements OnInit {
 
     this.isSending = true;
 
-    // 1) Crear sesión si aún no existe
+    // Crear sesión si falta
     if (!this.sessionId) {
       await firstValueFrom(this.chat.createSession());
     }
 
-    // 2) Enviar el texto
+    // Enviar y dejar que el servicio actualice messages$
     this.chat.sendMessage(this.sessionId, text);
 
-    // 3) Limpiar input y estado
     this.newText   = '';
     this.isSending = false;
   }
 
-  /** Hace scroll al final del contenedor */
+  /** Abre el documento de referencia (stub) */
+  openDocument(documentId: string): void {
+    // TODO: implementar navegación/descarga del documento
+    console.log('Abrir documento:', documentId);
+  }
+
   private scrollToBottom(): void {
     try {
       const el = this.msgContainer.nativeElement;
