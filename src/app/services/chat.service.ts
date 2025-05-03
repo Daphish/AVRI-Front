@@ -1,6 +1,8 @@
+// src/app/services/chat.service.ts
+
 import { Injectable, inject } from '@angular/core';
 import { HttpClient }         from '@angular/common/http';
-import { BehaviorSubject }    from 'rxjs';
+import { BehaviorSubject, Observable }    from 'rxjs';
 import { map, tap }           from 'rxjs/operators';
 import { Chat, Message, ReferenceChunk, RawMessage } from '../interfaces/chat.interface';
 
@@ -15,31 +17,36 @@ interface SessionHistory {
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
-  private http     = inject(HttpClient);
-  private BASE_URL = '/api/chat';
+  private http      = inject(HttpClient);
+  private BASE_URL  = '/api/chat';
 
-  // ——— Sesiones —————————————————————————————
+  // — Sesiones —
   private sessions$$ = new BehaviorSubject<Chat[]>([]);
   readonly sessions$ = this.sessions$$.asObservable();
 
-  /** Lista las sesiones del usuario (si está logueado) */
+  /** Obtener sesiones del usuario */
   loadSessions(): void {
     this.http.get<Chat[]>(`${this.BASE_URL}/`)
       .subscribe(list => this.sessions$$.next(list));
   }
 
-  /** Crea una nueva sesión y la añade al frente */
-  createSession(name: string = 'Chat sin título') {
+  /** Crear nueva sesión y poner saludo inicial */
+  createSession(name: string = 'Chat sin título'): Observable<Chat> {
     return this.http.post<Chat>(`${this.BASE_URL}/`, { session_name: name })
       .pipe(
         tap(newSession => {
-          this.sessions$$.next([newSession, ...this.sessions$$.value]);
+          // Añadir al frente y activar sesión
+          this.sessions$$.next([ newSession, ...this.sessions$$.value ]);
           this.idChat$$.next(newSession.session_id);
+          // Mostrar saludo inicial
+          this.messages$$.next([
+            { fromUser: false, text: 'Hola. ¿Cómo te puedo ayudar hoy?' }
+          ]);
         })
       );
   }
 
-  /** Borra una sesión */
+  /** Eliminar sesión */
   deleteSession(sessionId: string): void {
     this.http.delete(`${this.BASE_URL}/${sessionId}/`)
       .subscribe(() => {
@@ -52,17 +59,17 @@ export class ChatService {
       });
   }
 
-  /** Limpia todas las sesiones cargadas (para invitado o logout) */
+  /** Limpia sesiones cargadas (invitado/logout) */
   clearSessions(): void {
     this.sessions$$.next([]);
   }
 
-  // ——— Mensajes —————————————————————————————
+  // — Mensajes —
   private messages$$ = new BehaviorSubject<Message[]>([]);
   readonly messages$ = this.messages$$.asObservable();
 
-  private idChat$$ = new BehaviorSubject<string>('');
-  readonly idChat$ = this.idChat$$.asObservable();
+  private idChat$$    = new BehaviorSubject<string>('');
+  readonly idChat$   = this.idChat$$.asObservable();
 
   loadMessages(sessionId: string): void {
     // MRU reorder
@@ -73,10 +80,10 @@ export class ChatService {
       this.sessions$$.next([ sel, ...arr.slice(0, idx), ...arr.slice(idx + 1) ]);
     }
 
-    // Emitir activo
+    // Emitir sesión activa
     this.idChat$$.next(sessionId);
 
-    // Recuperar historial
+    // Recuperar historial completo
     this.http.get<{ data: SessionHistory[] }>(`${this.BASE_URL}/${sessionId}/`)
       .pipe(
         map(res => {
@@ -87,8 +94,8 @@ export class ChatService {
               (c, i, a) => a.findIndex(x => x.document_id === c.document_id) === i
             );
             return {
-              fromUser: m.role === 'user',
-              text:     m.content.replace(/##\d+\$\$/g, '').trim(),
+              fromUser:  m.role === 'user',
+              text:      m.content.replace(/##\d+\$\$/g, '').trim(),
               references: uniqueRefs
             } as Message;
           });
@@ -98,13 +105,12 @@ export class ChatService {
   }
 
   sendMessage(sessionId: string, text: string): void {
-    // Eco local
+    // Mostrar eco local
     this.messages$$.next([ ...this.messages$$.value, { fromUser: true, text } ]);
 
     // POST /ask/
     this.http.post<{ code: number; data: RawMessage }>(
-      `${this.BASE_URL}/${sessionId}/ask/`,
-      { query: text }
+      `${this.BASE_URL}/${sessionId}/ask/`, { query: text }
     )
     .pipe(
       map(res => res.data),
@@ -112,12 +118,10 @@ export class ChatService {
         const ans = (raw.answer ?? raw.content ?? '')
           .replace(/##\d+\$\$/g, '')
           .trim();
-
         const chunks: ReferenceChunk[] = raw.reference?.chunks ?? [];
         const uniqueRefs = chunks.filter(
           (c, i, a) => a.findIndex(x => x.document_id === c.document_id) === i
         );
-
         return { fromUser: false, text: ans, references: uniqueRefs } as Message;
       })
     )

@@ -1,3 +1,5 @@
+// src/app/components/sidebar/sidebar.component.ts
+
 import { Component, OnInit }    from '@angular/core';
 import { LoginModalComponent }  from '../login-modal/login-modal.component';
 import { NgClass, NgFor, NgIf } from '@angular/common';
@@ -26,23 +28,19 @@ export class SidebarComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // 1) Siempre suscribirse a sessions$
+    // Subscribirse siempre a la lista de sesiones
     this.chatService.sessions$.subscribe(list => this.chats = list);
 
-    // 2) Atender login/logout
+    // Manejar estado de autenticación
     this.authService.isLoggedIn$
       .subscribe(loggedIn => {
         this.isLoggedIn = loggedIn;
 
         if (loggedIn) {
-          // Cargar nombre y sesiones del usuario
           this.authService.currentUser$
-            .subscribe(user => {
-              this.currentUserName = user?.first_name || 'Usuario';
-            });
+            .subscribe(user => this.currentUserName = user?.first_name || 'Usuario');
           this.chatService.loadSessions();
         } else {
-          // Invitado: nombre y limpiar sesiones memorizadas
           this.currentUserName = 'Invitado';
           this.chatService.clearSessions();
         }
@@ -50,8 +48,11 @@ export class SidebarComponent implements OnInit {
   }
 
   viewHome() {
+    // Crear nuevo chat y mostrar saludo inicial sin esperar carga de backend
     this.chatService.createSession()
-      .subscribe(() => this.router.navigate(['/home']));
+      .subscribe(session => {
+        this.router.navigate(['/home']);
+      });
   }
 
   loadMessages(sessionId: string) {
