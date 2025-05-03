@@ -13,29 +13,8 @@
 
 .invisible { display: none; }
 
-/* Scrollable chat area */
-.chat-container-space {
-  width: 100%;
-  height: 80%;
-  overflow-y: auto;
-  display: flex;
-  justify-content: center;
-  margin-bottom: 5px;
-}
-.chat-container-space::-webkit-scrollbar {
-  width: 10px;
-}
-.chat-container-space::-webkit-scrollbar-track {
-  background: #dddddd;
-  border-radius: 20px;
-}
-.chat-container-space::-webkit-scrollbar-thumb {
-  background: #607890;
-  border-radius: 20px;
-}
-.chat-container-space::-webkit-scrollbar-thumb:hover {
-  background: #425263;
-}
+/* Ya no usamos .chat-container-space para scroll */
+/* En su lugar, el contenedor .messages manejará el overflow */
 
 /* Inner chat column */
 .chat-container {
@@ -44,6 +23,35 @@
   display: flex;
   flex-direction: column;
 }
+
+/* ============================= */
+/* Mensajes: ocupa el espacio   */
+/* restante y hace scroll sólo   */
+/* dentro de este contenedor     */
+/* ============================= */
+.messages {
+  flex: 1 1 auto;   /* crece y ocupa todo el espacio disponible */
+  min-height: 0;     /* necesario para contenido flex overflow */
+  overflow-y: auto;  /* scroll interno sólo si sobrepasa */
+}
+
+/* Personalización opcional de scrollbar */
+.messages::-webkit-scrollbar {
+  width: 8px;
+}
+.messages::-webkit-scrollbar-track {
+  background: #dddddd;
+  border-radius: 4px;
+}
+.messages::-webkit-scrollbar-thumb {
+  background: #607890;
+  border-radius: 4px;
+}
+.messages::-webkit-scrollbar-thumb:hover {
+  background: #425263;
+}
+
+/* Columnas internas */
 .column {
   display: flex;
   flex-direction: column;
