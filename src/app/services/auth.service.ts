@@ -11,10 +11,25 @@ export class AuthService {
   private http = inject(HttpClient);
 
   private currentUser$$ = new BehaviorSubject<User | null>(null);
-  currentUser$ = this.currentUser$$.asObservable();
+  readonly currentUser$ = this.currentUser$$.asObservable();
 
   private loggedIn$$ = new BehaviorSubject<boolean>(false);
-  isLoggedIn$ = this.loggedIn$$.asObservable();
+  readonly isLoggedIn$ = this.loggedIn$$.asObservable();
+
+  /** Llamar en bootstrap para reactivar sesión si hay token */
+  async autoLogin(): Promise<void> {
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+
+    this.loggedIn$$.next(true);
+    try {
+      const user = await firstValueFrom(this.http.get<User>('/api/user/me/'));
+      this.currentUser$$.next(user);
+    } catch {
+      // Token inválido → limpiar
+      this.logout();
+    }
+  }
 
   /** Login con usuario registrado */
   async login(email: string, password: string): Promise<boolean> {
@@ -36,12 +51,9 @@ export class AuthService {
   /** Crear usuario anónimo y obtener token */
   async createAnonymous(): Promise<boolean> {
     try {
-      // 1) Crear el usuario anónimo
       const anon = await firstValueFrom(
         this.http.post<AnonymousResponse>('/api/user/create-anonymous/', {})
       );
-
-      // 2) Solicitar token para ese anonymous_id
       const resp = await firstValueFrom(
         this.http.post<TokenResponse>(
           '/api/user/token-anonymous/',
@@ -50,11 +62,6 @@ export class AuthService {
       );
       localStorage.setItem('authToken', resp.token);
       this.loggedIn$$.next(true);
-
-      // (Opcional) Cargar info de usuario si tu endpoint lo devuelve
-      // const user = await firstValueFrom(this.http.get<User>('/api/user/me/'));
-      // this.currentUser$$.next(user);
-
       return true;
     } catch {
       return false;
