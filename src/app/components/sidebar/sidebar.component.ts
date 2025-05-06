@@ -1,11 +1,12 @@
-import { Component, OnInit } from '@angular/core';
-import { LoginModalComponent } from '../login-modal/login-modal.component';
+// src/app/components/sidebar/sidebar.component.ts
+
+import { Component, OnInit }    from '@angular/core';
+import { LoginModalComponent }  from '../login-modal/login-modal.component';
 import { NgClass, NgFor, NgIf } from '@angular/common';
-import { AuthService } from '../../services/auth.service';
-import { Router } from '@angular/router';
-import { ChatSession } from '../../interfaces/chat.interface';
-import { ChatService } from '../../services/chat.service';
-import { ApiService } from '../../services/api.service';
+import { AuthService }          from '../../services/auth.service';
+import { Router }               from '@angular/router';
+import { Chat }                 from '../../interfaces/chat.interface';
+import { ChatService }          from '../../services/chat.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -15,9 +16,10 @@ import { ApiService } from '../../services/api.service';
   styleUrls: ['./sidebar.component.css'],
 })
 export class SidebarComponent implements OnInit {
-  isModalOpen = false;
-  isLoggedIn = false;
-  chats: ChatSession[] = [];
+  isModalOpen     = false;
+  isLoggedIn      = false;
+  chats: Chat[]   = [];
+  currentUserName = 'Invitado';
 
   constructor(
     private authService: AuthService,
@@ -27,34 +29,38 @@ export class SidebarComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.isLoggedIn = this.authService.isLoggedIn();
-    if (this.isLoggedIn) {
-      this.api.getChatSessions().subscribe((chats) => {
-        this.chats = chats;
+    // Subscribirse siempre a la lista de sesiones
+    this.chatService.sessions$.subscribe(list => this.chats = list);
+
+    // Manejar estado de autenticación
+    this.authService.isLoggedIn$
+      .subscribe(loggedIn => {
+        this.isLoggedIn = loggedIn;
+
+        if (loggedIn) {
+          this.authService.currentUser$
+            .subscribe(user => this.currentUserName = user?.first_name || 'Usuario');
+          this.chatService.loadSessions();
+        } else {
+          this.currentUserName = 'Invitado';
+          this.chatService.clearSessions();
+        }
       });
-    }
   }
 
   viewHome() {
-    // Llamado desde (click)="viewHome()"
-    this.chatService.newChat();
+    // Crear nuevo chat y mostrar saludo inicial sin esperar carga de backend
+    this.chatService.createSession()
+      .subscribe(session => {
+        this.router.navigate(['/home']);
+      });
+  }
+  loadMessages(sessionId: string) {
+    this.chatService.loadMessages(sessionId);
     this.router.navigate(['/home']);
   }
 
-  loadMessages(chatId: string) {
-    // Llamado desde (click)="loadMessages(chat.id)"
-    // TODO: Guardar el chatSession en el servicio
-    this.api.getChatSession(chatId);
-    this.router.navigate(['/home']);
-  }
-
-  openModal() {
-    this.isModalOpen = true;
-  }
-  closeModal() {
-    this.isModalOpen = false;
-  }
-  viewProfile() {
-    this.router.navigate(['/profile']);
-  }
+  openModal()  { this.isModalOpen = true; }
+  closeModal() { this.isModalOpen = false; }
+  viewProfile() { this.router.navigate(['/profile']); }
 }

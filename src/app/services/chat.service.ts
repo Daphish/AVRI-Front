@@ -1,63 +1,132 @@
+// src/app/services/chat.service.ts
+
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, map, Observable } from 'rxjs';
-import { ChatSession, ChatMessage } from '../interfaces/chat.interface';
+import { HttpClient }         from '@angular/common/http';
+import { BehaviorSubject, Observable }    from 'rxjs';
+import { map, tap }           from 'rxjs/operators';
+import { Chat, Message, ReferenceChunk, RawMessage } from '../interfaces/chat.interface';
+
+interface SessionHistory {
+  chat_id: string;
+  messages: Array<{
+    content:   string;
+    role:      'user' | 'assistant';
+    reference?: ReferenceChunk[];
+  }>;
+}
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
-  private http = inject(HttpClient);
-  private API = '/api';
+  private http      = inject(HttpClient);
+  private BASE_URL  = '/api/chat';
 
-  // Subjects internos
-  private chats$$    = new BehaviorSubject<ChatSession[]>([]);
-  private messages$$ = new BehaviorSubject<ChatMessage[]>([]);
-  private idChat$$   = new BehaviorSubject<number>(0);
+  // — Sesiones —
+  private sessions$$ = new BehaviorSubject<Chat[]>([]);
+  readonly sessions$ = this.sessions$$.asObservable();
 
-  // Observables públicos
-  chats$    = this.chats$$.asObservable();
-  messages$ = this.messages$$.asObservable();
-  idChat$   = this.idChat$$.asObservable();
-
-  /**  Devuelve el listado de chats desde el backend */
-  getChats(): Observable<ChatSession[]> {
-    return this.http
-      .get<{ chats: ChatSession[] }>(`${this.API}/chats`)
-      .pipe(map(res => res.chats));
+  /** Obtener sesiones del usuario */
+  loadSessions(): void {
+    this.http.get<Chat[]>(`${this.BASE_URL}/`)
+      .subscribe(list => this.sessions$$.next(list));
   }
 
-  /**  Carga todos los chats en el BehaviorSubject */
-  loadChats(): void {
-    this.getChats().subscribe(chats => this.chats$$.next(chats));
+  /** Crear nueva sesión y poner saludo inicial */
+  createSession(name: string = 'Chat sin título'): Observable<Chat> {
+    return this.http.post<Chat>(`${this.BASE_URL}/`, { session_name: name })
+      .pipe(
+        tap(newSession => {
+          // Añadir al frente y activar sesión
+          this.sessions$$.next([ newSession, ...this.sessions$$.value ]);
+          this.idChat$$.next(newSession.session_id);
+          // Mostrar saludo inicial
+          this.messages$$.next([
+            { fromUser: false, text: 'Hola. ¿Cómo te puedo ayudar hoy?' }
+          ]);
+        })
+      );
   }
 
-  /**  Devuelve los mensajes de un chat concreto */
-  getMessages(idChat: number): Observable<ChatMessage[]> {
-    return this.http
-      .get<{ messages: ChatMessage[] }>(`${this.API}/messages?idChat=${idChat}`)
-      .pipe(map(res => res.messages));
-  }
-
-  /**  Carga mensajes y actualiza idChat$$ */
-  loadMessages(idChat: number): void {
-    this.getMessages(idChat).subscribe(msgs => {
-      this.idChat$$.next(idChat);
-      this.messages$$.next(msgs);
-    });
-  }
-
-  /**  Envía un mensaje de usuario y concatena la respuesta system */
-  sendMessage(idChat: number, text: string): void {
-    this.http
-      .post<ChatMessage>(`${this.API}/chat`, { idChat, text })
-      .subscribe(reply => {
-        const updated = [...this.messages$$.value, reply];
-        this.messages$$.next(updated);
+  /** Eliminar sesión */
+  deleteSession(sessionId: string): void {
+    this.http.delete(`${this.BASE_URL}/${sessionId}/`)
+      .subscribe(() => {
+        const updated = this.sessions$$.value.filter(s => s.session_id !== sessionId);
+        this.sessions$$.next(updated);
+        if (this.idChat$$.value === sessionId) {
+          this.idChat$$.next('');
+          this.messages$$.next([]);
+        }
       });
   }
 
-  /**  Inicia un nuevo chat (limpia estado) */
-  newChat(): void {
-    this.idChat$$.next(0);
-    this.messages$$.next([]);
+  /** Limpia sesiones cargadas (invitado/logout) */
+  clearSessions(): void {
+    this.sessions$$.next([]);
+  }
+
+  // — Mensajes —
+  private messages$$ = new BehaviorSubject<Message[]>([]);
+  readonly messages$ = this.messages$$.asObservable();
+
+  private idChat$$    = new BehaviorSubject<string>('');
+  readonly idChat$   = this.idChat$$.asObservable();
+
+  loadMessages(sessionId: string): void {
+    // MRU reorder
+    const arr = this.sessions$$.value;
+    const idx = arr.findIndex(s => s.session_id === sessionId);
+    if (idx !== -1) {
+      const sel = arr[idx];
+      this.sessions$$.next([ sel, ...arr.slice(0, idx), ...arr.slice(idx + 1) ]);
+    }
+
+    // Emitir sesión activa
+    this.idChat$$.next(sessionId);
+
+    // Recuperar historial completo
+    this.http.get<{ data: SessionHistory[] }>(`${this.BASE_URL}/${sessionId}/`)
+      .pipe(
+        map(res => {
+          const hist = res.data[0]?.messages || [];
+          return hist.map(m => {
+            const chunks: ReferenceChunk[] = m.reference ?? [];
+            const uniqueRefs = chunks.filter(
+              (c, i, a) => a.findIndex(x => x.document_id === c.document_id) === i
+            );
+            return {
+              fromUser:  m.role === 'user',
+              text:      m.content.replace(/##\d+\$\$/g, '').trim(),
+              references: uniqueRefs
+            } as Message;
+          });
+        })
+      )
+      .subscribe(msgs => this.messages$$.next(msgs));
+  }
+
+  sendMessage(sessionId: string, text: string): void {
+    // Mostrar eco local
+    this.messages$$.next([ ...this.messages$$.value, { fromUser: true, text } ]);
+
+    // POST /ask/
+    this.http.post<{ code: number; data: RawMessage }>(
+      `${this.BASE_URL}/${sessionId}/ask/`, { query: text }
+    )
+    .pipe(
+      map(res => res.data),
+      map(raw => {
+        const ans = (raw.answer ?? raw.content ?? '')
+          .replace(/##\d+\$\$/g, '')
+          .trim();
+        const chunks: ReferenceChunk[] = raw.reference?.chunks ?? [];
+        const uniqueRefs = chunks.filter(
+          (c, i, a) => a.findIndex(x => x.document_id === c.document_id) === i
+        );
+        return { fromUser: false, text: ans, references: uniqueRefs } as Message;
+      })
+    )
+    .subscribe(reply => {
+      this.messages$$.next([ ...this.messages$$.value, reply ]);
+    });
   }
 }

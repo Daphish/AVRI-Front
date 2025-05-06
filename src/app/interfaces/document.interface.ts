@@ -1,0 +1,49 @@
+// src/app/interfaces/document.interface.ts
+
+/**
+ * Representa un documento básico en la lista
+ */
+export interface Document {
+  /** Identificador único */
+  id: number;
+  /** Título o nombre del documento */
+  title: string;
+  /** URI del repositorio donde está alojado */
+  repository_uri: string;
+  /** Estado: L = Libre, R = Restringido, E = Embargado */
+  status: 'L' | 'R' | 'E';
+}
+
+/**
+ * Representa un documento con detalles adicionales
+ */
+export interface DocumentDetail extends Document {
+  /** Fecha de creación ISO 8601 */
+  created_at: string;
+  /** Fecha de última modificación ISO 8601 */
+  updated_at: string;
+}
+
+/**
+ * Representa un documento guardado por un usuario
+ */
+export interface SavedDocument {
+  /** Identificador del registro de guardado */
+  id: number;
+  /** El documento guardado */
+  document: DocumentDetail;
+  /** Fecha en que el usuario guardó el documento */
+  created_at: string;
+}
+
+/**
+ * Representa un documento marcado como propio por un usuario
+ */
+export interface AuthoredDocument {
+  /** Identificador del registro de autoría */
+  id: number;
+  /** El documento autorado */
+  document: DocumentDetail;
+  /** Fecha en que se añadió la autoría */
+  created_at: string;
+}

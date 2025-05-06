@@ -24,19 +24,24 @@ export class LoginModalComponent {
   }
 
   startSession() {
-    this.authService
-      .login({ email: this.user, password: this.password })
-      .subscribe({
-        next: (response) => {
-          if (response.token) {
-            this.closeModal();
-          } else {
-            this.error = true;
-            setTimeout(() => {
-              this.error = false;
-            }, 2000);
-          }
-        },
-      });
+    this.authService.login(this.user, this.password).then((success) => {
+      if(success) {
+        this.closeModal();
+      } else {
+        this.error = true;
+        setTimeout(() => { this.error = false; }, 2000);
+      }
+    });
+  }
+
+  continueAsGuest() {
+    this.authService.createAnonymous().then((success) => {
+      if(success) {
+        this.closeModal();
+      } else {
+        this.error = true;
+        setTimeout(() => { this.error = false; }, 2000);
+      }
+    });
   }
 }
