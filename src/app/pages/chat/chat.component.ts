@@ -2,7 +2,6 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { FormsModule }           from '@angular/forms';
 import { NgFor, NgIf, NgClass }  from '@angular/common';
 import { firstValueFrom }        from 'rxjs';
-
 import { ChatService } from '../../services/chat.service';
 import { Message }     from '../../interfaces/chat.interface';
 
@@ -11,7 +10,7 @@ import { Message }     from '../../interfaces/chat.interface';
   standalone: true,
   imports: [FormsModule, NgIf, NgFor, NgClass],
   templateUrl: './chat.component.html',
-  styleUrls: ['./chat.component.css']
+  styleUrls: ['./chat.component.css'],
 })
 export class ChatComponent implements OnInit {
   @ViewChild('msgContainer') private msgContainer!: ElementRef<HTMLDivElement>;

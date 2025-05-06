@@ -12,7 +12,6 @@ export class AuthService {
 
   private currentUser$$ = new BehaviorSubject<User | null>(null);
   readonly currentUser$ = this.currentUser$$.asObservable();
-
   private loggedIn$$ = new BehaviorSubject<boolean>(false);
   readonly isLoggedIn$ = this.loggedIn$$.asObservable();
 
@@ -39,7 +38,6 @@ export class AuthService {
       );
       localStorage.setItem('authToken', resp.token);
       this.loggedIn$$.next(true);
-
       const user = await firstValueFrom(this.http.get<User>('/api/user/me/'));
       this.currentUser$$.next(user);
       return true;

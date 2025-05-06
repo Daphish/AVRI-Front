@@ -8,14 +8,14 @@ import { AuthService } from '../../services/auth.service';
   standalone: true,
   imports: [NgIf, FormsModule],
   templateUrl: './login-modal.component.html',
-  styleUrl: './login-modal.component.css'
+  styleUrl: './login-modal.component.css',
 })
 export class LoginModalComponent {
-  constructor(private authService: AuthService){}
-  
-  user : string = "";
-  password : string = "";
-  error : boolean = false;
+  constructor(private authService: AuthService) {}
+
+  user: string = '';
+  password: string = '';
+  error: boolean = false;
 
   @Output() closeModalEvent = new EventEmitter<void>();
 
