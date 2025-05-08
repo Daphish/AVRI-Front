@@ -13,7 +13,7 @@ import { ChatService }          from '../../services/chat.service';
   standalone: true,
   imports: [LoginModalComponent, NgIf, NgClass, NgFor],
   templateUrl: './sidebar.component.html',
-  styleUrls: ['./sidebar.component.css'],
+  styleUrls: ['./sidebar.component.css']
 })
 export class SidebarComponent implements OnInit {
   isModalOpen     = false;
@@ -51,6 +51,7 @@ export class SidebarComponent implements OnInit {
     this.chatService.loadMessages('');
     this.router.navigate(['/home']);
   }
+
   loadMessages(sessionId: string) {
     this.chatService.loadMessages(sessionId);
     this.router.navigate(['/home']);

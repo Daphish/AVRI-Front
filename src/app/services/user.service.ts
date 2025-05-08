@@ -9,6 +9,7 @@ export class UserService {
   private http = inject(HttpClient);
   private url = '/api/user/list';
 
+  /** Devuelve la lista de usuarios */
   getUsers(): Observable<User[]> {
     return this.http.get<User[]>(this.url);
   }

@@ -1,0 +1,14 @@
+{
+    "chats": [
+        {
+            "id": 1,
+            "idUser": 1,
+            "name": "Primer chat jejejeje je je je je jejeeeeeeeeeeeeeeee"
+        },
+        {
+            "id": 2,
+            "idUser": 1,
+            "name": "Segundo chat"
+        }
+    ]
+}
