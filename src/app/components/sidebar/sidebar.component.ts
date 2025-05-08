@@ -24,7 +24,6 @@ export class SidebarComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private chatService: ChatService,
-    private api: ApiService,
     private router: Router
   ) {}
 
@@ -49,11 +48,8 @@ export class SidebarComponent implements OnInit {
   }
 
   viewHome() {
-    // Crear nuevo chat y mostrar saludo inicial sin esperar carga de backend
-    this.chatService.createSession()
-      .subscribe(session => {
-        this.router.navigate(['/home']);
-      });
+    this.chatService.loadMessages('');
+    this.router.navigate(['/home']);
   }
   loadMessages(sessionId: string) {
     this.chatService.loadMessages(sessionId);

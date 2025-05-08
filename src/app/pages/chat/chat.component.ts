@@ -45,7 +45,7 @@ export class ChatComponent implements OnInit {
 
     // Crear sesión si falta
     if (!this.sessionId) {
-      await firstValueFrom(this.chat.createSession());
+      await firstValueFrom(this.chat.createSession(text));
     }
 
     // Enviar y dejar que el servicio actualice messages$
