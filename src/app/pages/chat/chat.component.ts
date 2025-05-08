@@ -1,68 +1,172 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { FormsModule }           from '@angular/forms';
-import { NgFor, NgIf, NgClass }  from '@angular/common';
-import { firstValueFrom }        from 'rxjs';
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  ElementRef
+} from '@angular/core';
+import { NgIf, NgFor, NgClass } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 
 import { ChatService } from '../../services/chat.service';
-import { Message }     from '../../interfaces/chat.interface';
+import { Message } from '../../interfaces/chat.interface';
+
+interface SelectOption {
+  label: string;
+  selected: boolean;
+}
 
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [FormsModule, NgIf, NgFor, NgClass],
+  imports: [NgIf, NgFor, NgClass, FormsModule],
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css']
 })
 export class ChatComponent implements OnInit {
-  @ViewChild('msgContainer') private msgContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild('msgContainer') msgContainer!: ElementRef<HTMLDivElement>;
 
+  /* ---------- chat ---------- */
   sessionId = '';
   messages: Message[] = [];
-  newText   = '';
+  newText = '';
   isSending = false;
+
+  /* ---------- wizard ---------- */
+  showWizard = false;
+  step = 0;         // 0-intro,1-topics,2-keywords,3-docs
+  maxSelect = 5;
+  savingPrefs = false;
+
+  topics: SelectOption[] = [
+    'Química','Ciencias sociales','Ingeniería','Derecho','Medicina','Arquitectura',
+    'Biología','Filosofía','Matemáticas','Economía','Arte','Computación'
+  ].map(l => ({ label: l, selected: false }));
+
+  keywords: SelectOption[] = [
+    'Antropología','Sociología','Historia','Psicología','Cultura','Diversidad',
+    'Física','Algoritmos','Ecología','Ética','Innovación','Neurociencia',
+    'Energía','Política','Estadística','Globalización'
+  ].map(l => ({ label: l, selected: false }));
+
+  documents: SelectOption[] = [
+    'Análisis sociológico…','Estudio de los factores…','Participación ciudadana…',
+    'El rol de los medios…','Derechos humanos…','Cambio social y…',
+    'Impacto tecnológico…','Desarrollo sostenible…','Avances biomédicos…',
+    'Ingeniería de materiales…'
+  ].map(l => ({ label: l, selected: false }));
 
   constructor(private chat: ChatService) {}
 
+  /* ---------- ciclo ---------- */
   ngOnInit(): void {
-    // Limpiar cuando cambia de sesión
     this.chat.idChat$.subscribe(id => {
       this.sessionId = id;
-      this.messages  = [];
+      this.messages = [];
+
+      if (this.chat.pendingWizard) {
+        this.chat.pendingWizard = false;
+        this.resetWizard();
+        this.showWizard = true;
+      }
     });
 
-    // Reemplazar con el historial cargado
     this.chat.messages$.subscribe(msgs => {
       this.messages = msgs;
-      setTimeout(() => this.scrollToBottom(), 0);
+      if (msgs.length > 0) this.showWizard = false;
+      setTimeout(() => this.scrollBottom(), 0);
     });
   }
 
-  /** Envía el mensaje del usuario */
+  /* ---------- wizard helpers ---------- */
+  currentList(): SelectOption[] {
+    if (this.step === 1) return this.topics;
+    if (this.step === 2) return this.keywords;
+    return this.documents;
+  }
+
+  toggle(opt: SelectOption): void {
+    const list = this.currentList();
+    if (!opt.selected && list.filter(o => o.selected).length >= this.maxSelect)
+      return;
+    opt.selected = !opt.selected;
+  }
+
+  canContinue(): boolean {
+    return this.step === 0 || this.currentList().some(o => o.selected);
+  }
+
+  next(): void {
+    if (!this.canContinue()) return;
+    if (this.step < 3) {
+      this.step++;
+    } else {
+      this.finishWizard();
+    }
+  }
+
+  prev(): void {
+    if (this.step > 0) this.step--;
+  }
+
+  closeWizard(): void {
+    this.showWizard = false;
+  }
+
+  /* ---------- nuevo: enviar preferencias ---------- */
+  finishWizard(): void {
+    const interests = [
+      ...this.topics.filter(t => t.selected).map(t => t.label),
+      ...this.keywords.filter(k => k.selected).map(k => k.label)
+    ];
+    const docs = this.documents
+      .filter(d => d.selected)
+      .map(d => d.label);
+
+    this.savingPrefs = true;
+    this.chat
+      .submitProfile(interests, docs)
+      .subscribe({
+        next: () => {
+          console.log('Preferencias guardadas');
+          this.savingPrefs = false;
+          this.showWizard = false;
+        },
+        error: err => {
+          console.error('Error guardando preferencias', err);
+          this.savingPrefs = false;
+          this.showWizard = false; /* opcional: cierra igual */
+        }
+      });
+  }
+
+  resetWizard(): void {
+    this.step = 0;
+    [...this.topics, ...this.keywords, ...this.documents].forEach(
+      o => (o.selected = false)
+    );
+  }
+
+  /* ---------- chat send ---------- */
   async send(): Promise<void> {
     const text = this.newText.trim();
     if (!text) return;
 
+    if (!this.sessionId) await firstValueFrom(this.chat.createSession());
+
+    this.showWizard = false;
     this.isSending = true;
-
-    // Crear sesión si falta
-    if (!this.sessionId) {
-      await firstValueFrom(this.chat.createSession());
-    }
-
-    // Enviar y dejar que el servicio actualice messages$
     this.chat.sendMessage(this.sessionId, text);
 
-    this.newText   = '';
+    this.newText = '';
     this.isSending = false;
   }
 
-  /** Abre el documento de referencia (stub) */
-  openDocument(documentId: string): void {
-    // TODO: implementar navegación/descarga del documento
-    console.log('Abrir documento:', documentId);
+  openDocument(id: string): void {
+    console.log('Abrir documento', id);
   }
 
-  private scrollToBottom(): void {
+  private scrollBottom(): void {
     try {
       const el = this.msgContainer.nativeElement;
       el.scrollTop = el.scrollHeight;

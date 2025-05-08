@@ -1,132 +1,178 @@
-// src/app/services/chat.service.ts
-
 import { Injectable, inject } from '@angular/core';
-import { HttpClient }         from '@angular/common/http';
-import { BehaviorSubject, Observable }    from 'rxjs';
-import { map, tap }           from 'rxjs/operators';
-import { Chat, Message, ReferenceChunk, RawMessage } from '../interfaces/chat.interface';
+import { HttpClient } from '@angular/common/http';
+import {
+  BehaviorSubject,
+  Observable,
+  throwError
+} from 'rxjs';
+import { map, tap, catchError } from 'rxjs/operators';
+
+import {
+  Chat,
+  Message,
+  RawMessage,
+  ReferenceChunk
+} from '../interfaces/chat.interface';
 
 interface SessionHistory {
   chat_id: string;
-  messages: Array<{
-    content:   string;
-    role:      'user' | 'assistant';
+  messages: {
+    content: string;
+    role: 'user' | 'assistant';
     reference?: ReferenceChunk[];
-  }>;
+  }[];
 }
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
-  private http      = inject(HttpClient);
-  private BASE_URL  = '/api/chat';
+  private http = inject(HttpClient);
+  private BASE_URL = '/api/chat';
 
-  // — Sesiones —
+  /** Flag: mostrar cuestionario al volver del perfil */
+  pendingWizard = false;
+
+  /* ---------- sesiones ---------- */
   private sessions$$ = new BehaviorSubject<Chat[]>([]);
   readonly sessions$ = this.sessions$$.asObservable();
 
-  /** Obtener sesiones del usuario */
+  private idChat$$ = new BehaviorSubject<string>('');
+  readonly idChat$ = this.idChat$$.asObservable();
+
+  /* ---------- mensajes ---------- */
+  private messages$$ = new BehaviorSubject<Message[]>([]);
+  readonly messages$ = this.messages$$.asObservable();
+
+  /* ===== Sesiones ===== */
   loadSessions(): void {
-    this.http.get<Chat[]>(`${this.BASE_URL}/`)
+    this.http
+      .get<Chat[]>(`${this.BASE_URL}/`)
       .subscribe(list => this.sessions$$.next(list));
   }
 
-  /** Crear nueva sesión y poner saludo inicial */
-  createSession(name: string = 'Chat sin título'): Observable<Chat> {
-    return this.http.post<Chat>(`${this.BASE_URL}/`, { session_name: name })
+  createSession(name = 'Chat sin título'): Observable<Chat> {
+    return this.http
+      .post<Chat>(`${this.BASE_URL}/`, { session_name: name })
       .pipe(
-        tap(newSession => {
-          // Añadir al frente y activar sesión
-          this.sessions$$.next([ newSession, ...this.sessions$$.value ]);
-          this.idChat$$.next(newSession.session_id);
-          // Mostrar saludo inicial
+        tap(chat => {
+          /* MRU */
+          this.sessions$$.next([chat, ...this.sessions$$.value]);
+          /* Chat activo */
+          this.idChat$$.next(chat.session_id);
+          /* Saludo inicial */
           this.messages$$.next([
-            { fromUser: false, text: 'Hola. ¿Cómo te puedo ayudar hoy?' }
+            { fromUser: false, text: 'Hola. ¿Cómo puedo ayudarte hoy?' }
           ]);
         })
       );
   }
 
-  /** Eliminar sesión */
-  deleteSession(sessionId: string): void {
-    this.http.delete(`${this.BASE_URL}/${sessionId}/`)
-      .subscribe(() => {
-        const updated = this.sessions$$.value.filter(s => s.session_id !== sessionId);
-        this.sessions$$.next(updated);
-        if (this.idChat$$.value === sessionId) {
-          this.idChat$$.next('');
-          this.messages$$.next([]);
-        }
-      });
+  deleteSession(id: string): void {
+    this.http.delete(`${this.BASE_URL}/${id}/`).subscribe(() => {
+      this.sessions$$.next(
+        this.sessions$$.value.filter(s => s.session_id !== id)
+      );
+      if (this.idChat$$.value === id) {
+        this.idChat$$.next('');
+        this.messages$$.next([]);
+      }
+    });
   }
 
-  /** Limpia sesiones cargadas (invitado/logout) */
   clearSessions(): void {
     this.sessions$$.next([]);
   }
 
-  // — Mensajes —
-  private messages$$ = new BehaviorSubject<Message[]>([]);
-  readonly messages$ = this.messages$$.asObservable();
-
-  private idChat$$    = new BehaviorSubject<string>('');
-  readonly idChat$   = this.idChat$$.asObservable();
-
+  /* ===== Mensajes ===== */
   loadMessages(sessionId: string): void {
-    // MRU reorder
-    const arr = this.sessions$$.value;
-    const idx = arr.findIndex(s => s.session_id === sessionId);
+    /* MRU re-ordenar */
+    const list = this.sessions$$.value;
+    const idx = list.findIndex(s => s.session_id === sessionId);
     if (idx !== -1) {
-      const sel = arr[idx];
-      this.sessions$$.next([ sel, ...arr.slice(0, idx), ...arr.slice(idx + 1) ]);
+      const sel = list[idx];
+      this.sessions$$.next([sel, ...list.slice(0, idx), ...list.slice(idx + 1)]);
     }
 
-    // Emitir sesión activa
     this.idChat$$.next(sessionId);
+    this.messages$$.next([]); /* limpia la vista */
 
-    // Recuperar historial completo
-    this.http.get<{ data: SessionHistory[] }>(`${this.BASE_URL}/${sessionId}/`)
+    this.http
+      .get<any>(`${this.BASE_URL}/${sessionId}/`)
       .pipe(
-        map(res => {
-          const hist = res.data[0]?.messages || [];
-          return hist.map(m => {
+        /* Compatibilidad V3 / V4 */
+        map(res =>
+          Array.isArray(res?.data) && res.data[0]?.messages
+            ? res.data[0].messages
+            : res.messages ?? []
+        ),
+        map((list: any[]) =>
+          list.map(m => {
             const chunks: ReferenceChunk[] = m.reference ?? [];
             const uniqueRefs = chunks.filter(
               (c, i, a) => a.findIndex(x => x.document_id === c.document_id) === i
             );
             return {
-              fromUser:  m.role === 'user',
-              text:      m.content.replace(/##\d+\$\$/g, '').trim(),
+              fromUser: m.role === 'user',
+              text: (m.content ?? m.answer ?? '')
+                .replace(/##\d+\$\$/g, '')
+                .trim(),
               references: uniqueRefs
             } as Message;
-          });
-        })
+          })
+        )
       )
       .subscribe(msgs => this.messages$$.next(msgs));
   }
 
   sendMessage(sessionId: string, text: string): void {
-    // Mostrar eco local
-    this.messages$$.next([ ...this.messages$$.value, { fromUser: true, text } ]);
+    /* burbuja usuario */
+    this.messages$$.next([...this.messages$$.value, { fromUser: true, text }]);
 
-    // POST /ask/
-    this.http.post<{ code: number; data: RawMessage }>(
-      `${this.BASE_URL}/${sessionId}/ask/`, { query: text }
-    )
-    .pipe(
-      map(res => res.data),
-      map(raw => {
-        const ans = (raw.answer ?? raw.content ?? '')
-          .replace(/##\d+\$\$/g, '')
-          .trim();
-        const chunks: ReferenceChunk[] = raw.reference?.chunks ?? [];
-        const uniqueRefs = chunks.filter(
-          (c, i, a) => a.findIndex(x => x.document_id === c.document_id) === i
-        );
-        return { fromUser: false, text: ans, references: uniqueRefs } as Message;
+    this.http
+      .post<{ data: RawMessage }>(`${this.BASE_URL}/${sessionId}/ask/`, {
+        query: text
       })
-    )
-    .subscribe(reply => {
-      this.messages$$.next([ ...this.messages$$.value, reply ]);
-    });
+      .pipe(
+        map(r => r.data),
+        map(raw => {
+          const ans = (raw.answer ?? raw.content ?? '')
+            .replace(/##\d+\$\$/g, '')
+            .trim();
+          const chunks: ReferenceChunk[] = raw.reference?.chunks ?? [];
+          const unique = chunks.filter(
+            (c, i, a) => a.findIndex(x => x.document_id === c.document_id) === i
+          );
+          return {
+            fromUser: false,
+            text: ans,
+            references: unique
+          } as Message;
+        })
+      )
+      .subscribe(reply =>
+        this.messages$$.next([...this.messages$$.value, reply])
+      );
+  }
+
+  /* ===== Preferencias de usuario ===== */
+  submitProfile(interests: string[], documentTitles: string[]): Observable<any> {
+    const payload = {
+      profile: JSON.stringify({
+        interests,
+        document_titles: documentTitles
+      })
+    };
+
+    const urlCreate = '/api/recommender/profile/create/';
+    const urlUpdate = '/api/recommender/profile/me/'; // ajusta si tu Swagger usa otro
+
+    return this.http.post(urlCreate, payload).pipe(
+      /* Si ya existe perfil -> actualizamos */
+      catchError(err => {
+        if (err.status >= 400 && err.status < 500 || err.status === 500) {
+          return this.http.patch(urlUpdate, payload);
+        }
+        return throwError(() => err);
+      })
+    );
   }
 }

@@ -15,12 +15,15 @@ export class ProfileComponent {
     private router: Router
   ) {}
 
+  /** Regresa al chat y dispara el cuestionario */
+  goBack(): void {
+    this.chatService.pendingWizard = true;   // <-- mostrará wizard al volver
+    this.router.navigate(['/home']);
+  }
+
   logout(): void {
-    // 1) Limpiar sesiones de chat en memoria (invitado o usuario)
     this.chatService.clearSessions();
-    // 2) Cerrar sesión en el AuthService
     this.authService.logout();
-    // 3) Redirigir al login
     this.router.navigate(['/login']);
   }
 }

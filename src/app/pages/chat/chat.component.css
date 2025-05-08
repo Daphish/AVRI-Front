@@ -189,3 +189,209 @@
 .ref-badge:hover {
   background-color: #e0e0e0;
 }
+
+/* ... tu CSS existente permanece ... */
+
+/* =============== Mensajes en modo intro =============== */
+.messages.intro-mode {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Tarjeta de bienvenida (ahora sin overlay) */
+.intro-card {
+  background-color: #163a5c;
+  color: white;
+  max-width: 620px;
+  width: 90%;
+  padding: 3rem 2rem;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.intro-card h1 {
+  margin-bottom: 1.2rem;
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.intro-card p {
+  font-size: 1.15rem;
+  line-height: 1.5;
+  margin-bottom: 2rem;
+}
+
+.intro-btn {
+  background-color: #0060c0;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.7rem 2.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+}
+
+.intro-btn:hover {
+  background-color: #004e9b;
+}
+
+/* ---------- Wizard styling ---------- */
+.messages.intro-mode {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+
+.grid-box {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 1.5rem;
+}
+.grid-item {
+  background-color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.9rem 0.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.grid-item.selected {
+  background-color: #4a657e;
+  color: white;
+}
+
+.wizard-nav {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+.nav-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.3rem;
+  cursor: pointer;
+  color: white;
+}
+.primary-btn {
+  background-color: #0060c0;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 2rem;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+}
+.primary-btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.primary-btn:not([disabled]):hover {
+  background-color: #004e9b;
+}
+
+/* …todo tu CSS previo se mantiene… */
+
+/* Elimina reglas del step-indicator; si quieres conservarlas para otro uso, déjalas sin problema. */
+
+.step-indicator { display: none; }   /* <-- Línea opcional para ocultar si quedara código viejo */
+
+/* ----- Wizard (sin paginación) ----- */
+.messages.intro-mode {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.intro-card {
+  position: relative;
+  background: #163a5c;
+  color: white;
+  max-width: 640px;
+  width: 92%;
+  padding: 2.2rem 2rem 2.8rem;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  font-size: 1.4rem;
+  color: white;
+  cursor: pointer;
+}
+
+.intro-text {
+  font-size: 1.1rem;
+  line-height: 1.5;
+  margin-bottom: 1.8rem;
+}
+
+.grid-box {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  max-height: 260px;
+  overflow-y: auto;
+  margin-bottom: 1.5rem;
+}
+
+.grid-item {
+  background: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.9rem 0.4rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.grid-item.selected {
+  background: #4a657e;
+  color: white;
+}
+
+.wizard-nav {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.nav-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.4rem;
+  color: white;
+  cursor: pointer;
+}
+
+.primary-btn {
+  background: #0060c0;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 2rem;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.25s ease;
+}
+.primary-btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.primary-btn:not([disabled]):hover {
+  background: #004e9b;
+}

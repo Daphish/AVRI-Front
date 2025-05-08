@@ -1,46 +1,102 @@
 <div class="chat-container">
-  <div class="messages" #msgContainer>
+  <!-- Área mensajes / wizard -->
+  <div
+    class="messages"
+    #msgContainer
+    [ngClass]="{ 'intro-mode': showWizard }"
+  >
+    <!-- ------------- Wizard (intro + 3 pasos) ------------- -->
+    <ng-container *ngIf="showWizard">
+      <div class="intro-card">
+        <!-- Botón X -->
+        <button class="close-btn" (click)="closeWizard()">✕</button>
 
-    <!-- Bienvenida -->
-    <div *ngIf="messages.length === 0" class="column welcome-block">
-      <div class="welcome-title">¡Bienvenido!</div>
-      <img class="welcome-img" src="/Logo-AVRI.png" alt="logo AVRI" />
-      <div class="welcome-body">¿Cómo puedo ayudar hoy?</div>
-    </div>
+        <!-- Títulos por paso -->
+        <h1 *ngIf="step === 0">¡Bienvenido!</h1>
+        <h1 *ngIf="step === 1">Selecciona hasta 5&nbsp;temas de interés</h1>
+        <h1 *ngIf="step === 2">Selecciona 5&nbsp;palabras&nbsp;clave</h1>
+        <h1 *ngIf="step === 3">Escoge los documentos que&nbsp;te&nbsp;interesen</h1>
 
-    <!-- Mensajes + mini-referencias -->
-    <ng-container *ngFor="let m of messages">
-      <div class="column">
-        <div
-          class="message-bubble"
-          [ngClass]="m.fromUser ? 'message-user' : 'message-system'"
-        >
-          <div *ngIf="!m.fromUser" class="system-avatar-container">
-            <img src="/Logo-AVRI.png" class="system-avatar" alt="avatar sistema" />
-          </div>
-          <div class="message-text">{{ m.text }}</div>
+        <!-- Intro texto -->
+        <p *ngIf="step === 0" class="intro-text">
+          Queremos conocerte mejor y ayudarte a encontrar el conocimiento que
+          necesitas. Antes de comenzar elige los temas que más te interesen.
+        </p>
+
+        <!-- Grid de opciones -->
+        <div *ngIf="step > 0" class="grid-box">
+          <button
+            *ngFor="let opt of currentList()"
+            (click)="toggle(opt)"
+            class="grid-item"
+            [class.selected]="opt.selected"
+          >
+            {{ opt.label }}
+          </button>
         </div>
 
-        <!-- Mini-referencias -->
-        <div
-          *ngIf="!m.fromUser && m.references?.length"
-          class="message-references"
-        >
-          <span
-            *ngFor="let ref of m.references"
-            class="ref-badge"
-            (click)="openDocument(ref.document_id)"
+        <!-- Navegación (flecha atrás + continuar/guardar) -->
+        <div class="wizard-nav">
+          <button *ngIf="step > 0" class="nav-btn" (click)="prev()">◀</button>
+          <button
+            class="primary-btn"
+            [disabled]="!canContinue()"
+            (click)="next()"
           >
-            {{ ref.document_name }}
-          </span>
+            {{ step < 3 ? 'Continuar' : 'Guardar preferencias' }} ▶
+          </button>
         </div>
       </div>
     </ng-container>
 
+    <!-- ------------- Mensajes normales ------------- -->
+    <ng-container *ngIf="!showWizard">
+      <!-- Bloque saludo inicial -->
+      <div
+        *ngIf="messages.length === 0"
+        class="column welcome-block"
+      >
+        <div class="welcome-title">¡Bienvenido!</div>
+        <img class="welcome-img" src="/Logo-AVRI.png" alt="logo AVRI" />
+        <div class="welcome-body">¿Cómo puedo ayudar hoy?</div>
+      </div>
+
+      <ng-container *ngFor="let m of messages">
+        <div class="column">
+          <div
+            class="message-bubble"
+            [ngClass]="m.fromUser ? 'message-user' : 'message-system'"
+          >
+            <div *ngIf="!m.fromUser" class="system-avatar-container">
+              <img
+                src="/Logo-AVRI.png"
+                class="system-avatar"
+                alt="avatar sistema"
+              />
+            </div>
+            <div class="message-text">{{ m.text }}</div>
+          </div>
+
+          <!-- mini-referencias -->
+          <div
+            *ngIf="!m.fromUser && m.references?.length"
+            class="message-references"
+          >
+            <span
+              *ngFor="let ref of m.references"
+              class="ref-badge"
+              (click)="openDocument(ref.document_id)"
+            >
+              {{ ref.document_name }}
+            </span>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container>
   </div>
 
   <!-- Input -->
-  <div class="chat-input">
+  <div class="chat-input" *ngIf="!showWizard">
     <input
       class="chat-input-box"
       placeholder="Escribe algo al AVRI"

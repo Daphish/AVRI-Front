@@ -1,84 +1,103 @@
 .profile-container {
-    display: flex;
-    gap: 2rem;
-    padding: 2rem;
-  }
-  
-  .column-left {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .avatar-circle {
-    width: 8rem;
-    height: 8rem;
-    border-radius: 50%;
-    background-color: #2596BE;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1rem;
-  }
-  
-  .edit-photo-container {
-    margin-bottom: 1rem;
-    padding: 6px 12px;
-    font-size: 0.9rem;
-    border: 1px solid #21405F;
-    background-color: white;
-    cursor: pointer;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-  }
-  
-  .logout-button {
-    margin-top: 1rem;
-    padding: 8px 16px;
-    font-size: 0.9rem;
-    background-color: #0056A3;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    transition: background-color 0.3s ease;
-  }
-  
-  .logout-button:hover {
-    background-color: #21405F;
-  }
-  
-  .column {
-    flex: 1;
-  }
-  
-  .row-container {
-    display: flex;
-    gap: 2rem;
-  }
-  
-  .row-child {
-    flex: 1;
-  }
-  
-  .title-tag {
-    font-weight: bold;
-    margin-top: 1rem;
-    margin-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-  }
-  
-  .see-more-button {
-    margin-top: 0.5rem;
-    padding: 6px 12px;
-    font-size: 0.9rem;
-    background-color: #D9D9D9;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.column-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Botón Regresar */
+.back-button {
+  align-self: flex-start;
+  padding: 6px 14px;
+  margin-bottom: 1rem;
+  background-color: #D9D9D9;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease;
+}
+
+.back-button:hover {
+  background-color: #c2c2c2;
+}
+
+.avatar-circle {
+  width: 8rem;
+  height: 8rem;
+  border-radius: 50%;
+  background-color: #2596BE;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.edit-photo-container {
+  margin-bottom: 1rem;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  border: 1px solid #21405F;
+  background-color: white;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.logout-button {
+  margin-top: 1rem;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  background-color: #0056A3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.3s ease;
+}
+
+.logout-button:hover {
+  background-color: #21405F;
+}
+
+.column {
+  flex: 1;
+}
+
+.row-container {
+  display: flex;
+  gap: 2rem;
+}
+
+.row-child {
+  flex: 1;
+}
+
+.title-tag {
+  font-weight: bold;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.see-more-button {
+  margin-top: 0.5rem;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  background-color: #D9D9D9;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
