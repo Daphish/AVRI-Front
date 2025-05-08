@@ -23,6 +23,7 @@ export class ChatComponent implements OnInit {
   constructor(private chat: ChatService) {}
 
   ngOnInit(): void {
+
     // Limpiar cuando cambia de sesión
     this.chat.idChat$.subscribe(id => {
       this.sessionId = id;
