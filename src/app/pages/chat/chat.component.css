@@ -204,7 +204,7 @@
   background-color: #163a5c;
   color: white;
   max-width: 620px;
-  width: 90%;
+  width: 100%;
   padding: 3rem 2rem;
   border-radius: 8px;
   text-align: center;
@@ -244,9 +244,6 @@
   align-items: center;
   justify-content: center;
 }
-
-
-
 .grid-box {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -299,10 +296,6 @@
   background-color: #004e9b;
 }
 
-/* …todo tu CSS previo se mantiene… */
-
-/* Elimina reglas del step-indicator; si quieres conservarlas para otro uso, déjalas sin problema. */
-
 .step-indicator { display: none; }   /* <-- Línea opcional para ocultar si quedara código viejo */
 
 /* ----- Wizard (sin paginación) ----- */
@@ -316,8 +309,8 @@
   position: relative;
   background: #163a5c;
   color: white;
-  max-width: 640px;
-  width: 92%;
+  max-width: 1000px;/*640*/
+  width: 100%;
   padding: 2.2rem 2rem 2.8rem;
   border-radius: 8px;
   text-align: center;

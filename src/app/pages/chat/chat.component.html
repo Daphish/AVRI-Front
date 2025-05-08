@@ -24,12 +24,17 @@
         </p>
 
         <!-- Grid de opciones -->
-        <div *ngIf="step > 0" class="grid-box">
+        <div
+          *ngIf="step > 0"
+          class="grid-box"
+          [ngClass]="{ 'single-col': step === 3 }"
+        >
           <button
             *ngFor="let opt of currentList()"
             (click)="toggle(opt)"
             class="grid-item"
             [class.selected]="opt.selected"
+            title="{{ opt.label }}"
           >
             {{ opt.label }}
           </button>

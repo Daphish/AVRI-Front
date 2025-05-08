@@ -50,10 +50,10 @@ export class ChatComponent implements OnInit {
   ].map(l => ({ label: l, selected: false }));
 
   documents: SelectOption[] = [
-    'Análisis sociológico…','Estudio de los factores…','Participación ciudadana…',
-    'El rol de los medios…','Derechos humanos…','Cambio social y…',
-    'Impacto tecnológico…','Desarrollo sostenible…','Avances biomédicos…',
-    'Ingeniería de materiales…'
+    'Análisis sociológico y humano','Estudio de los factores ambientales','Participación ciudadana en México',
+    'El rol de los medios en la sociedad actual','Derechos humanos en México','Cambio social y estadistico',
+    'Impacto tecnológico en nuestra sociedad','Desarrollo sostenible y arquitectonico','Avances biomédicos atuales',
+    'Ingeniería de materiales renovables'
   ].map(l => ({ label: l, selected: false }));
 
   constructor(private chat: ChatService) {}
