@@ -10,6 +10,8 @@ export interface Document {
   title: string;
   /** URI del repositorio donde está alojado */
   repository_uri: string;
+  /** ID externa del documento dentro del repositorio institucional */
+  repository_id: string;
   /** Estado: L = Libre, R = Restringido, E = Embargado */
   status: 'L' | 'R' | 'E';
 }
