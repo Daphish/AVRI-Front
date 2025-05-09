@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
-import { User } from '../interfaces/user.interface';
+import { AnonymousUser, User } from '../interfaces/user.interface';
 
 interface TokenResponse { token: string; }
 interface AnonymousResponse { anonymous_id: string; }
@@ -10,11 +10,14 @@ interface AnonymousResponse { anonymous_id: string; }
 export class AuthService {
   private http = inject(HttpClient);
 
-  private currentUser$$ = new BehaviorSubject<User | null>(null);
+  private currentUser$$ = new BehaviorSubject<User | AnonymousUser | null>(null);
   readonly currentUser$ = this.currentUser$$.asObservable();
 
   private loggedIn$$ = new BehaviorSubject<boolean>(false);
   readonly isLoggedIn$ = this.loggedIn$$.asObservable();
+
+  /* private logoutEvent$$ = new BehaviorSubject<void>(undefined);
+  readonly logoutEvent$ = this.logoutEvent$$.asObservable();  */
 
   /** Llamar en bootstrap para reactivar sesión si hay token */
   async autoLogin(): Promise<void> {
@@ -25,7 +28,8 @@ export class AuthService {
     try {
       const user = await firstValueFrom(this.http.get<User>('/api/user/me/'));
       this.currentUser$$.next(user);
-    } catch {
+    } catch (error) {
+      console.error('Error al recuperar el usuario', error);
       // Token inválido → limpiar
       this.logout();
     }
@@ -62,6 +66,9 @@ export class AuthService {
       );
       localStorage.setItem('authToken', resp.token);
       this.loggedIn$$.next(true);
+
+      const user = await firstValueFrom(this.http.get<User>('/api/user/me/'));
+      this.currentUser$$.next(user);
       return true;
     } catch {
       return false;
@@ -73,6 +80,7 @@ export class AuthService {
     localStorage.removeItem('authToken');
     this.currentUser$$.next(null);
     this.loggedIn$$.next(false);
+    /* this.logoutEvent$$.next(); */
   }
 
   /** Recuperar token para el interceptor */

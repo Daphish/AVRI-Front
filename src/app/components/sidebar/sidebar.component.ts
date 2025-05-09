@@ -38,21 +38,32 @@ export class SidebarComponent implements OnInit {
 
         if (loggedIn) {
           this.authService.currentUser$
-            .subscribe(user => this.currentUserName = user?.first_name || 'Usuario');
+            .subscribe(user => {
+              if(user){
+                if ('anonymous_id' in user) {
+                  this.currentUserName = 'Invitado';
+                } else {
+                  this.currentUserName = user?.name || 'Invitado';
+                }
+              }
+            });
           this.chatService.loadSessions();
+          this.isModalOpen = false;
         } else {
           this.currentUserName = 'Invitado';
           this.chatService.clearSessions();
+          this.isModalOpen = true;
         }
       });
+
+      /* this.authService.logoutEvent$.subscribe(() => {
+        this.isModalOpen = true;
+      }); */
   }
 
   viewHome() {
-    // Crear nuevo chat y mostrar saludo inicial sin esperar carga de backend
-    this.chatService.createSession()
-      .subscribe(session => {
-        this.router.navigate(['/home']);
-      });
+    this.chatService.loadMessages('');
+    this.router.navigate(['/home']);
   }
 
   loadMessages(sessionId: string) {

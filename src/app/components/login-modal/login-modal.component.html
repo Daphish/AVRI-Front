@@ -1,5 +1,5 @@
-<div class="modal-overlay" (click)="closeModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
+<div class="modal-overlay">
+    <div class="modal-content">
         <div class="avatar-circle">
             <i class="bi bi-person-fill" style="color: white; font-size: 6rem;"></i>
         </div>
@@ -18,7 +18,6 @@
         </div>
         
         <div class="modal-actions">
-            <button class="btn cancel" (click)="closeModal()">Cancelar</button>
             <button class="btn login" (click)="startSession()">Iniciar Sesión</button>
             <button class="btn guest" (click)="continueAsGuest()">Continuar como invitado</button>
         </div>

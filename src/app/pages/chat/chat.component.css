@@ -190,6 +190,7 @@
   background-color: #e0e0e0;
 }
 
+
 /* ... tu CSS existente permanece ... */
 
 /* =============== Mensajes en modo intro =============== */
@@ -388,3 +389,9 @@
 .primary-btn:not([disabled]):hover {
   background: #004e9b;
 }
+
+.see-more-button.active {
+  background-color: #4caf50;
+  color: white;
+}
+

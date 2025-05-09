@@ -1,15 +1,12 @@
-import {
-  Component,
-  OnInit,
-  ViewChild,
-  ElementRef
-} from '@angular/core';
-import { NgIf, NgFor, NgClass } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { firstValueFrom } from 'rxjs';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { FormsModule }           from '@angular/forms';
+import { NgFor, NgIf, NgClass }  from '@angular/common';
+import { firstValueFrom }        from 'rxjs';
+import { Router }                from '@angular/router';
 
 import { ChatService } from '../../services/chat.service';
-import { Message } from '../../interfaces/chat.interface';
+import { DocumentService } from '../../services/document.service';
+import { Message }     from '../../interfaces/chat.interface';
 
 interface SelectOption {
   label: string;
@@ -32,34 +29,15 @@ export class ChatComponent implements OnInit {
   newText = '';
   isSending = false;
 
-  /* ---------- wizard ---------- */
-  showWizard = false;
-  step = 0;         // 0-intro,1-topics,2-keywords,3-docs
-  maxSelect = 5;
-  savingPrefs = false;
-
-  topics: SelectOption[] = [
-    'Química','Ciencias sociales','Ingeniería','Derecho','Medicina','Arquitectura',
-    'Biología','Filosofía','Matemáticas','Economía','Arte','Computación'
-  ].map(l => ({ label: l, selected: false }));
-
-  keywords: SelectOption[] = [
-    'Antropología','Sociología','Historia','Psicología','Cultura','Diversidad',
-    'Física','Algoritmos','Ecología','Ética','Innovación','Neurociencia',
-    'Energía','Política','Estadística','Globalización'
-  ].map(l => ({ label: l, selected: false }));
-
-  documents: SelectOption[] = [
-    'Análisis sociológico y humano','Estudio de los factores ambientales','Participación ciudadana en México',
-    'El rol de los medios en la sociedad actual','Derechos humanos en México','Cambio social y estadistico',
-    'Impacto tecnológico en nuestra sociedad','Desarrollo sostenible y arquitectonico','Avances biomédicos atuales',
-    'Ingeniería de materiales renovables'
-  ].map(l => ({ label: l, selected: false }));
-
-  constructor(private chat: ChatService) {}
+  constructor(
+    private chat: ChatService,
+    private doc: DocumentService,
+    private router: Router
+  ) {}
 
   /* ---------- ciclo ---------- */
   ngOnInit(): void {
+
     this.chat.idChat$.subscribe(id => {
       this.sessionId = id;
       this.messages = [];
@@ -154,16 +132,23 @@ export class ChatComponent implements OnInit {
 
     if (!this.sessionId) await firstValueFrom(this.chat.createSession());
 
-    this.showWizard = false;
-    this.isSending = true;
+
+    // Crear sesión si falta
+    if (!this.sessionId) {
+      await firstValueFrom(this.chat.createSession(text));
+    }
+
     this.chat.sendMessage(this.sessionId, text);
 
     this.newText = '';
     this.isSending = false;
   }
 
-  openDocument(id: string): void {
-    console.log('Abrir documento', id);
+
+  /** Abre el documento de referencia (stub) */
+  openDocument(documentId: string): void {
+    this.doc.setCurrentDocumentId(documentId);
+    this.router.navigate(['/document']);
   }
 
   private scrollBottom(): void {
