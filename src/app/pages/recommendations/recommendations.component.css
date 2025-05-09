@@ -1,0 +1,60 @@
+.recommendations-container {
+    padding: 1rem;
+    background: #f8f9fa;
+    height: 100%;
+    overflow-y: auto;
+  }
+  
+  .recommendation-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+  
+  .recommendation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+  
+  .recommendation-card {
+    padding: 1rem;
+    border-radius: 8px;
+    position: relative;
+  }
+  
+  .doc-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  
+  .doc-author {
+    font-size: 0.9rem;
+  }
+  
+  .doc-icons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    font-size: 1.2rem;
+  }
+
+  .blue-icon {
+    color: #003366;
+  }
+
+  .red-icon {
+    color: #871414;
+  }
+
+  .red {
+    background-color: #D9B6B7;
+  }
+
+  .yellow {
+    background-color: #FAE9B5;
+  }
+
+  .blue {
+    background-color: #cce5ff;;
+  }
