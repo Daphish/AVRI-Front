@@ -5,7 +5,7 @@
  */
 export interface Document {
   /** Identificador único */
-  id: number;
+  id: string;
   /** Título o nombre del documento */
   title: string;
   /** URI del repositorio donde está alojado */
@@ -24,6 +24,22 @@ export interface DocumentDetail extends Document {
   created_at: string;
   /** Fecha de última modificación ISO 8601 */
   updated_at: string;
+}
+
+/**
+ * Representa un documento con los metadatos del repositorio institucional
+ */
+export interface RepositoryDocument extends Document {
+  /** Lista de autores */
+  author: string;
+  /** Tipo de documento */
+  type: string;
+  /** Fecha de publicación */
+  publication_date: string;
+  /** Área de conocimiento externa */
+  knowledge_area: string;
+  /** Tipo de licencia */
+  license: string;
 }
 
 /**

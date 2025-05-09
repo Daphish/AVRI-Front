@@ -2,8 +2,10 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { FormsModule }           from '@angular/forms';
 import { NgFor, NgIf, NgClass }  from '@angular/common';
 import { firstValueFrom }        from 'rxjs';
+import { Router }                from '@angular/router';
 
 import { ChatService } from '../../services/chat.service';
+import { DocumentService } from '../../services/document.service';
 import { Message }     from '../../interfaces/chat.interface';
 
 @Component({
@@ -21,7 +23,11 @@ export class ChatComponent implements OnInit {
   newText   = '';
   isSending = false;
 
-  constructor(private chat: ChatService) {}
+  constructor(
+    private chat: ChatService,
+    private doc: DocumentService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
 
@@ -59,8 +65,8 @@ export class ChatComponent implements OnInit {
 
   /** Abre el documento de referencia (stub) */
   openDocument(documentId: string): void {
-    // TODO: implementar navegación/descarga del documento
-    console.log('Abrir documento:', documentId);
+    this.doc.setCurrentDocumentId(documentId);
+    this.router.navigate(['/document']);
   }
 
   private scrollToBottom(): void {
