@@ -189,3 +189,9 @@
 .ref-badge:hover {
   background-color: #e0e0e0;
 }
+
+.see-more-button.active {
+  background-color: #4caf50;
+  color: white;
+}
+
