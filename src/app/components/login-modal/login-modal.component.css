@@ -76,16 +76,16 @@ input:focus {
     font-weight: bold;
 }
 
-.btn.cancel {
-    color: red;
+.btn.guest {
+    color: black;
 }
 
 .btn.login {
     color: #0056A3;
 }
 
-.btn.cancel:hover {
-    background-color: red;
+.btn.guest:hover {
+    background-color: black;
     color: white;
 }
 

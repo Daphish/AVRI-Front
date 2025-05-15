@@ -1,0 +1,18 @@
+<div class="recommendations-container">
+    <div class="recommendation-title">Recomendaciones para ti</div>
+    <div *ngIf="recommendedDocs.length > 0" class="recommendation-grid">
+      <div class="recommendation-card" *ngFor="let doc of recommendedDocs" [ngClass]="{'blue': doc.status === 'L', 'red': doc.status === 'R', 'yellow': doc.status === 'E'}">
+        <div class="doc-title">{{ doc.title }}</div>
+        <div class="doc-author" [ngClass]="{'blue-icon': doc.status === 'L' || doc.status === 'E', 'red-icon': doc.status === 'R'}">{{ doc.status }}</div>
+        <div class="doc-icons" [ngClass]="{'blue-icon': doc.status === 'L' || doc.status === 'E', 'red-icon': doc.status === 'R'}">
+          <i class="bi bi-file-earmark-text"></i> 
+          <i class="bi bi-quote"></i> 
+        </div>
+      </div>
+    </div>
+    <div *ngIf="recommendedDocs.length === 0" class="recommendation-grid">
+        <div class="no-recommendations-message">
+            No hay recomendaciones disponibles para ti
+        </div>
+    </div>
+  </div>

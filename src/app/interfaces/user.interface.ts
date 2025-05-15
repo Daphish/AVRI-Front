@@ -8,3 +8,8 @@ export interface User {
     education_level: string;
     field_of_study: string;
 }
+
+export interface AnonymousUser {
+    is_anonymous: boolean;
+    anonymous_id: string;
+}

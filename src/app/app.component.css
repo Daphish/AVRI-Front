@@ -12,3 +12,7 @@
 ::ng-deep app-profile{
     width: 100%;
 }
+
+::ng-deep app-recommendations{
+    width: 100%;
+}

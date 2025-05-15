@@ -38,13 +38,27 @@ export class SidebarComponent implements OnInit {
 
         if (loggedIn) {
           this.authService.currentUser$
-            .subscribe(user => this.currentUserName = user?.first_name || 'Usuario');
+            .subscribe(user => {
+              if(user){
+                if ('anonymous_id' in user) {
+                  this.currentUserName = 'Invitado';
+                } else {
+                  this.currentUserName = user?.name || 'Invitado';
+                }
+              }
+            });
           this.chatService.loadSessions();
+          this.isModalOpen = false;
         } else {
           this.currentUserName = 'Invitado';
           this.chatService.clearSessions();
+          this.isModalOpen = true;
         }
       });
+
+      /* this.authService.logoutEvent$.subscribe(() => {
+        this.isModalOpen = true;
+      }); */
   }
 
   viewHome() {
