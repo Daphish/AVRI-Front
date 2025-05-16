@@ -1,100 +1,136 @@
-import { Component, OnInit } from '@angular/core'; // Agregado OnInit
+// src/app/pages/profile/profile.component.ts
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { AsyncPipe, NgFor, NgIf, UpperCasePipe } from '@angular/common'; // UpperCasePipe añadido
+import { firstValueFrom, Observable, Subscription, map } from 'rxjs';
+
 import { AuthService } from '../../services/auth.service';
 import { ChatService } from '../../services/chat.service';
 import { RecommendationService } from '../../services/recommendation.service';
-import { User } from '../../interfaces/user.interface';
-import { NgFor, NgIf } from '@angular/common';
-import { Document } from '../../interfaces/document.interface';
+import { User, AnonymousUser } from '../../interfaces/user.interface';
+import { Document } from '../../interfaces/document.interface'; // Asumo que esta interfaz tiene id: string y repository_id: string
 
 @Component({
   selector: 'app-profile',
   standalone: true,
   templateUrl: './profile.component.html',
-  imports: [NgIf, NgFor],
+  imports: [NgIf, NgFor, AsyncPipe, UpperCasePipe], // UpperCasePipe añadido
   styleUrls: ['./profile.component.css']
 })
-export class ProfileComponent implements OnInit { // Implementado OnInit
+export class ProfileComponent implements OnInit, OnDestroy {
+  private authService = inject(AuthService);
+  private chatService = inject(ChatService);
+  private recommendationService = inject(RecommendationService);
+  private router = inject(Router);
+  private subscriptions = new Subscription();
 
-  anonymous = true;
-  user: User = {
-    id: 0,
-    email: '',
-    password: '',
-    name: '',
-    first_name: '',
-    last_name: '',
-    education_level: '',
-    field_of_study: '',
-  };
+  userDisplay: User | null = null;
+  isActuallyAnonymous: boolean = true; // Usado para controlar la vista
   preferences: String[] = [];
   documents: Document[] = [];
+  profileNeedsSetup: boolean = false; // Se actualizará en base a profileSetupComplete$
 
-  constructor(
-    private authService: AuthService,
-    private chatService: ChatService,
-    private recommendationService: RecommendationService,
-    private router: Router
-  ) {}
+  // Para el botón de cerrar sesión y otras lógicas de plantilla
+  isUserLoggedInAndNotAnonymous$: Observable<boolean> = this.authService.currentUser$.pipe(
+    map(user => !!user && !('anonymous_id' in user))
+  );
+
+  constructor() {}
 
   ngOnInit() {
-    this.authService.currentUser$.subscribe(user => {
-      if(user) {
-        if ('anonymous_id'in user) {
-          this.anonymous = true;
-        } else {
-          this.user = user as User; // Aseguramos el tipo User si no es anónimo
-          if(!this.user.field_of_study || this.user.field_of_study === '') {
-            this.user.field_of_study = 'Sin estudios previos';
+    this.subscriptions.add(
+      this.authService.currentUser$.subscribe(currentUser => {
+        if (currentUser) {
+          if ('anonymous_id' in currentUser) {
+            this.isActuallyAnonymous = true;
+            this.userDisplay = null;
+            this.preferences = ['El perfil de preferencias no está disponible para invitados.'];
+            this.documents = this.getDefaultDocumentsPlaceholder();
+            this.profileNeedsSetup = false; // Anónimos no necesitan wizard de perfilamiento
+          } else {
+            this.isActuallyAnonymous = false;
+            this.userDisplay = currentUser as User;
+            if (this.userDisplay && (this.userDisplay.field_of_study === undefined || this.userDisplay.field_of_study === '')) {
+              this.userDisplay.field_of_study = 'Sin estudios previos';
+            }
+            this.loadProfileData();
           }
-          this.recommendationService.get().subscribe(data => {
-            // Asegúrate que data.profile.interests exista y sea un array
-            if (data && data.profile && Array.isArray(data.profile.interests)) {
-              this.preferences = data.profile.interests;
-            } else {
-              this.preferences = []; // Inicializa como vacío si no es válido
-            }
-            // Mueve la lógica de 'Sin preferencias' aquí para que se aplique después de la carga
-            if (this.preferences.length === 0) {
-              this.preferences = ['Sin preferencias'];
-            }
-          });
-          this.recommendationService.getDocuments().subscribe(documents => {
-            this.documents = documents;
-            // Mueve la lógica de 'Sin documentos' aquí para que se aplique después de la carga
-            if (this.documents.length === 0) {
-              this.documents = [{
-                id: 'default-doc-0', // CORREGIDO: id como string
-                title: 'Sin documentos',
-                repository_uri: '',
-                repository_id: 'N/A', // AÑADIDO: repository_id (requerido por la interfaz)
-                status: 'L'
-              }];
-            }
-          });
-          this.anonymous = false;
+        } else {
+          this.isActuallyAnonymous = true;
+          this.userDisplay = null;
+          this.preferences = ['Inicia sesión para ver y configurar tu perfil.'];
+          this.documents = this.getDefaultDocumentsPlaceholder();
+          this.profileNeedsSetup = false;
         }
-      } else {
-        // Manejar caso donde el usuario es null (ej. al inicio o después de logout)
-        this.anonymous = true;
-        this.preferences = ['Sin preferencias'];
-        this.documents = [{
-            id: 'default-doc-0', // CORREGIDO: id como string
-            title: 'Sin documentos',
-            repository_uri: '',
-            repository_id: 'N/A', // AÑADIDO: repository_id
-            status: 'L'
-          }];
-      }
-    });
+      })
+    );
+
+    this.subscriptions.add(
+      this.authService.profileSetupComplete$.subscribe(isComplete => {
+        if (!this.isActuallyAnonymous) { // Solo para usuarios registrados
+          this.profileNeedsSetup = !isComplete;
+        }
+      })
+    );
   }
 
+  private getDefaultDocumentsPlaceholder(): Document[] {
+    return [{
+      id: 'default-doc-placeholder', // Asegurar que coincida con la interfaz Document
+      title: 'No hay documentos para mostrar.',
+      repository_uri: '',
+      repository_id: 'N/A_placeholder', // Obligatorio si la interfaz lo define
+      status: 'L'
+    }];
+  }
+
+  loadProfileData(): void {
+    if (this.isActuallyAnonymous || !this.userDisplay) return;
+
+    this.subscriptions.add(
+      this.recommendationService.get().subscribe({
+        next: data => {
+          if (data?.profile?.interests && Array.isArray(data.profile.interests)) {
+            this.preferences = data.profile.interests.length > 0 ? data.profile.interests : ['Aún no has configurado tus preferencias.'];
+            this.authService.markProfileAsCompleted(true);
+          } else {
+            this.preferences = ['Configura tus preferencias para mejores recomendaciones.'];
+            this.authService.markProfileAsCompleted(false);
+          }
+        },
+        error: () => {
+          this.preferences = ['Error al cargar preferencias. Intenta configurar tu perfil.'];
+          this.authService.markProfileAsCompleted(false);
+        }
+      })
+    );
+
+    // Este getDocuments es del RecommendationService, asumo que es para historial o similares.
+    this.subscriptions.add(
+      this.recommendationService.getDocuments().subscribe(docs => {
+        if (docs && docs.length > 0) {
+          this.documents = docs;
+        } else {
+          this.documents = this.getDefaultDocumentsPlaceholder();
+        }
+      })
+    );
+  }
+
+    async goBack(): Promise<void> {
+    /* Siempre queremos volver a mostrar el wizard */
+    this.chatService.pendingWizard = true;
+    await this.router.navigate(['/home']);
+  }
+
+
   logout(): void {
-    // 1) Limpiar sesiones de chat en memoria (invitado o usuario)
     this.chatService.clearSessions();
-    // 2) Cerrar sesión en el AuthService
     this.authService.logout();
-    // 3) Redirigir al login
-    this.router.navigate(['/home']);
+    this.router.navigate(['/home']); // O a /login si prefieres
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe();
   }
 }

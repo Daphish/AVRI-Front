@@ -1,0 +1,306 @@
+/* src/app/components/chat/chat.component.css */
+/* Container border and layout */
+.chat-container {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  border: solid #0056A3 1px;
+  border-radius: 8px;
+  position: relative; /* Para posicionar elementos absolutos como el wizard si fuera necesario */
+}
+
+.messages {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.messages.intro-mode {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Scrollbar */
+.messages::-webkit-scrollbar {
+  width: 8px;
+}
+.messages::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+.messages::-webkit-scrollbar-thumb {
+  background: #b6c8d9;
+  border-radius: 4px;
+}
+.messages::-webkit-scrollbar-thumb:hover {
+  background: #a1b8ce;
+}
+
+/* Welcome block */
+.welcome-block {
+  text-align: center;
+  padding: 2rem;
+  margin: auto; /* Centrar el bloque de bienvenida */
+  color: #21405F;
+}
+.welcome-title {
+  font-weight: bold;
+  font-size: 2.5rem; /* Ajustado */
+  margin-bottom: 0.5rem;
+}
+.welcome-img {
+  width: 8rem; /* Ajustado */
+  height: auto;
+  margin: 1rem 0;
+}
+.welcome-body {
+  font-size: 1.25rem; /* Ajustado */
+}
+
+/* Message bubbles wrapper for alignment */
+.message-wrapper {
+  display: flex;
+  flex-direction: column;
+  max-width: 85%; /* Un poco más de espacio */
+}
+.user-message-wrapper {
+  align-self: flex-end;
+}
+.system-message-wrapper {
+  align-self: flex-start;
+}
+
+.message-bubble {
+  padding: 0.75rem 1rem; /* Ajustado */
+  border-radius: 12px; /* Más redondeado */
+  word-break: break-word;
+  display: flex;
+  align-items: flex-start; /* Alinear avatar con inicio de texto */
+  line-height: 1.5;
+}
+.message-user {
+  background-color: #B6C8D9;
+  color: #1e3a56;
+  border-bottom-right-radius: 4px; /* Estilo chat */
+}
+.message-system {
+  background-color: #EDEDED;
+  color: #333;
+  border-bottom-left-radius: 4px; /* Estilo chat */
+}
+
+.system-avatar-container {
+  width: 2rem; /* Más grande */
+  height: 2rem;
+  margin-right: 0.75rem;
+  flex-shrink: 0; /* Evitar que se encoja */
+}
+.system-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%; /* Círculo para el avatar */
+}
+.message-text {
+  white-space: pre-wrap; /* Respetar saltos de línea y espacios */
+}
+
+/* Chat input area */
+.chat-input {
+  display: flex;
+  padding: 0.75rem 1rem; /* Más padding */
+  border-top: 1px solid #ccc;
+  background-color: #f9f9f9;
+}
+.chat-input-box {
+  flex-grow: 1;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  margin-right: 0.75rem;
+  font-size: 1rem;
+  resize: none; /* Para textarea si se usa */
+}
+.chat-input-box:focus {
+  outline: none;
+  border-color: #0056A3;
+  box-shadow: 0 0 0 2px rgba(0, 86, 163, 0.2);
+}
+.chat-send-button {
+  background-color: #0056A3;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 48px; /* Tamaño fijo */
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.chat-send-button:hover {
+  background-color: #00417c;
+}
+.chat-send-button:disabled {
+  background-color: #a0a0a0;
+  cursor: not-allowed;
+}
+.chat-send-button i {
+  font-size: 1.5rem;
+}
+
+/* Mini-references */
+.message-references {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px; /* Más espacio */
+  margin-top: 0.5rem;
+  /* Alinear con el texto del mensaje del sistema */
+  padding-left: calc(2rem + 0.75rem); /* avatar + margin-right del avatar */
+}
+.user-message-wrapper .message-references {
+  justify-content: flex-end; /* Si las referencias también pueden ser del usuario */
+  padding-left: 0;
+  padding-right: calc(2rem + 0.75rem);
+}
+
+.ref-badge {
+  background-color: #e0e7ef;
+  color: #0056A3;
+  font-size: 0.8rem;
+  padding: 3px 8px;
+  border-radius: 12px; /* Más redondeado */
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  border: 1px solid #b6c8d9;
+}
+.ref-badge:hover {
+  background-color: #0056A3;
+  color: white;
+}
+
+/* Wizard Styles */
+.intro-card {
+  position: relative;
+  background: #163a5c;
+  color: white;
+  max-width: 640px;
+  width: 92%;
+  padding: 2.2rem 2rem 2.8rem;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  margin: auto; /* Centrar la tarjeta */
+}
+
+.close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: #a0bcd1;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0.5rem;
+}
+.close-btn:hover {
+  color: white;
+}
+
+.intro-card h1 {
+  margin-bottom: 1.2rem;
+  font-size: clamp(1.5rem, 5vw, 2.2rem); /* Responsive font size */
+  font-weight: bold;
+}
+
+.intro-text {
+  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+  line-height: 1.6;
+  margin-bottom: 1.8rem;
+  color: #e0e7ef;
+}
+
+.grid-box {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Responsive columns */
+  gap: 12px;
+  max-height: 280px; /* Aumentado un poco */
+  overflow-y: auto;
+  margin-bottom: 1.8rem; /* Más espacio */
+  padding-right: 5px; /* Espacio para scrollbar */
+}
+
+.grid-item {
+  background: #2a4a68; /* Color base para no seleccionados */
+  border: 1px solid #4b7294;
+  color: #e0e7ef;
+  border-radius: 6px;
+  padding: 0.9rem 0.6rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  text-align: left;
+}
+.grid-item:hover {
+  background-color: #3e6081;
+  border-color: #608cb0;
+}
+.grid-item.selected {
+  background: #007bff; /* Un azul más brillante para selección */
+  color: white;
+  border-color: #0056b3;
+}
+
+.wizard-nav {
+  display: flex;
+  justify-content: space-between; /* Para alinear botones a los extremos si hay dos */
+  align-items: center;
+  margin-top: 1rem;
+}
+.wizard-nav .prev-btn {
+  margin-right: auto; /* Empuja el botón prev a la izquierda */
+}
+.wizard-nav .next-btn {
+  margin-left: auto; /* Empuja el botón next a la derecha */
+}
+
+.nav-btn, .primary-btn, .intro-btn {
+  border: none;
+  border-radius: 6px;
+  padding: 0.7rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.25s ease, opacity 0.25s ease;
+  font-weight: 500;
+}
+
+.nav-btn { /* Para botones como la flecha */
+  background: transparent;
+  color: #a0bcd1;
+  font-size: 1.3rem; /* Más grande para íconos de flecha */
+  padding: 0.5rem 1rem;
+}
+.nav-btn:hover {
+  color: white;
+}
+
+.primary-btn, .intro-btn {
+  background: #007bff;
+  color: white;
+}
+.primary-btn:not([disabled]):hover, .intro-btn:hover {
+  background: #0056b3;
+}
+.primary-btn[disabled] {
+  background-color: #4a657e;
+  opacity: 0.7;
+  cursor: not-allowed;
+}

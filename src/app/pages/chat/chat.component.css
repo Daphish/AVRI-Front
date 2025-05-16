@@ -1,197 +1,98 @@
-/* Container border and layout */
-.right {
-  border: solid #0056A3 1px;
-  border-radius: 8px;
+.profile-container {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  height: 100%;
-  width: 100%;
-  position: relative;
-  justify-content: end;
-}
-
-.invisible { display: none; }
-
-/* Ya no usamos .chat-container-space para scroll */
-/* En su lugar, el contenedor .messages manejará el overflow */
-
-/* Inner chat column */
-.chat-container {
-  height: 100%;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-/* ============================= */
-/* Mensajes: ocupa el espacio   */
-/* restante y hace scroll sólo   */
-/* dentro de este contenedor     */
-/* ============================= */
-.messages {
-  flex: 1 1 auto;   /* crece y ocupa todo el espacio disponible */
-  min-height: 0;     /* necesario para contenido flex overflow */
-  overflow-y: auto;  /* scroll interno sólo si sobrepasa */
-}
-
-/* Personalización opcional de scrollbar */
-.messages::-webkit-scrollbar {
-  width: 8px;
-}
-.messages::-webkit-scrollbar-track {
-  background: #dddddd;
-  border-radius: 4px;
-}
-.messages::-webkit-scrollbar-thumb {
-  background: #607890;
-  border-radius: 4px;
-}
-.messages::-webkit-scrollbar-thumb:hover {
-  background: #425263;
-}
-
-/* Columnas internas */
-.column {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-/* Bienvenida */
-.welcome-block {
-  text-align: center;
+  gap: 2rem;
   padding: 2rem;
-}
-.welcome-title, .welcome-body {
-  color: #21405F;
-}
-.welcome-title {
-  font-weight: bold;
-  font-size: 3rem;
-}
-.welcome-img {
-  width: 10rem;
-  height: auto;
-  margin: 1rem 0;
-}
-.welcome-body {
-  margin-top: 10px;
-  font-size: 1.5rem;
+  font-family: 'Inter', sans-serif;
 }
 
-/* Burbujas de mensaje */
-.message-user,
-.message-system {
-  margin: 5px 0;
-  border-radius: 5px;
-  word-break: break-word;
-  max-width: 80%;
+/* ---------------- columna izquierda ---------------- */
+.column-left {
   display: flex;
-  padding: 10px;
+  flex-direction: column;
+  align-items: center;
 }
-.message-user {
-  align-self: flex-end;
-  background-color: #B6C8D9;
-}
-.message-system {
+
+/* botón regresar */
+.back-button {
   align-self: flex-start;
-  background-color: #EDEDED;
-}
-
-/* Avatar del sistema */
-.system-avatar-container {
-  width: 1.5rem;
-  margin-right: 10px;
-}
-.system-avatar {
-  width: 1.5rem;
-  height: auto;
-}
-
-/* Área de entrada */
-.chat-input {
-  height: 7%;
-  width: 100%;
-  border-radius: 20px;
-  background-color: #D9D9D9;
-  margin: 10px 0 30px;
-  border: 1px solid #0056A3;
   display: flex;
-  justify-content: space-between;
-  padding: 5px 10px;
-}
-.chat-input-box {
-  flex: 1;
-  border-radius: 20px;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  color: #0056A3;
   border: none;
-  background-color: #D9D9D9;
-  padding: 0 1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  transition: color 0.25s ease;
 }
-.chat-input-box:focus {
-  outline: none;
-}
-.chat-send-button {
-  background-color: #21405F;
+.back-button:hover   { color: #21405F; }
+.back-button i       { font-size: 1rem; }
+
+/* avatar */
+.avatar-circle {
+  width: 8rem;
+  height: 8rem;
   border-radius: 50%;
-  aspect-ratio: 1;
+  background-color: #2596BE;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 1rem;
+}
+
+/* editar foto */
+.edit-photo-container {
+  margin-bottom: 1rem;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  border: 1px solid #21405F;
+  background-color: #fff;
   cursor: pointer;
-  transition: all 0.3s ease;
-}
-.chat-send-button:hover {
-  background-color: #2a527a;
-}
-.chat-send-button i {
-  color: white;
-  font-size: 1.2rem;
-}
-
-/* Estrellas de valoración */
-.rating-container {
+  border-radius: 4px;
   display: flex;
-  gap: 5px;
-  margin-left: 1.5rem;
-  padding-left: 10px;
-}
-.rating-container span {
-  font-size: 24px;
-  color: gray;
-  transition: color 0.2s;
-}
-.rating-container span.filled {
-  color: gold;
+  align-items: center;
 }
 
-/* ============================= */
-/* Mini-referencias bajo mensajes */
-/* ============================= */
-.message-references {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin: 4px 0 0 1.5rem; /* separa un poco de la burbuja y alínea con el texto */
-}
-
-.ref-badge {
-  background-color: #f0f0f0;
-  color: #555;
-  font-size: 0.75rem;       /* más pequeño que el texto principal */
-  padding: 2px 6px;
-  border-radius: 3px;
-  white-space: nowrap;
+/* logout */
+.logout-button {
+  margin-top: 1rem;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  background-color: #0056A3;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.3s ease;
+}
+.logout-button:hover { background-color: #21405F; }
+
+/* ---------------- columna derecha ---------------- */
+.column { flex: 1; }
+
+.row-container { display: flex; gap: 2rem; }
+.row-child     { flex: 1; }
+
+.title-tag {
+  font-weight: bold;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
 }
 
-.ref-badge:hover {
-  background-color: #e0e0e0;
+/* botones “Configurar/Reconfigurar” */
+.see-more-button {
+  margin-top: 0.5rem;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  background-color: #D9D9D9;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.25s;
 }
-
-.see-more-button.active {
-  background-color: #4caf50;
-  color: white;
-}
-
+.see-more-button:hover { background-color: #c3c3c3; }

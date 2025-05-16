@@ -1,14 +1,72 @@
 <div class="chat-container">
-  <div class="messages" #msgContainer>
+  <!-- ====================== overlay wizard ====================== -->
+  <div *ngIf="showWizard" class="wizard-overlay">
+    <div class="wizard-card">
+      <!-- barra superior -->
+      <div class="wizard-header">
+        <span>Conócenos</span>
+        <i class="bi bi-x-lg close-ico" (click)="closeWizard()"></i>
+      </div>
 
-    <!-- Bienvenida -->
-    <div *ngIf="messages.length === 0" class="column welcome-block">
+      <!-- paso 0 : intro -->
+      <ng-container *ngIf="step===0">
+        <h2 class="wizard-title">¡Bienvenido!</h2>
+        <p class="wizard-intro">
+          Queremos personalizar tus recomendaciones.<br />
+          Sólo responde tres preguntas rápidas.
+        </p>
+        <button class="wizard-btn" (click)="next()">Comenzar</button>
+      </ng-container>
+
+      <!-- paso 1-2-3 : listas -->
+      <ng-container *ngIf="step>0">
+        <h3 class="wizard-title">
+          {{
+            step===1 ? 'Selecciona 5 temas de interés'
+                     : step===2 ? 'Selecciona 5 palabras clave'
+                                : 'Elige documentos que te interesen'
+          }}
+        </h3>
+
+        <div class="options-grid" [class.single-col]="step===3">
+          <button
+            *ngFor="let opt of currentList()"
+            (click)="toggle(opt)"
+            [ngClass]="{selected: opt.selected}"
+            [title]="opt.label"
+          >
+            {{ opt.label }}
+          </button>
+        </div>
+
+        <div class="wizard-nav">
+          <button (click)="prev()" [disabled]="step===1">&laquo;</button>
+          <span>{{ step }}/3</span>
+          <button
+            (click)="next()"
+            [disabled]="!canContinue()"
+          >
+            {{ step<3 ? '&raquo;' : 'Guardar' }}
+          </button>
+        </div>
+
+        <div *ngIf="savingPrefs" class="saving-msg">
+          Guardando preferencias…
+        </div>
+      </ng-container>
+    </div>
+  </div>
+
+  <!-- ====================== área de mensajes ===================== -->
+  <div class="messages" #msgContainer>
+    <!-- bienvenida -->
+    <div *ngIf="messages.length===0 && !showWizard" class="column welcome-block">
       <div class="welcome-title">¡Bienvenido!</div>
       <img class="welcome-img" src="/Logo-AVRI.png" alt="logo AVRI" />
       <div class="welcome-body">¿Cómo puedo ayudar hoy?</div>
     </div>
 
-    <!-- Mensajes + mini-referencias -->
+    <!-- historial -->
     <ng-container *ngFor="let m of messages">
       <div class="column">
         <div
@@ -16,12 +74,11 @@
           [ngClass]="m.fromUser ? 'message-user' : 'message-system'"
         >
           <div *ngIf="!m.fromUser" class="system-avatar-container">
-            <img src="/Logo-AVRI.png" class="system-avatar" alt="avatar sistema" />
+            <img src="/Logo-AVRI.png" class="system-avatar" alt="avatar" />
           </div>
           <div class="message-text">{{ m.text }}</div>
         </div>
 
-        <!-- Mini-referencias -->
         <div
           *ngIf="!m.fromUser && m.references?.length"
           class="message-references"
@@ -36,10 +93,9 @@
         </div>
       </div>
     </ng-container>
-
   </div>
 
-  <!-- Input -->
+  <!-- ======================== input ============================== -->
   <div class="chat-input">
     <input
       class="chat-input-box"
