@@ -1,5 +1,5 @@
-import { NgClass, NgFor, NgIf} from '@angular/common';
-import { Component } from '@angular/core';
+import { NgClass, NgFor, NgIf } from '@angular/common';
+import { Component, OnInit } from '@angular/core'; // Agregado OnInit
 import { Document } from '../../interfaces/document.interface';
 import { RecommendationService } from '../../services/recommendation.service';
 
@@ -10,39 +10,52 @@ import { RecommendationService } from '../../services/recommendation.service';
   templateUrl: './recommendations.component.html',
   styleUrl: './recommendations.component.css'
 })
-export class RecommendationsComponent {
+export class RecommendationsComponent implements OnInit { // Implementado OnInit
   recommendedDocs: Document[] = [
     {
-      id: 0,
-      title: 'Primer documento',
-      repository_uri: 'blablabla',
+      id: 'rec-doc-0', // CORREGIDO: id como string
+      title: 'Primer documento recomendado',
+      repository_uri: 'uri/doc0',
+      repository_id: 'repo-id-0', // AÑADIDO: repository_id
       status: 'L',
     },
     {
-      id: 1,
-      title: 'Segundo documento',
-      repository_uri: 'blablabla',
+      id: 'rec-doc-1', // CORREGIDO: id como string
+      title: 'Segundo documento recomendado',
+      repository_uri: 'uri/doc1',
+      repository_id: 'repo-id-1', // AÑADIDO: repository_id
       status: 'R',
     },
     {
-      id: 0,
-      title: 'Primer documento',
-      repository_uri: 'blablabla',
+      id: 'rec-doc-2', // CORREGIDO: id como string (ID único)
+      title: 'Tercer documento', // Título único
+      repository_uri: 'uri/doc2',
+      repository_id: 'repo-id-2', // AÑADIDO: repository_id
       status: 'E',
     },
     {
-      id: 1,
-      title: 'Segundo documento',
-      repository_uri: 'blablabla',
+      id: 'rec-doc-3', // CORREGIDO: id como string (ID único)
+      title: 'Cuarto documento', // Título único
+      repository_uri: 'uri/doc3',
+      repository_id: 'repo-id-3', // AÑADIDO: repository_id
       status: 'L',
     },
-  ]
+  ];
 
   constructor(private recommendationService: RecommendationService) {}
 
-  ngOninit() {
-    /* this.recommendationService.getDocuments().subscribe(documents => {
-      this.recommendedDocs = documents;
-    }); */
+  // ngOninit -> debe ser ngOnInit (camelCase)
+  ngOnInit(): void { // CORREGIDO: nombre del método y tipo de retorno
+    // Descomenta y ajusta esto si es necesario
+    /*
+    this.recommendationService.getDocuments().subscribe(documents => {
+      if (documents && documents.length > 0) {
+        this.recommendedDocs = documents;
+      } else {
+        // Opcional: Mantener los datos de ejemplo o mostrar mensaje si no hay recomendaciones
+        console.log('No se recibieron documentos recomendados del servicio.');
+      }
+    });
+    */
   }
 }

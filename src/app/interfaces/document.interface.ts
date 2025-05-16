@@ -11,7 +11,7 @@ export interface Document {
   /** URI del repositorio donde está alojado */
   repository_uri: string;
   /** ID externa del documento dentro del repositorio institucional */
-  repository_id: string;
+  repository_id: string; // Esta propiedad es requerida
   /** Estado: L = Libre, R = Restringido, E = Embargado */
   status: 'L' | 'R' | 'E';
 }
@@ -47,7 +47,7 @@ export interface RepositoryDocument extends Document {
  */
 export interface SavedDocument {
   /** Identificador del registro de guardado */
-  id: number;
+  id: number; // ID del registro de guardado, no del documento
   /** El documento guardado */
   document: DocumentDetail;
   /** Fecha en que el usuario guardó el documento */
@@ -59,7 +59,7 @@ export interface SavedDocument {
  */
 export interface AuthoredDocument {
   /** Identificador del registro de autoría */
-  id: number;
+  id: number; // ID del registro de autoría, no del documento
   /** El documento autorado */
   document: DocumentDetail;
   /** Fecha en que se añadió la autoría */
