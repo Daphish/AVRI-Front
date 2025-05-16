@@ -1,52 +1,62 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil, filter } from 'rxjs';
-import { DocumentService } from '../../services/document.service';
 
-import { RepositoryDocument } from '../../interfaces/document.interface';
+import {
+  DocumentService,
+  DocumentDetail,
+} from '../../services/document.service';
 
 @Component({
-  selector: 'app-document-view',
-  standalone: true,
-  imports: [CommonModule],
+  standalone : true,
+  selector   : 'app-document-view',
   templateUrl: './document-view.component.html',
-  styleUrl: './document-view.component.css'
+  styleUrl   : './document-view.component.css',
+  imports    : [CommonModule],
 })
 export class DocumentViewComponent implements OnInit, OnDestroy {
-  private documentId$$ = new Subject<string>();
 
-  loading = false;
+  document: DocumentDetail | null = null;
+  loading  = false;
   error: string | null = null;
-  document: RepositoryDocument | null = null;
+
+  saved   = false;
+  claimed = false;
 
   private destroy$ = new Subject<void>();
 
-  constructor(private documentService: DocumentService) {}
+  constructor(private docs: DocumentService) {}
 
+  /* ---------------- ciclo de vida ---------------- */
   ngOnInit(): void {
-    // Subscribe to repository document changes
-    this.documentService.repoDocument$
+
+    /* Detalle reactivo */
+    this.docs.document$
       .pipe(takeUntil(this.destroy$))
       .subscribe(doc => {
         this.document = doc;
-        this.loading = false;
+        this.loading  = false;
       });
 
-    this.documentService.currentDocumentId$
+    /* Id que llega desde el chat */
+    this.docs.currentDocumentId$
       .pipe(
         takeUntil(this.destroy$),
         filter(id => !!id)
       )
       .subscribe(id => {
         this.loading = true;
-        this.error = null;
-        this.documentService.loadRepoDocument(id);
+        this.error   = null;
+        this.docs.loadDocument(id!);       // ← nombre correcto
       });
   }
 
-  setDocumentId(id: string): void {
-    this.documentId$$.next(id);
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
+
+  /* ---------------- acciones UI ---------------- */
 
   viewInRepository(): void {
     if (this.document?.repository_uri) {
@@ -54,62 +64,39 @@ export class DocumentViewComponent implements OnInit, OnDestroy {
     }
   }
 
-  saveDocument(): void {
-    if (this.document?.id) {
-      this.documentService.saveDocument(this.document.id)
-        .subscribe({
-          error: err => console.error('Error saving document:', err)
-        });
-    }
-  }
+  toggleSave(): void {
+    if (!this.document) return;
 
-  unsaveDocument(): void {
-    if (this.document?.id) {
-      this.documentService.removeSavedDocument(this.document.id)
-    }
-  }
+    const id = this.document.id;
 
-  claimAsAuthor(): void {
-    if (this.document?.id) {
-      this.documentService.addAuthoredDocument(this.document.id)
-        .subscribe({
-          error: err => console.error('Error claiming as author:', err)
-        });
-    }
-  }
-
-  unclaimAsAuthor(): void {
-    if (this.document?.id) {
-      this.documentService.removeAuthoredDocument(this.document.id)
-    }
-  }
-
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-    this.documentId$$.complete();
-  }
-
-  saved = false;
-  claimed = false;
-
-  toggleSave() {
     if (this.saved) {
-      this.saveDocument();
+      this.docs.removeSaved(id).subscribe({
+        next : ()   => (this.saved = false),
+        error: (e) => console.error('Error unsaving:', e),
+      });
     } else {
-      this.unsaveDocument();
+      this.docs.saveDocument(id).subscribe({
+        next : ()   => (this.saved = true),
+        error: (e) => console.error('Error saving:', e),
+      });
     }
-    this.saved = !this.saved;
   }
 
-  toggleClaim() {
-    if (!this.claimed) {
-      this.claimAsAuthor();
-    } else {
-      this.unclaimAsAuthor();
-    }
-    this.claimed = !this.claimed;
-  }
+  toggleClaim(): void {
+    if (!this.document) return;
 
+    const id = this.document.id;
+
+    if (this.claimed) {
+      this.docs.unclaimDocument(id).subscribe({
+        next : ()   => (this.claimed = false),
+        error: (e) => console.error('Error un-claiming:', e),
+      });
+    } else {
+      this.docs.claimDocument(id).subscribe({
+        next : ()   => (this.claimed = true),
+        error: (e) => console.error('Error claiming:', e),
+      });
+    }
+  }
 }

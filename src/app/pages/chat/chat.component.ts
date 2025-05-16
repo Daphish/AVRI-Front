@@ -1,127 +1,101 @@
 import {
-  Component, OnInit, ViewChild, ElementRef
+  Component,
+  OnInit,
+  ViewChild,
+  ElementRef,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { NgFor, NgIf, NgClass } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { ChatService } from '../../services/chat.service';
-import { Message }     from '../../interfaces/chat.interface';
+import { DocumentService } from '../../services/document.service';
+import { Message } from '../../interfaces/chat.interface';
 
-interface SelectOption { label: string; selected: boolean; }
+/* ---------------- modelo de opción del wizard ---------------- */
+interface SelectOption {
+  label: string;
+  selected: boolean;
+}
 
 @Component({
-  selector   : 'app-chat',
   standalone : true,
-  imports    : [FormsModule, NgIf, NgFor, NgClass],
+  selector   : 'app-chat',
   templateUrl: './chat.component.html',
-  styleUrls  : ['./chat.component.css']
+  styleUrls  : ['./chat.component.css'],
+  imports    : [NgIf, NgFor, NgClass, FormsModule],
 })
 export class ChatComponent implements OnInit {
+  /* ---------- inyección ---------- */
+  constructor(
+    private chatService: ChatService,
+    private docService : DocumentService,
+    private router     : Router,
+  ) {}
 
-  /* --------------------------- chat core --------------------------- */
+  /* ---------- refs DOM ---------- */
   @ViewChild('msgContainer') private msgContainer!: ElementRef<HTMLDivElement>;
 
-  sessionId = '';
+  /* ---------- estado chat ---------- */
+  sessionId  = '';
   messages: Message[] = [];
   newText   = '';
   isSending = false;
 
-  /* -------------------- cuestionario (wizard) ---------------------- */
-  showWizard = false;       // overlay visible
-  step       = 0;           // 0-intro | 1-topics | 2-keywords | 3-docs
-  readonly maxSelect = 5;
+  /* ---------- estado wizard ---------- */
+  showWizard   = false;
+  step         = 0;   // 0:intro, 1:temas, 2:keywords, 3:documentos
+  savingPrefs  = false;
 
-  topics:    SelectOption[] = [
-    'Química','Ciencias sociales','Ingeniería','Derecho','Medicina','Arquitectura',
-    'Biología','Filosofía','Matemáticas','Economía','Arte','Computación'
-  ].map(l => ({ label: l, selected: false }));
+  topics: SelectOption[] = [
+    'Ingeniería', 'Ciencias Sociales', 'Química', 'Biología',
+    'Derecho', 'Física', 'Matemáticas', 'Medicina',
+    'Artes', 'Economía', 'Educación', 'Historia',
+  ].map(label => ({ label, selected: false }));
 
-  keywords:  SelectOption[] = [
-    'Antropología','Sociología','Historia','Psicología','Cultura','Diversidad',
-    'Física','Algoritmos','Ecología','Ética','Innovación','Neurociencia',
-    'Energía','Política','Estadística','Globalización'
-  ].map(l => ({ label: l, selected: false }));
+  keywords: SelectOption[] = [
+    'Minería de datos', 'Inteligencia Artificial', 'Derechos Humanos',
+    'Energías Renovables', 'Cambio Climático', 'Big Data',
+    'Robótica', 'Nanotecnología', 'Política Pública', 'Emprendimiento',
+    'Salud Pública', 'Blockchain', 'Bioinformática', 'Ciberseguridad',
+  ].map(label => ({ label, selected: false }));
 
   documents: SelectOption[] = [
-    'Análisis sociológico…','Estudio de los factores…','Participación ciudadana…',
-    'El rol de los medios…','Derechos humanos…','Cambio social y…',
-    'Impacto tecnológico…','Desarrollo sostenible…','Avances biomédicos…',
-    'Ingeniería de materiales…'
-  ].map(l => ({ label: l, selected: false }));
+    'Guía rápida de investigación cualitativa',
+    'Fundamentos de termodinámica aplicada',
+    'Introducción a la nanotecnología',
+    'Manual de derecho ambiental mexicano',
+    'Patrones de diseño de software',
+    'Efectos del cambio climático en México',
+    'Dinámicas de grupo en organizaciones',
+    'Algoritmos de aprendizaje automático',
+    'Análisis económico contemporáneo',
+    'Estadística para ciencias sociales',
+  ].map(label => ({ label, selected: false }));
 
-  savingPrefs = false;
-
-  constructor(private chat: ChatService) {}
-
-  /* ======================= ciclo de vida ========================= */
+  /* ---------------- ciclo de vida ---------------- */
   ngOnInit(): void {
-    /* ── cambio de sesión ───────────────────────────────────────── */
-    this.chat.idChat$.subscribe(id => {
+    /* sesión seleccionada */
+    this.chatService.idChat$.subscribe(id => {
       this.sessionId = id;
       this.messages  = [];
-
-      if (this.chat.pendingWizard) {
-        this.chat.pendingWizard = false;   // consume el flag
+      if (this.chatService.pendingWizard) {
+        this.chatService.pendingWizard = false;
         this.resetWizard();
         this.showWizard = true;
       }
     });
 
-    /* ── stream de mensajes ─────────────────────────────────────── */
-    this.chat.messages$.subscribe(msgs => {
+    /* stream de mensajes */
+    this.chatService.messages$.subscribe(msgs => {
       this.messages = msgs;
-      if (msgs.length > 0) this.showWizard = false;   // si ya hay chat, oculta wizard
+      if (msgs.length > 0) this.showWizard = false;
       setTimeout(() => this.scrollBottom(), 0);
     });
   }
 
-  /* ====================== wizard helpers ======================== */
-  currentList(): SelectOption[] {
-    return this.step === 1 ? this.topics
-         : this.step === 2 ? this.keywords
-         : this.documents;
-  }
-
-  toggle(opt: SelectOption): void {
-    const list = this.currentList();
-    if (!opt.selected && list.filter(o => o.selected).length >= this.maxSelect) return;
-    opt.selected = !opt.selected;
-  }
-
-  canContinue(): boolean {
-    return this.step === 0 || this.currentList().some(o => o.selected);
-  }
-
-  next(): void {
-    if (!this.canContinue()) return;
-    if (this.step < 3) { this.step++; }
-    else               { this.finishWizard(); }
-  }
-  prev(): void { if (this.step > 0) this.step--; }
-  closeWizard(): void { this.showWizard = false; }
-
-  finishWizard(): void {
-    const interests = [
-      ...this.topics  .filter(t => t.selected).map(t => t.label),
-      ...this.keywords.filter(k => k.selected).map(k => k.label)
-    ];
-    const docs = this.documents.filter(d => d.selected).map(d => d.label);
-
-    this.savingPrefs = true;
-    this.chat.submitProfile(interests, docs).subscribe({
-      next : () => { this.savingPrefs = false; this.showWizard = false; },
-      error: ()   => { this.savingPrefs = false; this.showWizard = false; }
-    });
-  }
-
-  resetWizard(): void {
-    this.step = 0;
-    [...this.topics, ...this.keywords, ...this.documents]
-      .forEach(o => o.selected = false);
-  }
-
-  /* ======================= chat actions ========================= */
+  /* ================= chat ================= */
   async send(): Promise<void> {
     const text = this.newText.trim();
     if (!text) return;
@@ -130,19 +104,87 @@ export class ChatComponent implements OnInit {
     this.showWizard = false;
 
     if (!this.sessionId) {
-      await firstValueFrom(this.chat.createSession());
+      await firstValueFrom(this.chatService.createSession());
     }
-    this.chat.sendMessage(this.sessionId, text);
+    this.chatService.sendMessage(this.sessionId, text);
 
     this.newText   = '';
     this.isSending = false;
   }
 
   openDocument(id: string): void {
-    console.log('Abrir documento', id);
+    this.docService.setCurrentDocumentId(id);
+    this.router.navigate(['/document']);
   }
 
-  /* ====================== utilidades UI ========================= */
+  /* ================= wizard ================= */
+  closeWizard(): void {
+    this.showWizard = false;
+  }
+
+  toggle(opt: SelectOption): void {
+    opt.selected = !opt.selected;
+  }
+
+  currentList(): SelectOption[] {
+    if (this.step === 1) return this.topics;
+    if (this.step === 2) return this.keywords;
+    return this.documents; // step 3
+  }
+
+  canContinue(): boolean {
+    const sel = this.currentList().filter(o => o.selected).length;
+    return this.step === 3 ? sel > 0 : sel >= 5;
+  }
+
+  next(): void {
+    if (this.step === 0) { this.step = 1; return; }
+
+    if (this.step < 3) {
+      if (!this.canContinue()) return;
+      this.step++;
+      return;
+    }
+
+    /* step === 3 -> Guardar preferencias */
+    if (!this.canContinue()) return;
+    this.finishWizard();
+  }
+
+  prev(): void { if (this.step > 1) this.step--; }
+
+  finishWizard(): void {
+    this.savingPrefs = true;
+
+    const interests = [
+      ...this.topics  .filter(o => o.selected).map(o => o.label),
+      ...this.keywords.filter(o => o.selected).map(o => o.label),
+    ];
+    const docTitles = this.documents.filter(o => o.selected).map(o => o.label);
+
+    this.chatService.submitProfile(interests, docTitles).subscribe({
+      next: () => {
+        this.savingPrefs = false;
+        this.showWizard  = false;
+      },
+      error: err => {
+        console.error(err);
+        this.savingPrefs = false;
+        alert('No se pudo guardar el perfil.');
+      },
+    });
+  }
+
+  resetWizard(): void {
+    [...this.topics, ...this.keywords, ...this.documents]
+      .forEach(o => (o.selected = false));
+    this.step = 0;
+    this.savingPrefs = false;
+  }
+
+  /* ---------------- utilidades ---------------- */
+  trackByIndex(i: number) { return i; }
+
   private scrollBottom(): void {
     try {
       const el = this.msgContainer.nativeElement;
