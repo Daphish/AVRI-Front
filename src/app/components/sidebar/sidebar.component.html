@@ -1,7 +1,6 @@
 <div class="left">
   <div class="top-left">
-    <img src="/Logo-AVRI-Alt.png" />
-    <div class="left-title">Asistente Virtual RI</div>
+    <img src="/Logo-AVRI-Alt.png" alt="Logo AVRI" /> <div class="left-title">Asistente Virtual RI</div>
   </div>
 
   <button class="new-chat-button" (click)="viewHome()">
@@ -9,36 +8,50 @@
   </button>
 
   <div class="left-chats">
-    <div
-      [ngClass]="{ 'no-chats-message': chats.length === 0, invisible: chats.length !== 0 }"
-    >
-      Aún no hay conversaciones
-    </div>
-    <div
-      *ngFor="let chat of chats"
-      class="sidebar-chat"
-      (click)="loadMessages(chat.session_id)"
-    >
-      <i class="bi bi-chat-left" style="font-size:1rem; margin-right:5px;"></i>
-      {{ chat.session_name }}
-    </div>
+    <ng-container *ngIf="chats$ | async as chatList">
+      <div
+        *ngIf="!chatList || chatList.length === 0"
+        class="no-chats-message"
+      >
+        Aún no hay conversaciones
+      </div>
+      <div
+        *ngFor="let chat of chatList"
+        class="sidebar-chat"
+        (click)="loadMessages(chat.session_id)"
+        tabindex="0" (keyup.enter)="loadMessages(chat.session_id)" role="button"
+        [attr.aria-label]="'Cargar chat: ' + chat.session_name"
+      >
+        <i class="bi bi-chat-left" style="font-size:1rem; margin-right:5px;"></i>
+        {{ chat.session_name }}
+      </div>
+    </ng-container>
   </div>
 
-  <div class="left-login">
+  <div class="left-login" *ngIf="isLoggedIn$ | async as isLoggedInVal">
     <button
-      [ngClass]="{ 'login-button': !isLoggedIn, invisible: isLoggedIn }"
+      *ngIf="!isLoggedInVal"
+      class="login-button"
       (click)="openModal()"
     >
       Iniciar sesión
     </button>
     <button
-      [ngClass]="{ 'account-button': isLoggedIn, invisible: !isLoggedIn }"
+      *ngIf="isLoggedInVal"
+      class="account-button"
       (click)="viewProfile()"
     >
       <div class="account-circle">
-        {{ currentUserName.charAt(0) }}
+        {{ (currentUserInitial$ | async) | uppercase }}
       </div>
-      {{ currentUserName }}
+      {{ currentUserName$ | async }}
+    </button>
+  </div>
+  <div class="left-login" *ngIf="!(isLoggedIn$ | async)"> <button
+      class="login-button"
+      (click)="openModal()"
+    >
+      Iniciar sesión
     </button>
   </div>
 </div>
