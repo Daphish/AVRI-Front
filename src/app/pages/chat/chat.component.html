@@ -76,7 +76,18 @@
           <div *ngIf="!m.fromUser" class="system-avatar-container">
             <img src="/Logo-AVRI.png" class="system-avatar" alt="avatar" />
           </div>
-          <div class="message-text">{{ m.text }}</div>
+          <div class="message-text">
+            <!-- burbuja normal -->
+            <ng-container *ngIf="!m.isLoading; else typingDots">
+              {{ m.text }}
+            </ng-container>
+
+            <!-- burbuja “escribiendo…” -->
+            <ng-template #typingDots>
+              <span class="dot" *ngFor="let d of [1,2,3]; let i = index"
+                    [style.animationDelay]="i * 0.2 + 's'">.</span>
+            </ng-template>
+          </div>
         </div>
 
         <div
