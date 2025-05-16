@@ -144,3 +144,83 @@
 .sidebar-chat:hover {
     background-color: #e2e2e2;
 }
+/* contenedor lateral */
+.left{
+  height:100%;
+  width:300px;
+  background:#B6C8D9;
+  border:1px solid #0056A3;
+  border-radius:8px;
+  margin-right:25px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+/* cabecera */
+.top-left{
+  display:flex;align-items:center;
+  background:#0056A3;padding:1rem;width:100%;
+  border-top-left-radius:8px;border-top-right-radius:8px;
+}
+.left-title{color:#fff;margin-left:1rem;}
+
+/* botón nuevo chat */
+.new-chat-button{
+  border-radius:20px;background:#fff;border:1px solid #21405F;
+  padding:10px;margin-top:10px;cursor:pointer;transition:.3s;
+}
+.new-chat-button:hover{background:#e2e2e2;}
+
+/* listado con scroll */
+.left-chats{
+  flex:1 1 auto;min-height:0;
+  overflow-y:auto;overflow-x:hidden;
+  width:100%;padding:5px 10px;margin-top:10px;
+}
+.left-chats::-webkit-scrollbar{width:8px;}
+.left-chats::-webkit-scrollbar-track{background:#dddd;border-radius:4px;}
+.left-chats::-webkit-scrollbar-thumb{background:#607890;border-radius:4px;}
+.left-chats::-webkit-scrollbar-thumb:hover{background:#425263;}
+
+/* fila de chat */
+.sidebar-chat{
+  display:flex;justify-content:space-between;align-items:center;
+  width:100%;padding:5px;cursor:pointer;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  transition:.2s;
+}
+.sidebar-chat:hover{background:#e2e2e2;}
+.chat-name{overflow:hidden;text-overflow:ellipsis;}
+
+/* icono borrar */
+.delete-icon{
+  font-size:0.9rem;color:#b02121;opacity:0;
+  transition:opacity .2s;
+}
+.sidebar-chat:hover .delete-icon{opacity:1;}
+.delete-icon:hover{color:#7d0000;}
+
+/* bloque login / cuenta */
+.left-login{width:100%;padding:10px;}
+.login-button,.account-button{
+  width:100%;border:none;cursor:pointer;transition:.3s;
+  color:#fff;font-size:1rem;
+}
+/* login */
+.login-button{
+  background:#0056A3;font-weight:bold;border-radius:20px;padding:10px;
+}
+.login-button:hover{background:#36699c;}
+/* cuenta */
+.account-button{
+  background:#607890;display:flex;align-items:center;gap:5px;height:40px;
+}
+.account-button:hover{background:#6f8ba7;}
+.account-circle{
+  border-radius:50%;height:80%;aspect-ratio:1;
+  background:#2596BE;display:flex;justify-content:center;align-items:center;
+}
+
+/* mensaje sin chats */
+.no-chats-message{text-align:center;width:100%;color:#21405F;}

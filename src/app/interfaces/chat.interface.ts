@@ -13,8 +13,12 @@ export interface ReferenceChunk {
 export interface Message {
   fromUser: boolean;
   text: string;
-  // Nuevo campo para las referencias
+
+  /** Referencias únicas extraídas de `reference.chunks` */
   references?: ReferenceChunk[];
+
+  /** Burbuja en modo “escribiendo…” */
+  isLoading?: boolean;
 }
 
 export interface Chat {
@@ -23,14 +27,13 @@ export interface Chat {
   user: number;
 }
 
-// Extendemos RawMessage para capturar el objeto 'reference' del /ask/
+/* RawMessage viene tal cual del backend /ask/ */
 export interface RawMessage {
-  answer?:   string;
-  content?:  string;
-  text?:     string;
-  query?:    string;
+  answer?:  string;
+  content?: string;
+  text?:    string;
+  query?:   string;
   from_user: boolean;
-  // Nuevo: para respuestas de /ask/
   reference?: {
     chunks: ReferenceChunk[];
     doc_aggs: any[];
