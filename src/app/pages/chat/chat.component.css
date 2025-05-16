@@ -1,98 +1,126 @@
-.profile-container {
-  display: flex;
-  gap: 2rem;
-  padding: 2rem;
-  font-family: 'Inter', sans-serif;
+/* ---------- layout general del chat ---------- */
+.chat-container{
+  height:100%;
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+  background:#ffffff;          /* ← fondo blanco, no azul-gris */
 }
 
-/* ---------------- columna izquierda ---------------- */
-.column-left {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+/* ---------- área de mensajes ---------- */
+.messages{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  padding:1rem 0.5rem;
 }
+.messages::-webkit-scrollbar{width:8px;}
+.messages::-webkit-scrollbar-track{background:#e4e8ed;border-radius:4px;}
+.messages::-webkit-scrollbar-thumb{background:#7789a0;border-radius:4px;}
+.messages::-webkit-scrollbar-thumb:hover{background:#5a6d84;}
 
-/* botón regresar */
-.back-button {
-  align-self: flex-start;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: transparent;
-  color: #0056A3;
-  border: none;
-  font-size: 0.9rem;
-  cursor: pointer;
-  margin-bottom: 1rem;
-  transition: color 0.25s ease;
+/* ----- columna contenedora de cada mensaje ----- */
+.column{display:flex;flex-direction:column;align-items:flex-start;}
+
+/* bienvenida ---------------------------------------------------- */
+.welcome-block{width:100%;display:flex;flex-direction:column;align-items:center;}
+.welcome-title{font-size:2rem;font-weight:700;color:#21405F;margin-top:1.2rem;}
+.welcome-img{width:8rem;margin:1rem 0;}
+.welcome-body{font-size:1.25rem;color:#21405F;}
+
+/* ----- burbujas ------------------------------------------------ */
+.message-bubble{
+  display:flex;align-items:flex-start;
+  max-width:80%;margin:4px 0;padding:10px;line-height:1.35;
+  border-radius:10px;word-break:break-word;
 }
-.back-button:hover   { color: #21405F; }
-.back-button i       { font-size: 1rem; }
+.message-user  {align-self:flex-end;  background:#B6C8D9;color:#002850;}
+.message-system{align-self:flex-start;background:#EDEDED;color:#111;}
 
-/* avatar */
-.avatar-circle {
-  width: 8rem;
-  height: 8rem;
-  border-radius: 50%;
-  background-color: #2596BE;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 1rem;
+.system-avatar-container{width:1.6rem;margin-right:8px;}
+.system-avatar{width:1.6rem;height:auto;}
+.message-text{white-space:pre-line;}
+
+/* mini-referencias ---------------------------------------------- */
+.message-references{
+  display:flex;flex-wrap:wrap;gap:4px;margin:2px 0 4px 1.6rem;
 }
-
-/* editar foto */
-.edit-photo-container {
-  margin-bottom: 1rem;
-  padding: 6px 12px;
-  font-size: 0.9rem;
-  border: 1px solid #21405F;
-  background-color: #fff;
-  cursor: pointer;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
+.ref-badge{
+  background:#f0f0f0;color:#555;font-size:0.72rem;
+  padding:2px 6px;border-radius:3px;cursor:pointer;
+  transition:background .2s;
 }
+.ref-badge:hover{background:#e0e0e0;}
 
-/* logout */
-.logout-button {
-  margin-top: 1rem;
-  padding: 8px 16px;
-  font-size: 0.9rem;
-  background-color: #0056A3;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  transition: background-color 0.3s ease;
+/* ---------- input area (estilo original) ----------------------- */
+.chat-input{
+  margin:10px 16px 20px;
+  background:#D9D9D9;
+  border:1px solid #0056A3;
+  border-radius:20px;
+  display:flex;align-items:center;gap:10px;
+  padding:6px 10px;
 }
-.logout-button:hover { background-color: #21405F; }
-
-/* ---------------- columna derecha ---------------- */
-.column { flex: 1; }
-
-.row-container { display: flex; gap: 2rem; }
-.row-child     { flex: 1; }
-
-.title-tag {
-  font-weight: bold;
-  margin-top: 1rem;
-  margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
+.chat-input-box{
+  flex:1;border:none;background:transparent;
+  font-size:1rem;padding:0 1rem;
 }
-
-/* botones “Configurar/Reconfigurar” */
-.see-more-button {
-  margin-top: 0.5rem;
-  padding: 6px 12px;
-  font-size: 0.9rem;
-  background-color: #D9D9D9;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background 0.25s;
+.chat-input-box:focus{outline:none;}
+.chat-send-button{
+  width:38px;height:38px;border-radius:50%;
+  background:#0056A3;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:background .25s;
 }
-.see-more-button:hover { background-color: #c3c3c3; }
+.chat-send-button:hover{background:#21405F;}
+.chat-send-button i{color:#fff;font-size:1.2rem;}
+
+/* ====================== WIZARD OVERLAY ========================= */
+.wizard-overlay{
+  position:absolute;inset:0;z-index:30;
+  background:#00000025;display:flex;justify-content:center;align-items:center;
+  padding:1rem;
+}
+.wizard-card{
+  width:100%;max-width:640px;
+  background:#163a5c;color:#fff;border-radius:10px;
+  box-shadow:0 4px 16px rgba(0,0,0,.35);
+  padding:2rem 1.5rem 2.5rem;display:flex;flex-direction:column;align-items:center;
+}
+/* cabecera */
+.wizard-header{
+  align-self:stretch;display:flex;justify-content:space-between;align-items:center;
+  font-weight:600;font-size:1.05rem;margin-bottom:1rem;
+}
+.close-ico{cursor:pointer;}
+/* títulos y textos */
+.wizard-title{text-align:center;margin:0.4rem 0 1rem;}
+.wizard-intro{text-align:center;margin-bottom:2rem;}
+/* opciones */
+.options-grid{
+  width:100%;display:grid;grid-template-columns:repeat(auto-fill,minmax(8rem,1fr));
+  gap:0.5rem;margin-bottom:1.4rem;
+}
+.options-grid.single-col{grid-template-columns:1fr;}
+.options-grid button{
+  padding:0.55rem 0.4rem;border:1px solid #0056A3;border-radius:6px;
+  background:#fff;color:#21405F;font-weight:500;
+  cursor:pointer;transition:background .2s;
+  text-overflow:ellipsis;overflow:hidden;white-space:nowrap;
+}
+.options-grid button.selected{background:#0056A3;color:#fff;}
+/* navegación */
+.wizard-nav{display:flex;align-items:center;gap:1rem;font-weight:600;margin-top:4px;}
+.wizard-nav button{
+  background:transparent;border:none;color:#fff;font-size:1.35rem;cursor:pointer;
+}
+.wizard-nav button[disabled]{opacity:.35;cursor:not-allowed;}
+/* CTA grande */
+.wizard-btn{
+  background:#0060c0;color:#fff;border:none;border-radius:6px;
+  padding:0.7rem 2.4rem;font-weight:600;font-size:1rem;cursor:pointer;
+  transition:background .25s;
+}
+.wizard-btn:hover{background:#004e9b;}
+/* guardando */
+.saving-msg{margin-top:1rem;font-style:italic;}
