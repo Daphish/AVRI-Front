@@ -5,79 +5,137 @@
       Regresar al chat
     </button>
     <div class="avatar-circle">
-      <i *ngIf="isActuallyAnonymous || !userDisplay" class="bi bi-person-fill" style="color: white; font-size: 6rem;"></i>
-      <span *ngIf="!isActuallyAnonymous && userDisplay" style="color: white; font-size: 4rem; font-weight: bold;">
-        {{ (userDisplay.first_name ? userDisplay.first_name.charAt(0) : (userDisplay.name ? userDisplay.name.charAt(0) : '?')) | uppercase }}
+      <i
+        *ngIf="isActuallyAnonymous || !userDisplay"
+        class="bi bi-person-fill"
+        style="color: white; font-size: 6rem"
+      ></i>
+      <span
+        *ngIf="!isActuallyAnonymous && userDisplay"
+        style="color: white; font-size: 4rem; font-weight: bold"
+      >
+        {{ userDisplay.name.charAt(0) }}
       </span>
     </div>
-    <button class="edit-photo-container" title="Funcionalidad no implementada todavía">
-      <i class="bi bi-camera" style="color: black; font-size: 1rem; margin-right: 5px;"></i>
-      Editar foto de perfil
-    </button>
-
-    <button class="logout-button" (click)="logout()" *ngIf="isUserLoggedInAndNotAnonymous$ | async">
-      <i class="bi bi-box-arrow-right" style="margin-right:5px;"></i>
+    <button class="logout-button" (click)="logout()">
+      <i class="bi bi-box-arrow-right" style="margin-right: 5px"></i>
       Cerrar sesión
     </button>
   </div>
 
   <div *ngIf="!isActuallyAnonymous && userDisplay" class="column">
-    <h1>{{ userDisplay.name || (userDisplay.first_name + ' ' + userDisplay.last_name) }}</h1>
+    <h1>
+      {{ userDisplay.name }} {{ userDisplay.first_name }}
+      {{ userDisplay.last_name }}
+    </h1>
     <div class="row-container">
       <div class="row-child">
         <div class="title-tag">
-          <i class="bi bi-person" style="color: black; font-size: 1.2rem; margin-right: 5px;"></i>
+          <i
+            class="bi bi-person"
+            style="color: black; font-size: 1.2rem; margin-right: 5px"
+          ></i>
           Datos de identificación
         </div>
-        <p>{{ userDisplay.field_of_study || 'No especificado' }}</p>
-        <p>{{ userDisplay.education_level || 'No especificado' }}</p>
+        <p>{{ userDisplay.field_of_study || "No especificado" }}</p>
+        <p>{{ userDisplay.education_level || "No especificado" }}</p>
         <div>
-          <i class="bi bi-envelope" style="color: black; font-size: 1rem; margin-right: 5px;"></i>
+          <i
+            class="bi bi-envelope"
+            style="color: black; font-size: 1rem; margin-right: 5px"
+          ></i>
           {{ userDisplay.email }}
         </div>
 
         <div class="title-tag">
-          <i class="bi bi-heart" style="color: black; font-size: 1rem; margin-right: 5px;"></i>
+          <i
+            class="bi bi-heart"
+            style="color: black; font-size: 1rem; margin-right: 5px"
+          ></i>
           Preferencias
         </div>
-        <p *ngIf="preferences.length === 0 || preferences[0]?.startsWith('Sin ') || preferences[0]?.startsWith('Configura ') || preferences[0]?.startsWith('Error ')">
-          {{ preferences[0] || 'No has configurado preferencias.' }}
+        <p
+          *ngIf="
+            preferences.length === 0 ||
+            preferences[0]?.startsWith('Sin ') ||
+            preferences[0]?.startsWith('Configura ') ||
+            preferences[0]?.startsWith('Error ')
+          "
+        >
+          {{ preferences[0] || "No has configurado preferencias." }}
         </p>
-        <ng-container *ngIf="preferences.length > 0 && !(preferences[0]?.startsWith('Sin ')) && !(preferences[0]?.startsWith('Configura ')) && !(preferences[0]?.startsWith('Error '))">
+        <ng-container
+          *ngIf="
+            preferences.length > 0 &&
+            !preferences[0]?.startsWith('Sin ') &&
+            !preferences[0]?.startsWith('Configura ') &&
+            !preferences[0]?.startsWith('Error ')
+          "
+        >
           <p *ngFor="let preference of preferences">
             {{ preference }}
           </p>
         </ng-container>
 
-        <button class="see-more-button" *ngIf="profileNeedsSetup && !isActuallyAnonymous" (click)="goBack()">
+        <button
+          class="see-more-button"
+          *ngIf="profileNeedsSetup && !isActuallyAnonymous"
+          (click)="goBack()"
+        >
           Configurar Preferencias
         </button>
-        <button class="see-more-button" *ngIf="!profileNeedsSetup && !isActuallyAnonymous" (click)="goBack()">
+        <button
+          class="see-more-button"
+          *ngIf="!profileNeedsSetup && !isActuallyAnonymous"
+          (click)="goBack()"
+        >
           Reconfigurar Preferencias
         </button>
       </div>
 
       <div class="row-child">
         <div class="title-tag">
-          <i class="bi bi-bookmarks" style="color: black; font-size: 1.2rem; margin-right: 5px;"></i>
+          <i
+            class="bi bi-bookmarks"
+            style="color: black; font-size: 1.2rem; margin-right: 5px"
+          ></i>
           Historial / Elementos guardados
         </div>
-        <ng-container *ngIf="documents.length > 0 && documents[0].id !== 'default-doc-placeholder'; else noDocumentsTemplate">
-          <div *ngFor="let item of documents" class="document-item" style="margin-bottom: 0.5em;">
+        <ng-container
+          *ngIf="
+            documents.length > 0 &&
+              documents[0].id !== 'default-doc-placeholder';
+            else noDocumentsTemplate
+          "
+        >
+          <div
+            *ngFor="let item of documents"
+            class="document-item"
+            style="margin-bottom: 0.5em"
+          >
             <strong>{{ item.title }}</strong>
             <br />
             <small *ngIf="item.repository_uri">{{ item.repository_uri }}</small>
           </div>
         </ng-container>
         <ng-template #noDocumentsTemplate>
-          <p>{{ (documents.length > 0 && documents[0]) ? documents[0].title : 'No hay documentos para mostrar.' }}</p>
+          <p>
+            {{
+              documents.length > 0 && documents[0]
+                ? documents[0].title
+                : "No hay documentos para mostrar."
+            }}
+          </p>
         </ng-template>
-        </div>
+      </div>
     </div>
   </div>
 
   <div *ngIf="isActuallyAnonymous" class="column">
     <h1>Usuario Invitado</h1>
-    <p>Inicia sesión para acceder a tu perfil completo y guardar tus preferencias.</p>
-    </div>
+    <p>
+      Inicia sesión para acceder a tu perfil completo y guardar tus
+      preferencias.
+    </p>
+  </div>
 </div>
