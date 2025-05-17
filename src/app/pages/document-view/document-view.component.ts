@@ -8,19 +8,18 @@ import {
 } from '../../services/document.service';
 
 @Component({
-  standalone : true,
-  selector   : 'app-document-view',
+  standalone: true,
+  selector: 'app-document-view',
   templateUrl: './document-view.component.html',
-  styleUrl   : './document-view.component.css',
-  imports    : [CommonModule],
+  styleUrl: './document-view.component.css',
+  imports: [CommonModule],
 })
 export class DocumentViewComponent implements OnInit, OnDestroy {
-
   document: DocumentDetail | null = null;
-  loading  = false;
+  loading = false;
   error: string | null = null;
 
-  saved   = false;
+  saved = false;
   claimed = false;
 
   private destroy$ = new Subject<void>();
@@ -29,25 +28,22 @@ export class DocumentViewComponent implements OnInit, OnDestroy {
 
   /* ---------------- ciclo de vida ---------------- */
   ngOnInit(): void {
-
     /* Detalle reactivo */
-    this.docs.document$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(doc => {
-        this.document = doc;
-        this.loading  = false;
-      });
+    this.docs.document$.pipe(takeUntil(this.destroy$)).subscribe((doc) => {
+      this.document = doc;
+      this.loading = false;
+    });
 
     /* Id que llega desde el chat */
     this.docs.currentDocumentId$
       .pipe(
         takeUntil(this.destroy$),
-        filter(id => !!id)
+        filter((id) => !!id)
       )
-      .subscribe(id => {
+      .subscribe((id) => {
         this.loading = true;
-        this.error   = null;
-        this.docs.loadDocument(id!);       // ← nombre correcto
+        this.error = null;
+        this.docs.loadDocument(id!); // ← nombre correcto
       });
   }
 
@@ -71,12 +67,12 @@ export class DocumentViewComponent implements OnInit, OnDestroy {
 
     if (this.saved) {
       this.docs.removeSaved(id).subscribe({
-        next : ()   => (this.saved = false),
+        next: () => (this.saved = false),
         error: (e) => console.error('Error unsaving:', e),
       });
     } else {
       this.docs.saveDocument(id).subscribe({
-        next : ()   => (this.saved = true),
+        next: () => (this.saved = true),
         error: (e) => console.error('Error saving:', e),
       });
     }
@@ -89,12 +85,12 @@ export class DocumentViewComponent implements OnInit, OnDestroy {
 
     if (this.claimed) {
       this.docs.unclaimDocument(id).subscribe({
-        next : ()   => (this.claimed = false),
+        next: () => (this.claimed = false),
         error: (e) => console.error('Error un-claiming:', e),
       });
     } else {
       this.docs.claimDocument(id).subscribe({
-        next : ()   => (this.claimed = true),
+        next: () => (this.claimed = true),
         error: (e) => console.error('Error claiming:', e),
       });
     }

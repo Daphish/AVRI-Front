@@ -1,25 +1,37 @@
 <div class="modal-overlay">
-    <div class="modal-content">
-        <div class="avatar-circle">
-            <i class="bi bi-person-fill" style="color: white; font-size: 6rem;"></i>
-        </div>
-        <h2>Iniciar Sesión</h2>
-        
-        <label for="email" style="width: 100%;">Correo Electrónico</label>
-        <input type="email" id="email" placeholder="Ejemplo: usuario@email.com"
-               [(ngModel)]="user" (keyup.enter)="startSession()">
-        
-        <label for="password" style="width: 100%;">Contraseña</label>
-        <input type="password" id="password" placeholder="********"
-               [(ngModel)]="password" (keyup.enter)="startSession()">
-
-        <div class="error-message" *ngIf="error">
-            Las credenciales no son correctas
-        </div>
-        
-        <div class="modal-actions">
-            <button class="btn login" (click)="startSession()">Iniciar Sesión</button>
-            <button class="btn guest" (click)="continueAsGuest()">Continuar como invitado</button>
-        </div>
+  <div class="modal-content">
+    <div class="avatar-circle">
+      <i class="bi bi-person-fill" style="color: white; font-size: 6rem"></i>
     </div>
+    <h2>Iniciar Sesión</h2>
+
+    <label for="email" style="width: 100%">Correo Electrónico</label>
+    <input
+      type="email"
+      id="email"
+      placeholder="Ejemplo: usuario@email.com"
+      [(ngModel)]="user"
+      (keyup.enter)="startSession()"
+    />
+
+    <label for="password" style="width: 100%">Contraseña</label>
+    <input
+      type="password"
+      id="password"
+      placeholder="********"
+      [(ngModel)]="password"
+      (keyup.enter)="startSession()"
+    />
+
+    <div class="error-message" *ngIf="error">
+      Las credenciales no son correctas
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn login" (click)="startSession()">Iniciar Sesión</button>
+      <button class="btn guest" (click)="continueAsGuest()">
+        Continuar como invitado
+      </button>
+    </div>
+  </div>
 </div>

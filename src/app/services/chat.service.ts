@@ -34,31 +34,33 @@ export class ChatService {
   loadSessions(): void {
     this.http
       .get<Chat[]>(`${this.BASE_URL}/`)
-      .subscribe(list => this.sessions$$.next(list));
+      .subscribe((list) => this.sessions$$.next(list));
   }
 
   createSession(name = 'Chat sin título'): Observable<Chat> {
-    return this.http.post<Chat>(`${this.BASE_URL}/`, { session_name: name }).pipe(
-      tap(s => {
-        this.sessions$$.next([s, ...this.sessions$$.value]);
-        this.idChat$$.next(s.session_id);
-        this.messages$$.next([]); // sin mensaje automático
-      }),
-    );
+    return this.http
+      .post<Chat>(`${this.BASE_URL}/`, { session_name: name })
+      .pipe(
+        tap((s) => {
+          this.sessions$$.next([s, ...this.sessions$$.value]);
+          this.idChat$$.next(s.session_id);
+          this.messages$$.next([]); // sin mensaje automático
+        })
+      );
   }
 
   deleteSession(id: string): void {
     this.http.delete(`${this.BASE_URL}/${id}/`).subscribe({
       next: () => {
         this.sessions$$.next(
-          this.sessions$$.value.filter(c => c.session_id !== id),
+          this.sessions$$.value.filter((c) => c.session_id !== id)
         );
         if (this.idChat$$.value === id) {
           this.idChat$$.next('');
           this.messages$$.next([]);
         }
       },
-      error: err => console.error('Error al borrar sesión:', err),
+      error: (err) => console.error('Error al borrar sesión:', err),
     });
   }
 
@@ -73,7 +75,7 @@ export class ChatService {
   loadMessages(id: string): void {
     // Reordenar: seleccionado al principio
     const arr = this.sessions$$.value;
-    const idx = arr.findIndex(s => s.session_id === id);
+    const idx = arr.findIndex((s) => s.session_id === id);
     if (idx !== -1) {
       const sel = arr[idx];
       this.sessions$$.next([sel, ...arr.slice(0, idx), ...arr.slice(idx + 1)]);
@@ -85,26 +87,30 @@ export class ChatService {
     this.http
       .get<any>(`${this.BASE_URL}/${id}/`)
       .pipe(
-        map(res =>
+        map((res) =>
           Array.isArray(res?.data) && res.data[0]?.messages
             ? res.data[0].messages
-            : res.messages ?? [],
+            : res.messages ?? []
         ),
         map((list: any[]) =>
-          list.map(m => {
-            const chunks: ReferenceChunk[] = m.reference?.chunks ?? m.reference ?? [];
+          list.map((m) => {
+            const chunks: ReferenceChunk[] =
+              m.reference?.chunks ?? m.reference ?? [];
             const uniqueRefs = chunks.filter(
-              (c, i, a) => a.findIndex(x => x.document_id === c.document_id) === i,
+              (c, i, a) =>
+                a.findIndex((x) => x.document_id === c.document_id) === i
             );
             return {
               fromUser: m.role === 'user',
-              text: (m.content ?? m.answer ?? '').replace(/##\d+\$\$/g, '').trim(),
+              text: (m.content ?? m.answer ?? '')
+                .replace(/##\d+\$\$/g, '')
+                .trim(),
               references: uniqueRefs,
             } as Message;
-          }),
-        ),
+          })
+        )
       )
-      .subscribe(msgs => this.messages$$.next(msgs));
+      .subscribe((msgs) => this.messages$$.next(msgs));
   }
 
   /** Envía texto y agrega burbuja “escribiendo…” */
@@ -119,34 +125,35 @@ export class ChatService {
         query: text,
       })
       .pipe(
-        map(r => r.data),
-        map(raw => {
+        map((r) => r.data),
+        map((raw) => {
           const answer = (raw.answer ?? raw.content ?? '')
             .replace(/##\d+\$\$/g, '')
             .trim();
           const chunks: ReferenceChunk[] = raw.reference?.chunks ?? [];
           const uniqueRefs = chunks.filter(
-            (c, i, a) => a.findIndex(x => x.document_id === c.document_id) === i,
+            (c, i, a) =>
+              a.findIndex((x) => x.document_id === c.document_id) === i
           );
           return {
             fromUser: false,
             text: answer,
             references: uniqueRefs,
           } as Message;
-        }),
+        })
       )
       .subscribe({
-        next: reply => {
+        next: (reply) => {
           const msgs = [...this.messages$$.value];
-          const idx = msgs.findIndex(m => m.isLoading);
+          const idx = msgs.findIndex((m) => m.isLoading);
           if (idx !== -1) msgs[idx] = reply;
           else msgs.push(reply);
           this.messages$$.next(msgs);
         },
-        error: err => {
+        error: (err) => {
           console.error(err);
           this.messages$$.next(
-            this.messages$$.value.filter(m => !m.isLoading),
+            this.messages$$.value.filter((m) => !m.isLoading)
           );
         },
       });
@@ -155,7 +162,7 @@ export class ChatService {
   /* --------------- preferencias perfil --------------- */
   submitProfile(
     interests: string[],
-    documentTitles: string[],
+    documentTitles: string[]
   ): Observable<any> {
     const payload = {
       profile: JSON.stringify({ interests, document_titles: documentTitles }),
@@ -166,14 +173,14 @@ export class ChatService {
 
     return this.http.post(urlCreate, payload).pipe(
       tap(() => this.authService.markProfileAsCompleted(true)),
-      catchError(err => {
+      catchError((err) => {
         if (err.status === 409 || (err.status >= 400 && err.status < 500)) {
-          return this.http.patch(urlUpdate, payload).pipe(
-            tap(() => this.authService.markProfileAsCompleted(true)),
-          );
+          return this.http
+            .patch(urlUpdate, payload)
+            .pipe(tap(() => this.authService.markProfileAsCompleted(true)));
         }
         return throwError(() => err);
-      }),
+      })
     );
   }
 }

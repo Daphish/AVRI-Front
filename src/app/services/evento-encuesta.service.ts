@@ -6,6 +6,7 @@ import { Subject } from 'rxjs';
 export class EventoEncuestaService {
   private encuesta$$ = new Subject<void>();
   encuestaActivada$ = this.encuesta$$.asObservable();
-  lanzarEncuesta() { this.encuesta$$.next(); }
+  lanzarEncuesta() {
+    this.encuesta$$.next();
+  }
 }
-

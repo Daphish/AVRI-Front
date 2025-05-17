@@ -9,7 +9,7 @@
       </div>
 
       <!-- paso 0 : intro -->
-      <ng-container *ngIf="step===0">
+      <ng-container *ngIf="step === 0">
         <h2 class="wizard-title">¡Bienvenido!</h2>
         <p class="wizard-intro">
           Queremos personalizar tus recomendaciones.<br />
@@ -19,20 +19,22 @@
       </ng-container>
 
       <!-- paso 1-2-3 : listas -->
-      <ng-container *ngIf="step>0">
+      <ng-container *ngIf="step > 0">
         <h3 class="wizard-title">
           {{
-            step===1 ? 'Selecciona 5 temas de interés'
-                     : step===2 ? 'Selecciona 5 palabras clave'
-                                : 'Elige documentos que te interesen'
+            step === 1
+              ? "Selecciona 5 temas de interés"
+              : step === 2
+              ? "Selecciona 5 palabras clave"
+              : "Elige documentos que te interesen"
           }}
         </h3>
 
-        <div class="options-grid" [class.single-col]="step===3">
+        <div class="options-grid" [class.single-col]="step === 3">
           <button
             *ngFor="let opt of currentList()"
             (click)="toggle(opt)"
-            [ngClass]="{selected: opt.selected}"
+            [ngClass]="{ selected: opt.selected }"
             [title]="opt.label"
           >
             {{ opt.label }}
@@ -40,13 +42,10 @@
         </div>
 
         <div class="wizard-nav">
-          <button (click)="prev()" [disabled]="step===1">&laquo;</button>
+          <button (click)="prev()" [disabled]="step === 1">&laquo;</button>
           <span>{{ step }}/3</span>
-          <button
-            (click)="next()"
-            [disabled]="!canContinue()"
-          >
-            {{ step<3 ? '&raquo;' : 'Guardar' }}
+          <button (click)="next()" [disabled]="!canContinue()">
+            {{ step < 3 ? "&raquo;" : "Guardar" }}
           </button>
         </div>
 
@@ -60,7 +59,10 @@
   <!-- ====================== área de mensajes ===================== -->
   <div class="messages" #msgContainer>
     <!-- bienvenida -->
-    <div *ngIf="messages.length===0 && !showWizard" class="column welcome-block">
+    <div
+      *ngIf="messages.length === 0 && !showWizard"
+      class="column welcome-block"
+    >
       <div class="welcome-title">¡Bienvenido!</div>
       <img class="welcome-img" src="/Logo-AVRI.png" alt="logo AVRI" />
       <div class="welcome-body">¿Cómo puedo ayudar hoy?</div>
@@ -76,31 +78,39 @@
           <div *ngIf="!m.fromUser" class="system-avatar-container">
             <img src="/Logo-AVRI.png" class="system-avatar" alt="avatar" />
           </div>
-          <div class="message-text">
-            <!-- burbuja normal -->
-            <ng-container *ngIf="!m.isLoading; else typingDots">
-              {{ m.text }}
-            </ng-container>
+          <div class="column">
+            <div class="message-text">
+              <!-- burbuja normal -->
+              <ng-container *ngIf="!m.isLoading; else typingDots">
+                {{ m.text }}
+              </ng-container>
 
-            <!-- burbuja “escribiendo…” -->
-            <ng-template #typingDots>
-              <span class="dot" *ngFor="let d of [1,2,3]; let i = index"
-                    [style.animationDelay]="i * 0.2 + 's'">.</span>
-            </ng-template>
+              <!-- burbuja “escribiendo…” -->
+              <ng-template #typingDots>
+                <span
+                  class="dot"
+                  *ngFor="let d of [1, 2, 3]; let i = index"
+                  [style.animationDelay]="i * 0.2 + 's'"
+                  >.</span
+                >
+              </ng-template>
+            </div>
+            <div
+              *ngIf="!m.fromUser && m.references?.length"
+              class="message-references"
+            >
+              <div class="recommendation-card" *ngFor="let ref of m.references">
+                <div class="doc-title">{{ ref.document_name }}</div>
+                <div class="doc-icons">
+                  <i
+                    class="bi bi-file-earmark-text"
+                    (click)="openDocument(ref.document_id)"
+                  ></i>
+                  <i class="bi bi-quote"></i>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-
-        <div
-          *ngIf="!m.fromUser && m.references?.length"
-          class="message-references"
-        >
-          <span
-            *ngFor="let ref of m.references"
-            class="ref-badge"
-            (click)="openDocument(ref.document_id)"
-          >
-            {{ ref.document_name }}
-          </span>
         </div>
       </div>
     </ng-container>

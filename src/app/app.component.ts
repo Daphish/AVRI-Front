@@ -1,13 +1,13 @@
 import { Component, OnInit, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { firstValueFrom }    from 'rxjs';
-import { RouterOutlet }      from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+import { RouterOutlet } from '@angular/router';
 
-import { AuthService }          from './services/auth.service';
-import { ChatService }          from './services/chat.service';
-import { HeaderComponent }      from './components/header/header.component';
-import { SidebarComponent }     from './components/sidebar/sidebar.component';
-import { LoginModalComponent }  from './components/login-modal/login-modal.component';
+import { AuthService } from './services/auth.service';
+import { ChatService } from './services/chat.service';
+import { HeaderComponent } from './components/header/header.component';
+import { SidebarComponent } from './components/sidebar/sidebar.component';
+import { LoginModalComponent } from './components/login-modal/login-modal.component';
 
 @Component({
   selector: 'app-root',
@@ -16,14 +16,14 @@ import { LoginModalComponent }  from './components/login-modal/login-modal.compo
     RouterOutlet,
     HeaderComponent,
     SidebarComponent,
-    LoginModalComponent
+    LoginModalComponent,
   ],
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit {
-  private auth      = inject(AuthService);
-  private chat      = inject(ChatService);
+  private auth = inject(AuthService);
+  private chat = inject(ChatService);
   private platformId = inject(PLATFORM_ID);
 
   showLoginModal = false;

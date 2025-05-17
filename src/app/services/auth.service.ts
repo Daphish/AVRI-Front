@@ -4,21 +4,30 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import { AnonymousUser, User } from '../interfaces/user.interface';
 
-interface TokenResponse { token: string; }
-interface AnonymousResponse { anonymous_id: string; }
+interface TokenResponse {
+  token: string;
+}
+interface AnonymousResponse {
+  anonymous_id: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
 
-  private currentUserSource = new BehaviorSubject<User | AnonymousUser | null>(null);
-  readonly currentUser$: Observable<User | AnonymousUser | null> = this.currentUserSource.asObservable();
+  private currentUserSource = new BehaviorSubject<User | AnonymousUser | null>(
+    null
+  );
+  readonly currentUser$: Observable<User | AnonymousUser | null> =
+    this.currentUserSource.asObservable();
 
   private loggedInSource = new BehaviorSubject<boolean>(false);
-  readonly isLoggedIn$: Observable<boolean> = this.loggedInSource.asObservable();
+  readonly isLoggedIn$: Observable<boolean> =
+    this.loggedInSource.asObservable();
 
   private profileSetupCompleteSource = new BehaviorSubject<boolean>(false);
-  readonly profileSetupComplete$: Observable<boolean> = this.profileSetupCompleteSource.asObservable();
+  readonly profileSetupComplete$: Observable<boolean> =
+    this.profileSetupCompleteSource.asObservable();
 
   constructor() {
     // autoLogin se llama desde AppComponent para controlar el inicio
@@ -60,10 +69,9 @@ export class AuthService {
         this.http.post<AnonymousResponse>('/api/user/create-anonymous/', {})
       );
       const resp = await firstValueFrom(
-        this.http.post<TokenResponse>(
-          '/api/user/token-anonymous/',
-          { anonymous_id: anonData.anonymous_id }
-        )
+        this.http.post<TokenResponse>('/api/user/token-anonymous/', {
+          anonymous_id: anonData.anonymous_id,
+        })
       );
       localStorage.setItem('authToken', resp.token);
       await this.fetchAndSetCurrentUser(); // Esto establecerá el usuario anónimo
@@ -82,19 +90,26 @@ export class AuthService {
       return;
     }
     try {
-      const user = await firstValueFrom(this.http.get<User | AnonymousUser>('/api/user/me/'));
+      const user = await firstValueFrom(
+        this.http.get<User | AnonymousUser>('/api/user/me/')
+      );
       this.loggedInSource.next(true);
       this.currentUserSource.next(user);
 
       if (user && 'anonymous_id' in user) {
         this.profileSetupCompleteSource.next(true); // Para anónimos, se considera completo o no aplica
       } else if (user) {
-        this.profileSetupCompleteSource.next(!!(user as User).profile_preferences_set);
+        this.profileSetupCompleteSource.next(
+          !!(user as User).profile_preferences_set
+        );
       } else {
         this.logout(); // Si user es null inesperadamente
       }
     } catch (error) {
-      console.error('Error al obtener datos del usuario actual en fetchAndSetCurrentUser:', error);
+      console.error(
+        'Error al obtener datos del usuario actual en fetchAndSetCurrentUser:',
+        error
+      );
       this.logout(); // Si /me/ falla con un token válido, es un problema, hacemos logout
     }
   }

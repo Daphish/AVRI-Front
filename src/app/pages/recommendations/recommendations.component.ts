@@ -8,9 +8,10 @@ import { RecommendationService } from '../../services/recommendation.service';
   standalone: true,
   imports: [NgFor, NgIf, NgClass],
   templateUrl: './recommendations.component.html',
-  styleUrl: './recommendations.component.css'
+  styleUrl: './recommendations.component.css',
 })
-export class RecommendationsComponent implements OnInit { // Implementado OnInit
+export class RecommendationsComponent implements OnInit {
+  // Implementado OnInit
   recommendedDocs: Document[] = [
     {
       id: 'rec-doc-0', // CORREGIDO: id como string
@@ -45,7 +46,8 @@ export class RecommendationsComponent implements OnInit { // Implementado OnInit
   constructor(private recommendationService: RecommendationService) {}
 
   // ngOninit -> debe ser ngOnInit (camelCase)
-  ngOnInit(): void { // CORREGIDO: nombre del método y tipo de retorno
+  ngOnInit(): void {
+    // CORREGIDO: nombre del método y tipo de retorno
     // Descomenta y ajusta esto si es necesario
     /*
     this.recommendationService.getDocuments().subscribe(documents => {
