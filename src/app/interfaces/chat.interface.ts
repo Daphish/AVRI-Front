@@ -29,10 +29,10 @@ export interface Chat {
 
 /* RawMessage viene tal cual del backend /ask/ */
 export interface RawMessage {
-  answer?:  string;
+  answer?: string;
   content?: string;
-  text?:    string;
-  query?:   string;
+  text?: string;
+  query?: string;
   from_user: boolean;
   reference?: {
     chunks: ReferenceChunk[];

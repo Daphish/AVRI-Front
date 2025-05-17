@@ -26,7 +26,7 @@
         [attr.aria-label]="'Cargar chat: ' + chat.session_name"
       >
         <span class="chat-name">
-          <i class="bi bi-chat-left" style="margin-right:4px;"></i>
+          <i class="bi bi-chat-left" style="margin-right: 4px"></i>
           {{ chat.session_name }}
         </span>
 
@@ -42,21 +42,13 @@
 
   <!-- ---------- login / cuenta ---------- -->
   <div class="left-login" *ngIf="isLoggedIn$ | async as logged">
-    <button
-      *ngIf="!logged"
-      class="login-button"
-      (click)="openModal()"
-    >
+    <button *ngIf="!logged" class="login-button" (click)="openModal()">
       Iniciar sesión
     </button>
 
-    <button
-      *ngIf="logged"
-      class="account-button"
-      (click)="viewProfile()"
-    >
+    <button *ngIf="logged" class="account-button" (click)="viewProfile()">
       <div class="account-circle">
-        {{ (currentUserInitial$ | async) | uppercase }}
+        {{ currentUserInitial$ | async | uppercase }}
       </div>
       {{ currentUserName$ | async }}
     </button>

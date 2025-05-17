@@ -1,9 +1,11 @@
 // src/app/components/sidebar/sidebar.component.ts
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import {
-  Component, OnInit, OnDestroy, inject,
-} from '@angular/core';
-import {
-  AsyncPipe, NgClass, NgFor, NgIf, UpperCasePipe,
+  AsyncPipe,
+  NgClass,
+  NgFor,
+  NgIf,
+  UpperCasePipe,
 } from '@angular/common';
 import { Router } from '@angular/router';
 import { Observable, Subscription, map } from 'rxjs';
@@ -18,7 +20,12 @@ import { User } from '../../interfaces/user.interface';
   selector: 'app-sidebar',
   standalone: true,
   imports: [
-    LoginModalComponent, NgIf, NgClass, NgFor, AsyncPipe, UpperCasePipe,
+    LoginModalComponent,
+    NgIf,
+    NgClass,
+    NgFor,
+    AsyncPipe,
+    UpperCasePipe,
   ],
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.css'],
@@ -36,40 +43,42 @@ export class SidebarComponent implements OnInit, OnDestroy {
   chats$: Observable<Chat[]> = this.chatService.sessions$;
 
   currentUserName$: Observable<string> = this.authService.currentUser$.pipe(
-    map(user => {
+    map((user) => {
       if (user) {
         if ('anonymous_id' in user) return 'Invitado';
         return (user as User).first_name || (user as User).name || 'Usuario';
       }
       return 'Invitado';
-    }),
+    })
   );
   currentUserInitial$: Observable<string> = this.currentUserName$.pipe(
-    map(n => (n ? n.charAt(0) : '?')),
+    map((n) => (n ? n.charAt(0) : '?'))
   );
 
   /* ---------------- ciclo de vida ---------------- */
   ngOnInit() {
     this.subs.add(
-      this.authService.isLoggedIn$.subscribe(loggedIn => {
+      this.authService.isLoggedIn$.subscribe((loggedIn) => {
         const current = this.authService.getCurrentUserSnapshot();
         if (loggedIn && current && !('anonymous_id' in current)) {
           this.chatService.loadSessions();
         } else {
           this.chatService.clearSessions();
         }
-      }),
+      })
     );
   }
-  ngOnDestroy() { this.subs.unsubscribe(); }
+  ngOnDestroy() {
+    this.subs.unsubscribe();
+  }
 
   /* ---------------- acciones UI ---------------- */
   viewHome() {
     this.subs.add(
       this.chatService.createSession().subscribe({
         next: () => this.router.navigate(['/home']),
-        error: err => console.error('Error creando sesión:', err),
-      }),
+        error: (err) => console.error('Error creando sesión:', err),
+      })
     );
   }
   loadMessages(id: string) {
@@ -83,7 +92,13 @@ export class SidebarComponent implements OnInit, OnDestroy {
     }
   }
 
-  openModal() { this.isModalOpen = true; }
-  closeModal() { this.isModalOpen = false; }
-  viewProfile() { this.router.navigate(['/profile']); }
+  openModal() {
+    this.isModalOpen = true;
+  }
+  closeModal() {
+    this.isModalOpen = false;
+  }
+  viewProfile() {
+    this.router.navigate(['/profile']);
+  }
 }

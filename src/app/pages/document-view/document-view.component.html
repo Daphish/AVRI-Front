@@ -16,35 +16,58 @@
     <div class="row-container">
       <!-- Left panel -->
       <div class="row-child">
-        <div class="title-tag">
-          Información del documento
-        </div>
-        <p><i class="bi bi-person" style="color: black; font-size: 1.2rem; margin-right: 5px;"></i><strong>Autor:</strong> {{ document.author }}</p>
-        <p><strong>Fecha de publicación:</strong> {{ document.publication_date }}</p>
-        <p><strong>Área de conocimiento:</strong> {{ document.knowledge_area }}</p>
+        <div class="title-tag">Información del documento</div>
+        <p>
+          <i
+            class="bi bi-person"
+            style="color: black; font-size: 1.2rem; margin-right: 5px"
+          ></i
+          ><strong>Autor:</strong> {{ document.author }}
+        </p>
+        <p>
+          <strong>Fecha de publicación:</strong> {{ document.publication_date }}
+        </p>
+        <p>
+          <strong>Área de conocimiento:</strong> {{ document.knowledge_area }}
+        </p>
         <p><strong>Licencia:</strong> {{ document.license }}</p>
-        <button class="see-more-button" (click)="viewInRepository()">Ver en el repositorio</button>
+        <button class="see-more-button" (click)="viewInRepository()">
+          Ver en el repositorio
+        </button>
       </div>
 
       <!-- Right panel -->
       <div class="row-child">
         <div class="title-tag">
-          <i class="bi bi-bookmarks" style="color: black; font-size: 1.2rem; margin-right: 5px;"></i>
+          <i
+            class="bi bi-bookmarks"
+            style="color: black; font-size: 1.2rem; margin-right: 5px"
+          ></i>
           Opciones
         </div>
-        <button class="see-more-button" [class.active]="saved" (click)="toggleSave()">
-          {{ saved ? 'Guardado' : 'Guardar' }}
+        <button
+          class="see-more-button"
+          [class.active]="saved"
+          (click)="toggleSave()"
+        >
+          {{ saved ? "Guardado" : "Guardar" }}
         </button>
 
         <div class="title-tag">
-          <i class="bi bi-person-check" style="color: black; font-size: 1.2rem; margin-right: 5px;"></i>
+          <i
+            class="bi bi-person-check"
+            style="color: black; font-size: 1.2rem; margin-right: 5px"
+          ></i>
           Autoría
         </div>
-        <button class="see-more-button" [class.active]="claimed" (click)="toggleClaim()">
-          {{ claimed ? 'Ya eres el autor' : 'Soy el autor' }}
+        <button
+          class="see-more-button"
+          [class.active]="claimed"
+          (click)="toggleClaim()"
+        >
+          {{ claimed ? "Ya eres el autor" : "Soy el autor" }}
         </button>
       </div>
     </div>
   </div>
 </div>
-

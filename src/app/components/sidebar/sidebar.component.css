@@ -1,226 +1,300 @@
 .left {
-    height: 100%;
-    width: 300px;
-    background-color: #B6C8D9;
-    border: solid #0056A3 1px;
-    border-radius: 8px;
-    margin-right: 25px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  height: 100%;
+  width: 300px;
+  background-color: #b6c8d9;
+  border: solid #0056a3 1px;
+  border-radius: 8px;
+  margin-right: 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .top-left {
-    display: flex;
-    align-items: center;
-    background-color: #0056A3;
-    padding: 1rem;
-    width: 100%;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
+  display: flex;
+  align-items: center;
+  background-color: #0056a3;
+  padding: 1rem;
+  width: 100%;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
 }
 
 .left-title {
-    color: white;
-    margin-left: 1rem;
-    text-align: center;
+  color: white;
+  margin-left: 1rem;
+  text-align: center;
 }
 
 .new-chat-button {
-    border-radius: 20px;
-    background-color: white;
-    border: 1px solid #21405F;
-    padding: 10px;
-    margin-top: 10px;
-    cursor: pointer;
-    transition: all 0.3s ease;
+  border-radius: 20px;
+  background-color: white;
+  border: 1px solid #21405f;
+  padding: 10px;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .new-chat-button:hover {
-    background-color: #e2e2e2;
+  background-color: #e2e2e2;
 }
 
 /* === Aquí ajustamos left-chats para scroll interno === */
 .left-chats {
-    /* que crezca y luego haga overflow */
-    flex: 1 1 auto;
-    /* permitir overflow interno */
-    overflow-y: auto;
-    overflow-x: hidden;
-    /* necesario para que el flex-item calcule bien el overflow */
-    min-height: 0;
+  /* que crezca y luego haga overflow */
+  flex: 1 1 auto;
+  /* permitir overflow interno */
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* necesario para que el flex-item calcule bien el overflow */
+  min-height: 0;
 
-    /* tus estilos originales */
-    width: 100%;
-    padding: 5px 10px;
-    margin-top: 10px;
+  /* tus estilos originales */
+  width: 100%;
+  padding: 5px 10px;
+  margin-top: 10px;
 }
 
 /* Puedes personalizar la scrollbar si quieres */
 .left-chats::-webkit-scrollbar {
-    width: 8px;
+  width: 8px;
 }
 .left-chats::-webkit-scrollbar-track {
-    background: #dddddd;
-    border-radius: 4px;
+  background: #dddddd;
+  border-radius: 4px;
 }
 .left-chats::-webkit-scrollbar-thumb {
-    background: #607890;
-    border-radius: 4px;
+  background: #607890;
+  border-radius: 4px;
 }
 .left-chats::-webkit-scrollbar-thumb:hover {
-    background: #425263;
+  background: #425263;
 }
 
 .left-login {
-    width: 100%;
-    padding: 10px;
+  width: 100%;
+  padding: 10px;
 }
 
-.login-button, .account-button {
-    cursor: pointer;
-    border: none;
-    color: white;
-    width: 100%;
-    font-size: 1rem;
-    transition: all 0.3s ease;
+.login-button,
+.account-button {
+  cursor: pointer;
+  border: none;
+  color: white;
+  width: 100%;
+  font-size: 1rem;
+  transition: all 0.3s ease;
 }
 
 .login-button {
-    border-radius: 20px;
-    background-color: #0056A3;
-    font-weight: bold;
-    padding: 10px;
+  border-radius: 20px;
+  background-color: #0056a3;
+  font-weight: bold;
+  padding: 10px;
 }
 
 .login-button:hover {
-    background-color: rgb(54, 105, 156);
+  background-color: rgb(54, 105, 156);
 }
 
 .account-button {
-    background-color: #607890;
-    font-weight: normal;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 40px;
-    gap: 5px;
+  background-color: #607890;
+  font-weight: normal;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 40px;
+  gap: 5px;
 }
 
 .account-button:hover {
-    background-color: #6f8ba7;
+  background-color: #6f8ba7;
 }
 
 .account-circle {
-    border-radius: 50%;
-    height: 80%;
-    aspect-ratio: 1;
-    background-color: #2596BE;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  border-radius: 50%;
+  height: 80%;
+  aspect-ratio: 1;
+  background-color: #2596be;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .invisible {
-    display: none;
+  display: none;
 }
 
 .no-chats-message {
-    width: 100%;
-    text-align: center;
+  width: 100%;
+  text-align: center;
 }
 
 .sidebar-chat {
-    display: flex;
-    width: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    cursor: pointer;
-    padding: 5px;
-    transition: all 0.3s ease;
+  display: flex;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  padding: 5px;
+  transition: all 0.3s ease;
 }
 
 .sidebar-chat:hover {
-    background-color: #e2e2e2;
+  background-color: #e2e2e2;
 }
 /* contenedor lateral */
-.left{
-  height:100%;
-  width:300px;
-  background:#B6C8D9;
-  border:1px solid #0056A3;
-  border-radius:8px;
-  margin-right:25px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
+.left {
+  height: 100%;
+  width: 300px;
+  background: #b6c8d9;
+  border: 1px solid #0056a3;
+  border-radius: 8px;
+  margin-right: 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* cabecera */
-.top-left{
-  display:flex;align-items:center;
-  background:#0056A3;padding:1rem;width:100%;
-  border-top-left-radius:8px;border-top-right-radius:8px;
+.top-left {
+  display: flex;
+  align-items: center;
+  background: #0056a3;
+  padding: 1rem;
+  width: 100%;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
 }
-.left-title{color:#fff;margin-left:1rem;}
+.left-title {
+  color: #fff;
+  margin-left: 1rem;
+}
 
 /* botón nuevo chat */
-.new-chat-button{
-  border-radius:20px;background:#fff;border:1px solid #21405F;
-  padding:10px;margin-top:10px;cursor:pointer;transition:.3s;
+.new-chat-button {
+  border-radius: 20px;
+  background: #fff;
+  border: 1px solid #21405f;
+  padding: 10px;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: 0.3s;
 }
-.new-chat-button:hover{background:#e2e2e2;}
+.new-chat-button:hover {
+  background: #e2e2e2;
+}
 
 /* listado con scroll */
-.left-chats{
-  flex:1 1 auto;min-height:0;
-  overflow-y:auto;overflow-x:hidden;
-  width:100%;padding:5px 10px;margin-top:10px;
+.left-chats {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+  padding: 5px 10px;
+  margin-top: 10px;
 }
-.left-chats::-webkit-scrollbar{width:8px;}
-.left-chats::-webkit-scrollbar-track{background:#dddd;border-radius:4px;}
-.left-chats::-webkit-scrollbar-thumb{background:#607890;border-radius:4px;}
-.left-chats::-webkit-scrollbar-thumb:hover{background:#425263;}
+.left-chats::-webkit-scrollbar {
+  width: 8px;
+}
+.left-chats::-webkit-scrollbar-track {
+  background: #dddd;
+  border-radius: 4px;
+}
+.left-chats::-webkit-scrollbar-thumb {
+  background: #607890;
+  border-radius: 4px;
+}
+.left-chats::-webkit-scrollbar-thumb:hover {
+  background: #425263;
+}
 
 /* fila de chat */
-.sidebar-chat{
-  display:flex;justify-content:space-between;align-items:center;
-  width:100%;padding:5px;cursor:pointer;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  transition:.2s;
+.sidebar-chat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 5px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: 0.2s;
 }
-.sidebar-chat:hover{background:#e2e2e2;}
-.chat-name{overflow:hidden;text-overflow:ellipsis;}
+.sidebar-chat:hover {
+  background: #e2e2e2;
+}
+.chat-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 /* icono borrar */
-.delete-icon{
-  font-size:0.9rem;color:#b02121;opacity:0;
-  transition:opacity .2s;
+.delete-icon {
+  font-size: 0.9rem;
+  color: #b02121;
+  opacity: 0;
+  transition: opacity 0.2s;
 }
-.sidebar-chat:hover .delete-icon{opacity:1;}
-.delete-icon:hover{color:#7d0000;}
+.sidebar-chat:hover .delete-icon {
+  opacity: 1;
+}
+.delete-icon:hover {
+  color: #7d0000;
+}
 
 /* bloque login / cuenta */
-.left-login{width:100%;padding:10px;}
-.login-button,.account-button{
-  width:100%;border:none;cursor:pointer;transition:.3s;
-  color:#fff;font-size:1rem;
+.left-login {
+  width: 100%;
+  padding: 10px;
+}
+.login-button,
+.account-button {
+  width: 100%;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+  color: #fff;
+  font-size: 1rem;
 }
 /* login */
-.login-button{
-  background:#0056A3;font-weight:bold;border-radius:20px;padding:10px;
+.login-button {
+  background: #0056a3;
+  font-weight: bold;
+  border-radius: 20px;
+  padding: 10px;
 }
-.login-button:hover{background:#36699c;}
+.login-button:hover {
+  background: #36699c;
+}
 /* cuenta */
-.account-button{
-  background:#607890;display:flex;align-items:center;gap:5px;height:40px;
+.account-button {
+  background: #607890;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 40px;
 }
-.account-button:hover{background:#6f8ba7;}
-.account-circle{
-  border-radius:50%;height:80%;aspect-ratio:1;
-  background:#2596BE;display:flex;justify-content:center;align-items:center;
+.account-button:hover {
+  background: #6f8ba7;
+}
+.account-circle {
+  border-radius: 50%;
+  height: 80%;
+  aspect-ratio: 1;
+  background: #2596be;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* mensaje sin chats */
-.no-chats-message{text-align:center;width:100%;color:#21405F;}
+.no-chats-message {
+  text-align: center;
+  width: 100%;
+  color: #21405f;
+}

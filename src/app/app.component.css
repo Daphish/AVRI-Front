@@ -1,18 +1,18 @@
 .main-container {
-    padding: 2.5rem;
-    width: 100vw;
-    height: calc(100vh - 8rem);
-    display: flex;
+  padding: 2.5rem;
+  width: 100vw;
+  height: calc(100vh - 8rem);
+  display: flex;
 }
 
-::ng-deep app-chat{
-    width: 100%;
+::ng-deep app-chat {
+  width: 100%;
 }
 
-::ng-deep app-profile{
-    width: 100%;
+::ng-deep app-profile {
+  width: 100%;
 }
 
-::ng-deep app-recommendations{
-    width: 100%;
+::ng-deep app-recommendations {
+  width: 100%;
 }
