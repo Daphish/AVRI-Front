@@ -2,6 +2,7 @@ import { NgIf } from '@angular/common';
 import { Component, EventEmitter, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
+import { ChatService } from '../../services/chat.service';
 
 @Component({
   selector: 'app-login-modal',
@@ -11,7 +12,10 @@ import { AuthService } from '../../services/auth.service';
   styleUrl: './login-modal.component.css',
 })
 export class LoginModalComponent {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private chatService: ChatService
+  ) {}
 
   user: string = '';
   password: string = '';
@@ -26,6 +30,7 @@ export class LoginModalComponent {
   startSession() {
     this.authService.login(this.user, this.password).then((success) => {
       if (success) {
+        this.chatService.loadSessions();
         this.closeModal();
       } else {
         this.error = true;
