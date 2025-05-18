@@ -48,7 +48,7 @@ export class DocumentService {
   /** GET /api/documents/{id}/ */
   loadDocument(id: string): Observable<DocumentDetail> {
     return this.http
-      .get<DocumentDetail>(`${this.api}/${id}/`)
+      .get<DocumentDetail>(`${this.api}/${id}/repository`)
       .pipe(tap((d) => this.detail$$.next(d)));
   }
 
