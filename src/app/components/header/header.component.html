@@ -6,6 +6,6 @@
   <ul class="navbar-items">
     <li><a (click)="viewFYP()">Recomendaciones</a></li>
     <li><a href="#" *ngIf="is_author">Panel de autor</a></li>
-    <li><a href="#" *ngIf="is_staff">Panel de administrador</a></li>
+    <li><a href="http://localhost:8000/admin/login/?next=/admin/" *ngIf="is_staff">Panel de administrador</a></li>
   </ul>
 </div>

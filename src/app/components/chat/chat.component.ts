@@ -196,7 +196,7 @@ export class ChatComponent implements OnInit {
     if (!text) return;
 
     if (!this.sessionId) {
-      await firstValueFrom(this.chat.createSession());
+      await firstValueFrom(this.chat.createSession(text));
     }
 
     this.chat.sendMessage(this.sessionId, text);

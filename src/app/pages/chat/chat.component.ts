@@ -118,7 +118,7 @@ export class ChatComponent implements OnInit {
     this.showWizard = false;
 
     if (!this.sessionId) {
-      await firstValueFrom(this.chatService.createSession());
+      await firstValueFrom(this.chatService.createSession(text));
     }
     this.chatService.sendMessage(this.sessionId, text);
 
