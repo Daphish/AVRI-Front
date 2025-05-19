@@ -19,14 +19,7 @@ import { User } from '../../interfaces/user.interface';
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [
-    LoginModalComponent,
-    NgIf,
-    NgClass,
-    NgFor,
-    AsyncPipe,
-    UpperCasePipe,
-  ],
+  imports: [LoginModalComponent, NgIf, NgFor, AsyncPipe, UpperCasePipe],
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.css'],
 })
@@ -57,13 +50,18 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   /* ---------------- ciclo de vida ---------------- */
   ngOnInit() {
+    this.authService.autoLogin(); // auto-login al iniciar
     this.subs.add(
       this.authService.isLoggedIn$.subscribe((loggedIn) => {
         const current = this.authService.getCurrentUserSnapshot();
         if (loggedIn && current && !('anonymous_id' in current)) {
           this.chatService.loadSessions();
-        } else {
+          this.isModalOpen = false;
+        }
+        if (!loggedIn) {
           this.chatService.clearSessions();
+          this.isModalOpen = true;
+          console.log('No hay sesión');
         }
       })
     );

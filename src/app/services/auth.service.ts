@@ -1,8 +1,9 @@
 // src/app/services/auth.service.ts
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import { AnonymousUser, User } from '../interfaces/user.interface';
+import { isPlatformBrowser } from '@angular/common';
 
 interface TokenResponse {
   token: string;
@@ -14,6 +15,7 @@ interface AnonymousResponse {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
+  private platformId = inject(PLATFORM_ID);
 
   private currentUserSource = new BehaviorSubject<User | AnonymousUser | null>(
     null
@@ -39,7 +41,11 @@ export class AuthService {
   }
 
   async autoLogin(): Promise<void> {
+    if (!isPlatformBrowser(this.platformId)) {
+      return; // No hacer nada si no estamos en el navegador
+    }
     const token = localStorage.getItem('authToken');
+    console.log(token);
     if (!token) {
       this.logout(); // Limpia todos los estados si no hay token
       return;
