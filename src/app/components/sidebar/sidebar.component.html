@@ -21,6 +21,7 @@
         *ngFor="let chat of chatList"
         class="sidebar-chat"
         (click)="loadMessages(chat.session_id)"
+        [ngClass]="{ 'active': chat.session_id === activeSessionId }"
         tabindex="0"
         (keyup.enter)="loadMessages(chat.session_id)"
         [attr.aria-label]="'Cargar chat: ' + chat.session_name"
