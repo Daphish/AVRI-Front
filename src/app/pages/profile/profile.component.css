@@ -91,3 +91,23 @@ h1 {
   border-radius: 4px;
   cursor: pointer;
 }
+
+.back-button {
+  width: 8rem;
+  height: 2rem;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background-color: #0056a3;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-bottom: 1.5rem;
+}
+
+.back-button:hover {
+  background-color: #21405f;
+}
