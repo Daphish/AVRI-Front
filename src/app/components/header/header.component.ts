@@ -17,10 +17,8 @@ export class HeaderComponent {
   constructor(private AuthService: AuthService, private router: Router) {}
 
   ngOnInit() {
-    console.log('hola');
     this.AuthService.currentUser$.subscribe((user) => {
       if (user) {
-        console.log(user);
         if ('anonymous_id' in user) {
           this.is_author = false;
           this.is_staff = false;
