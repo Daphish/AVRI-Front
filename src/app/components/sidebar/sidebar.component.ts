@@ -19,7 +19,7 @@ import { User } from '../../interfaces/user.interface';
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [LoginModalComponent, NgIf, NgFor, AsyncPipe, UpperCasePipe],
+  imports: [LoginModalComponent, NgIf, NgClass, NgFor, AsyncPipe, UpperCasePipe],
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.css'],
 })
@@ -28,7 +28,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   private chatService = inject(ChatService);
   private router = inject(Router);
   private subs = new Subscription();
-
+  activeSessionId: string | null = null;
   isModalOpen = false;
 
   /* ------------ streams para la plantilla ------------ */
@@ -80,6 +80,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     );
   }
   loadMessages(id: string) {
+    this.activeSessionId = id;      
     this.chatService.loadMessages(id);
     this.router.navigate(['/home']);
   }
