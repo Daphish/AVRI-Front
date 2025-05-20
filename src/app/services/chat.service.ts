@@ -37,6 +37,11 @@ export class ChatService {
       .subscribe((list) => this.sessions$$.next(list));
   }
 
+  clearIdChat(): void {
+    this.idChat$$.next('');
+    this.messages$$.next([]);
+  }
+
   createSession(name = 'Chat sin título'): Observable<Chat> {
     return this.http
       .post<Chat>(`${this.BASE_URL}/`, { session_name: name })

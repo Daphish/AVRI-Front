@@ -19,7 +19,14 @@ import { User } from '../../interfaces/user.interface';
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [LoginModalComponent, NgIf, NgClass, NgFor, AsyncPipe, UpperCasePipe],
+  imports: [
+    LoginModalComponent,
+    NgIf,
+    NgClass,
+    NgFor,
+    AsyncPipe,
+    UpperCasePipe,
+  ],
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.css'],
 })
@@ -72,15 +79,11 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   /* ---------------- acciones UI ---------------- */
   viewHome() {
-    this.subs.add(
-      this.chatService.createSession().subscribe({
-        next: () => this.router.navigate(['/home']),
-        error: (err) => console.error('Error creando sesión:', err),
-      })
-    );
+    this.chatService.clearIdChat();
+    this.router.navigate(['/home']);
   }
   loadMessages(id: string) {
-    this.activeSessionId = id;      
+    this.activeSessionId = id;
     this.chatService.loadMessages(id);
     this.router.navigate(['/home']);
   }
