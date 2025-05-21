@@ -40,10 +40,9 @@ export class DocumentViewComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$),
         filter((id) => !!id)
       )
-      .subscribe((id) => {
+      .subscribe(() => {
         this.loading = true;
         this.error = null;
-        this.docs.loadDocument(id!); // ← nombre correcto
       });
   }
 
