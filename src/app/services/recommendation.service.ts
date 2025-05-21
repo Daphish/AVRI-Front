@@ -24,22 +24,20 @@ export class RecommendationService {
     );
   }
 
-  /* getDocuments(): Observable<Document[]> {
+  getDocuments(): Observable<Document[]> {
     return this.http.get<Document[]>(`${this.BASE}/serve/`).pipe(
       catchError((error) => {
         console.warn('Error en getDocuments():', error);
         return of([]);
       })
     );
-  } */
-  getDocuments(): void {
+  }
+  getDetailedDocuments(): void {
     this.http.get<Document[]>(`${this.BASE}/serve/`).subscribe((documents) => {
       const documentIds = documents.map((doc) => doc.id);
-      const detailedDocuments: DocumentDetail[] = [];
       this.documentService.getDocumentsByIds(documentIds).subscribe((docs) => {
-        detailedDocuments.push(...docs);
+        this.documents$$.next(docs);
       });
-      this.documents$$.next(detailedDocuments);
     });
   }
 }

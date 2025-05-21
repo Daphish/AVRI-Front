@@ -50,6 +50,7 @@ export class RecommendationsComponent implements OnInit {
 
   // ngOninit -> debe ser ngOnInit (camelCase)
   ngOnInit(): void {
+    this.recommendationService.getDetailedDocuments();
     this.recommendationService.documents$.subscribe((documents) => {
       if (documents && documents.length > 0) {
         this.recommendedDocsBack = documents;
