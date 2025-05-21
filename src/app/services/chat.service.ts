@@ -10,11 +10,14 @@ import {
   RawMessage,
 } from '../interfaces/chat.interface';
 import { AuthService } from './auth.service';
+import { DocumentService } from './document.service';
+import { DocumentDetail } from './document.service';
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
   private http = inject(HttpClient);
   private authService = inject(AuthService);
+  private documentService = inject(DocumentService);
   private readonly BASE_URL = '/api/chat';
 
   /* Flag para volver a mostrar el wizard después de perfil */
@@ -105,12 +108,19 @@ export class ChatService {
               (c, i, a) =>
                 a.findIndex((x) => x.document_id === c.document_id) === i
             );
+            const documentIds = uniqueRefs.map((r) => r.document_id);
+            const detailedDocs: DocumentDetail[] = [];
+            this.documentService
+              .getDocumentsByIds(documentIds)
+              .subscribe((docs) => {
+                detailedDocs.push(...docs);
+              });
             return {
               fromUser: m.role === 'user',
               text: (m.content ?? m.answer ?? '')
                 .replace(/##\d+\$\$/g, '')
                 .trim(),
-              references: uniqueRefs,
+              references: detailedDocs,
             } as Message;
           })
         )
@@ -140,10 +150,17 @@ export class ChatService {
             (c, i, a) =>
               a.findIndex((x) => x.document_id === c.document_id) === i
           );
+          const documentIds = uniqueRefs.map((r) => r.document_id);
+          const detailedDocs: DocumentDetail[] = [];
+          this.documentService
+            .getDocumentsByIds(documentIds)
+            .subscribe((docs) => {
+              detailedDocs.push(...docs);
+            });
           return {
             fromUser: false,
             text: answer,
-            references: uniqueRefs,
+            references: detailedDocs,
           } as Message;
         })
       )

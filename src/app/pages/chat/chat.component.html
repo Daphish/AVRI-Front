@@ -99,12 +99,35 @@
               *ngIf="!m.fromUser && m.references?.length"
               class="message-references"
             >
-              <div class="recommendation-card" *ngFor="let ref of m.references">
-                <div class="doc-title">{{ ref.document_name }}</div>
-                <div class="doc-icons">
+              <div
+                class="recommendation-card"
+                *ngFor="let ref of m.references"
+                [ngClass]="{
+                  blue: ref.status === 'L',
+                  red: ref.status === 'R',
+                  yellow: ref.status === 'E'
+                }"
+              >
+                <div class="doc-title">{{ ref.title }}</div>
+                <div
+                  class="doc-author"
+                  [ngClass]="{
+                    'blue-icon': ref.status === 'L' || ref.status === 'E',
+                    'red-icon': ref.status === 'R'
+                  }"
+                >
+                  {{ ref.author }}
+                </div>
+                <div
+                  class="doc-icons"
+                  [ngClass]="{
+                    'blue-icon': ref.status === 'L' || ref.status === 'E',
+                    'red-icon': ref.status === 'R'
+                  }"
+                >
                   <i
                     class="bi bi-file-earmark-text"
-                    (click)="openDocument(ref.document_id)"
+                    (click)="openDocument(ref)"
                   ></i>
                   <i class="bi bi-quote"></i>
                 </div>

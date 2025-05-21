@@ -10,12 +10,26 @@ export interface ReferenceChunk {
   url?: string | null;
 }
 
+export interface Documents {
+  id: string;
+  title: string;
+  author: string;
+  publication_date: string;
+  knowledge_area: string;
+  license: string;
+  repository_uri: string;
+  repository_id: string;
+  status: 'L' | 'R' | 'E';
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Message {
   fromUser: boolean;
   text: string;
 
   /** Referencias únicas extraídas de `reference.chunks` */
-  references?: ReferenceChunk[];
+  references?: Documents[];
 
   /** Burbuja en modo “escribiendo…” */
   isLoading?: boolean;

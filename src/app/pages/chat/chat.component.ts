@@ -6,7 +6,7 @@ import { firstValueFrom } from 'rxjs';
 
 import { ChatService } from '../../services/chat.service';
 import { DocumentService } from '../../services/document.service';
-import { Message } from '../../interfaces/chat.interface';
+import { Documents, Message } from '../../interfaces/chat.interface';
 
 /* ---------------- modelo de opción del wizard ---------------- */
 interface SelectOption {
@@ -126,8 +126,8 @@ export class ChatComponent implements OnInit {
     this.isSending = false;
   }
 
-  openDocument(id: string): void {
-    this.docService.setCurrentDocumentId(id);
+  openDocument(document: Documents): void {
+    this.docService.setCurrentDocument(document);
     this.router.navigate(['/document']);
   }
 
