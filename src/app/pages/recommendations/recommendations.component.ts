@@ -2,6 +2,7 @@ import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, OnInit } from '@angular/core'; // Agregado OnInit
 import { Document } from '../../interfaces/document.interface';
 import { RecommendationService } from '../../services/recommendation.service';
+import { DocumentDetail } from '../../services/document.service';
 
 @Component({
   selector: 'app-recommendations',
@@ -43,10 +44,20 @@ export class RecommendationsComponent implements OnInit {
     },
   ];
 
+  recommendedDocsBack: DocumentDetail[] = [];
+
   constructor(private recommendationService: RecommendationService) {}
 
   // ngOninit -> debe ser ngOnInit (camelCase)
   ngOnInit(): void {
+    this.recommendationService.documents$.subscribe((documents) => {
+      if (documents && documents.length > 0) {
+        this.recommendedDocsBack = documents;
+      } else {
+        // Opcional: Mantener los datos de ejemplo o mostrar mensaje si no hay recomendaciones
+        console.log('No se recibieron documentos recomendados del servicio.');
+      }
+    });
     // CORREGIDO: nombre del método y tipo de retorno
     // Descomenta y ajusta esto si es necesario
     /*
