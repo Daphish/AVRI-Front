@@ -83,4 +83,8 @@ export class DocumentService {
     this.currentId$$.next(null);
     this.detail$$.next(null);
   }
+
+  get currentDocument(): DocumentDetail | null {
+    return this.detail$$.value;
+  }
 }
