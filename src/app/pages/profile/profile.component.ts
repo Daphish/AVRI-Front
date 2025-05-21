@@ -139,6 +139,15 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   async goBack(): Promise<void> {
     /* Siempre queremos volver a mostrar el wizard */
+    this.authService.profileSetupComplete$.subscribe((isComplete) => {
+      if (!isComplete) {
+        this.chatService.pendingWizard = true;
+      }
+    });
+    await this.router.navigate(['/home']);
+  }
+
+  async showWizard(): Promise<void> {
     this.chatService.pendingWizard = true;
     await this.router.navigate(['/home']);
   }
@@ -146,7 +155,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
   logout(): void {
     this.chatService.clearSessions();
     this.authService.logout();
-    this.router.navigate(['/home']); // O a /login si prefieres
+    this.router.navigate(['/home']);
+    this.chatService.pendingWizard = false;
   }
 
   ngOnDestroy() {
