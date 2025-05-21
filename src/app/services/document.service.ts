@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, forkJoin, Observable, tap } from 'rxjs';
 
 /* ------------ modelos ------------ */
 export interface DocumentDetail {
@@ -40,9 +40,16 @@ export class DocumentService {
 
   constructor(private http: HttpClient) {}
 
-  setCurrentDocumentId(id: string): void {
-    this.currentId$$.next(id);
-    this.loadDocument(id).subscribe();
+  setCurrentDocument(document: DocumentDetail): void {
+    this.currentId$$.next(document.id);
+    this.detail$$.next(document);
+  }
+
+  getDocumentsByIds(ids: string[]): Observable<DocumentDetail[]> {
+    const requests = ids.map((id) =>
+      this.http.get<DocumentDetail>(`${this.api}/${id}/repository`)
+    );
+    return forkJoin(requests); // Devuelve un Observable<DocumentDetail[]>
   }
 
   /** GET /api/documents/{id}/ */
@@ -75,5 +82,9 @@ export class DocumentService {
   clear(): void {
     this.currentId$$.next(null);
     this.detail$$.next(null);
+  }
+
+  get currentDocument(): DocumentDetail | null {
+    return this.detail$$.value;
   }
 }

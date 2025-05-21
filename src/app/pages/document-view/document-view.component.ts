@@ -28,23 +28,13 @@ export class DocumentViewComponent implements OnInit, OnDestroy {
 
   /* ---------------- ciclo de vida ---------------- */
   ngOnInit(): void {
-    /* Detalle reactivo */
+    this.document = this.docs.currentDocument; // ← toma el valor actual si ya existe
+    this.loading = false;
+
     this.docs.document$.pipe(takeUntil(this.destroy$)).subscribe((doc) => {
       this.document = doc;
       this.loading = false;
     });
-
-    /* Id que llega desde el chat */
-    this.docs.currentDocumentId$
-      .pipe(
-        takeUntil(this.destroy$),
-        filter((id) => !!id)
-      )
-      .subscribe((id) => {
-        this.loading = true;
-        this.error = null;
-        this.docs.loadDocument(id!); // ← nombre correcto
-      });
   }
 
   ngOnDestroy(): void {

@@ -46,7 +46,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     map((user) => {
       if (user) {
         if ('anonymous_id' in user) return 'Invitado';
-        return (user as User).first_name || (user as User).name || 'Usuario';
+        return (user as User).name || 'Usuario';
       }
       return 'Invitado';
     })
@@ -68,7 +68,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
         if (!loggedIn) {
           this.chatService.clearSessions();
           this.isModalOpen = true;
-          console.log('No hay sesión');
         }
       })
     );
