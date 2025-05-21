@@ -16,10 +16,20 @@
         {{ userDisplay.name.charAt(0) }}
       </span>
     </div>
-    <button class="logout-button" (click)="logout()">
-      <i class="bi bi-box-arrow-right" style="margin-right: 5px"></i>
-      Cerrar sesión
+    <button
+      *ngIf="isActuallyAnonymous; else logoutButton"
+      class="logout-button"
+      (click)="logout()"
+    >
+      <i class="bi bi-box-arrow-in-right" style="margin-right: 5px"></i>
+      Iniciar sesión
     </button>
+    <ng-template #logoutButton>
+      <button class="logout-button" (click)="logout()">
+        <i class="bi bi-box-arrow-right" style="margin-right: 5px"></i>
+        Cerrar sesión
+      </button>
+    </ng-template>
   </div>
 
   <div *ngIf="!isActuallyAnonymous && userDisplay" class="column">
@@ -79,14 +89,14 @@
         <button
           class="see-more-button"
           *ngIf="profileNeedsSetup && !isActuallyAnonymous"
-          (click)="goBack()"
+          (click)="showWizard()"
         >
           Configurar Preferencias
         </button>
         <button
           class="see-more-button"
           *ngIf="!profileNeedsSetup && !isActuallyAnonymous"
-          (click)="goBack()"
+          (click)="showWizard()"
         >
           Reconfigurar Preferencias
         </button>

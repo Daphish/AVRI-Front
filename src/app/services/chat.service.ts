@@ -2,7 +2,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
-import { map, tap, catchError } from 'rxjs/operators';
+import { map, tap, catchError, switchMap } from 'rxjs/operators';
 import {
   Chat,
   Message,
@@ -165,26 +165,34 @@ export class ChatService {
   }
 
   /* --------------- preferencias perfil --------------- */
+  getProfile(): Observable<any> {
+    return this.http.get('/api/recommender/profile/me/');
+  }
   submitProfile(
     interests: string[],
     documentTitles: string[]
   ): Observable<any> {
     const payload = {
-      profile: JSON.stringify({ interests, document_titles: documentTitles }),
+      profile: {
+        interests: interests,
+        document_titles: documentTitles,
+      },
     };
 
     const urlCreate = '/api/recommender/profile/create/';
     const urlUpdate = '/api/recommender/profile/me/';
 
-    return this.http.post(urlCreate, payload).pipe(
-      tap(() => this.authService.markProfileAsCompleted(true)),
+    return this.getProfile().pipe(
+      switchMap(() =>
+        this.http
+          .patch(urlUpdate, payload)
+          .pipe(tap(() => this.authService.markProfileAsCompleted(true)))
+      ),
       catchError((err) => {
-        if (err.status === 409 || (err.status >= 400 && err.status < 500)) {
-          return this.http
-            .patch(urlUpdate, payload)
-            .pipe(tap(() => this.authService.markProfileAsCompleted(true)));
-        }
-        return throwError(() => err);
+        return this.http.post(urlCreate, payload).pipe(
+          tap(() => this.authService.markProfileAsCompleted(true)),
+          catchError((error) => throwError(() => error))
+        );
       })
     );
   }
