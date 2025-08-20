@@ -3,7 +3,7 @@
   <div *ngIf="recommendedDocs.length > 0" class="recommendation-grid">
     <div
       class="recommendation-card"
-      *ngFor="let doc of recommendedDocs"
+      *ngFor="let doc of recommendedDocsBack"
       [ngClass]="{
         blue: doc.status === 'L',
         red: doc.status === 'R',
@@ -32,7 +32,7 @@
       </div>
     </div>
   </div>
-  <div *ngIf="recommendedDocs.length === 0" class="recommendation-grid">
+  <div *ngIf="recommendedDocsBack.length === 0" class="recommendation-grid">
     <div class="no-recommendations-message">
       No hay recomendaciones disponibles para ti
     </div>
