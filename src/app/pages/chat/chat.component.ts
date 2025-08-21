@@ -141,7 +141,7 @@ export class ChatComponent implements OnInit {
     { texto: '7. Me imagino que la mayoría de la gente aprendería a utilizar este sistema muy rápidamente.' },
     { texto: '8. El sistema me pareció muy incómodo de usar.' },
     { texto: '9. Me sentí muy seguro al utilizar el sistema.' },
-    { texto: '10. Necesité aprender muchas cosas antes de poder poner en marcha este sistema.' }
+    { texto: '10. Necesite aprender muchas cosas antes de poder poner en marcha este sistema.' }
   ];
   
   
