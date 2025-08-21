@@ -137,6 +137,47 @@
         </div>
       </div>
     </ng-container>
+
+    <!-- ====================== encuesta de satisfaccion ===================== -->
+
+  <ng-template #encuesta>
+    <div class="modal-encuesta">
+      <ng-container *ngIf="!mostrarFormulario">
+        <h2>Encuesta de satisfacción</h2>
+        <p>Queremos brindarte la mejor experiencia posible en nuestro sistema. Por eso, hemos diseñado una breve encuesta de satisfacción que nos ayudará a entender qué tan fácil y útil te resulta nuestro servicio.</p>
+        <p>Tus respuestas serán anónimas.</p>
+        <button class="secundario" (click)="cancelarEncuesta()">Responder más tarde</button>
+        <button class="primario" (click)="iniciarEncuesta()">Iniciar</button>
+      </ng-container>
+  
+      <form *ngIf="mostrarFormulario" (ngSubmit)="enviarEncuesta()">
+        <h3>Selecciona la opción que mejor describa tu experiencia con el sistema</h3>
+  
+        <div *ngFor="let p of preguntas; let i = index" class="pregunta">
+          <div><strong>{{ p.texto }}</strong></div>
+          <div class="opciones">
+            <label *ngFor="let o of opciones">
+              <input
+                type="radio"
+                name="q{{i+1}}"
+                [(ngModel)]="respuestas['q' + (i+1)]"
+                [value]="o.valor"
+                required
+              />
+              {{ o.texto }}
+            </label>
+          </div>
+        </div>
+        
+  
+        <label>Comentarios</label>
+        <textarea [(ngModel)]="respuestas.comments" name="comments" rows="3"></textarea>
+  
+        <button type="submit" class="primario">Enviar</button>
+      </form>
+    </div>
+  </ng-template>
+  
   </div>
 
   <!-- ======================== input ============================== -->
