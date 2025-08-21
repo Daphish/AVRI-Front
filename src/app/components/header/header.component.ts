@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
-import { AuthService } from '../../services/auth.service';
-import { Router } from '@angular/router';
 import { NgIf } from '@angular/common';
+import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+import { EventoEncuestaService } from '../../services/evento-encuesta.service';
 
 @Component({
   selector: 'app-header',
@@ -11,29 +12,38 @@ import { NgIf } from '@angular/common';
   styleUrl: './header.component.css',
 })
 export class HeaderComponent {
-  is_author: boolean = false;
-  is_staff: boolean = false;
+  is_author = false;
+  is_staff = false;
 
-  constructor(private AuthService: AuthService, private router: Router) {}
+  constructor(
+    private auth: AuthService,
+    private router: Router,
+    private encuesta: EventoEncuestaService
+  ) {}
 
   ngOnInit() {
-    this.AuthService.currentUser$.subscribe((user) => {
-      if (user) {
-        if ('anonymous_id' in user) {
-          this.is_author = false;
-          this.is_staff = false;
-        }
-        if ('is_staff' in user) {
-          user.is_staff ? (this.is_staff = true) : (this.is_staff = false);
-        }
-        if ('is_author' in user) {
-          user.is_author ? (this.is_author = true) : (this.is_author = false);
-        }
+    this.auth.currentUser$.subscribe((user: any) => {
+      if (!user) {
+        this.is_author = false;
+        this.is_staff = false;
+        return;
       }
+      // Usuario anónimo
+      if ('anonymous_id' in user) {
+        this.is_author = false;
+        this.is_staff = false;
+      }
+      // Flags de staff/autor si existen
+      if ('is_staff' in user) this.is_staff = !!user.is_staff;
+      if ('is_author' in user) this.is_author = !!user.is_author;
     });
   }
 
   viewFYP() {
     this.router.navigate(['/fyp']);
+  }
+
+  abrirEncuesta() {
+    this.encuesta.lanzarEncuesta();
   }
 }

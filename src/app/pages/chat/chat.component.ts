@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { NgFor, NgIf, NgClass } from '@angular/common';
+import { NgFor, NgIf, NgClass, NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -8,121 +8,153 @@ import { ChatService } from '../../services/chat.service';
 import { DocumentService } from '../../services/document.service';
 import { Documents, Message } from '../../interfaces/chat.interface';
 
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { EventoEncuestaService } from '../../services/evento-encuesta.service';
 
-/* ---------------- modelo de opción del wizard ---------------- */
-interface SelectOption {
+/* Unificamos a un solo tipo para el wizard */
+interface SelectItem {
   label: string;
   selected: boolean;
 }
 
 @Component({
-  standalone: true,
   selector: 'app-chat',
+  standalone: true,
+  imports: [NgIf, NgFor, NgClass, NgTemplateOutlet, FormsModule],
   templateUrl: './chat.component.html',
-  styleUrls: ['./chat.component.css'],
-  imports: [NgIf, NgFor, NgClass, FormsModule],
+  styleUrl: './chat.component.css',
 })
 export class ChatComponent implements OnInit {
-  /* ---------- inyección ---------- */
-  constructor(
-    private chatService: ChatService,
-    private docService: DocumentService,
-    private router: Router,
-    private http: HttpClient, 
-    private eventoEncuesta: EventoEncuestaService
-  ) {}
-
-  /* ---------- refs DOM ---------- */
-  @ViewChild('msgContainer') private msgContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild('msgContainer') msgContainer!: ElementRef<HTMLDivElement>;
 
   /* ---------- estado chat ---------- */
   sessionId = '';
   messages: Message[] = [];
   newText = '';
   isSending = false;
-  mostrarEncuesta = false;
-  mostrarFormulario = false;
 
-  /* ---------- estado wizard ---------- */
+  /* ---------- wizard ---------- */
   showWizard = false;
-  step = 0; // 0:intro, 1:temas, 2:keywords, 3:documentos
+  step = 0;
   savingPrefs = false;
 
-  topics: SelectOption[] = [
-    'Ingeniería',
-    'Ciencias Sociales',
-    'Química',
-    'Biología',
-    'Derecho',
-    'Física',
-    'Matemáticas',
-    'Medicina',
-    'Artes',
-    'Economía',
-    'Educación',
-    'Historia',
-  ].map((label) => ({ label, selected: false }));
+  temas: SelectItem[] = [
+    'Ingeniería','Ciencias Sociales','Ciencias Naturales','Humanidades','Arquitectura',
+    'Administración','Psicología','Comunicación','Lenguas','Química','Biología','Derecho',
+    'Física','Matemáticas','Medicina','Artes','Economía','Educación','Historia',
+  ].map(label => ({ label, selected: false }));
 
-  keywords: SelectOption[] = [
-    'Minería de datos',
-    'Inteligencia Artificial',
-    'Derechos Humanos',
-    'Energías Renovables',
-    'Cambio Climático',
-    'Big Data',
-    'Robótica',
-    'Nanotecnología',
-    'Política Pública',
-    'Emprendimiento',
-    'Salud Pública',
-    'Blockchain',
-    'Bioinformática',
-    'Ciberseguridad',
-  ].map((label) => ({ label, selected: false }));
+  keywords: SelectItem[] = [
+    'Minería de datos','Inteligencia Artificial','Sistemas Operativos','Algoritmos','Compiladores',
+    'Redes','Bases de Datos','Visión por Computador','Aprendizaje Automático','Ciberseguridad',
+  ].map(label => ({ label, selected: false }));
 
-  documents: SelectOption[] = [
-    'Guía rápida de investigación cualitativa',
-    'Fundamentos de termodinámica aplicada',
-    'Introducción a la nanotecnología',
-    'Manual de derecho ambiental mexicano',
-    'Patrones de diseño de software',
-    'Efectos del cambio climático en México',
-    'Dinámicas de grupo en organizaciones',
-    'Algoritmos de aprendizaje automático',
-    'Análisis económico contemporáneo',
-    'Estadística para ciencias sociales',
-  ].map((label) => ({ label, selected: false }));
+  documentos: SelectItem[] = [
+    'Manual de laboratorio','Tesis Doctoral','Artículo de revista','Reporte técnico','Capítulo de libro',
+  ].map(label => ({ label, selected: false }));
 
-  /* ---------------- ciclo de vida ---------------- */
-  ngOnInit(): void {
-    /* sesión seleccionada */
+  /* ---------- encuesta de satisfacción ---------- */
+  mostrarEncuesta = false;
+  mostrarFormulario = false;
+  isSubmittingSurvey = false;
+
+  preguntas = [
+    { id: 'q1',  texto: 'Encontré que el sistema es fácil de usar.' },
+    { id: 'q2',  texto: 'Me gustaría usar el sistema con frecuencia.' },
+    { id: 'q3',  texto: 'Las funciones del sistema están bien integradas.' },
+    { id: 'q4',  texto: 'El sistema es innecesariamente complejo.' },
+    { id: 'q5',  texto: 'Considero que el sistema es consistente.' },
+    { id: 'q6',  texto: 'Creo que la mayoría de la gente aprendería a usarlo rápidamente.' },
+    { id: 'q7',  texto: 'El sistema es muy engorroso.' },
+    { id: 'q8',  texto: 'Me sentí muy confiado usando el sistema.' },
+    { id: 'q9',  texto: 'Necesité aprender muchas cosas antes de comenzar.' },
+    { id: 'q10', texto: 'En general estoy satisfecho con el sistema.' },
+  ];
+
+  opciones = [1,2,3,4,5].map(v => ({ valor: v, texto: String(v) }));
+
+  respuestas: any = {
+    q1: 0, q2: 0, q3: 0, q4: 0, q5: 0,
+    q6: 0, q7: 0, q8: 0, q9: 0, q10: 0,
+    comments: ''
+  };
+
+  constructor(
+    public chatService: ChatService,
+    private docService: DocumentService,
+    private router: Router,
+    private http: HttpClient,
+    private eventoEncuesta: EventoEncuestaService
+  ) {}
+
+  async ngOnInit(): Promise<void> {
+    // Sesión y wizard
     this.chatService.idChat$.subscribe((id) => {
       this.sessionId = id;
       this.messages = [];
       if (this.chatService.pendingWizard) {
-        this.chatService.pendingWizard = false;
-        this.resetWizard();
         this.showWizard = true;
+        this.step = 0;
+        this.chatService.pendingWizard = false;
       }
     });
 
-    /* stream de mensajes */
+    // Mensajes
     this.chatService.messages$.subscribe((msgs) => {
       this.messages = msgs;
-      if (msgs.length > 0) this.showWizard = false;
       setTimeout(() => this.scrollBottom(), 0);
     });
 
-     // Escuchar si alguien lanza la encuesta
-     this.eventoEncuesta.encuestaActivada$.subscribe(() => {
+    // Encuesta (disparo desde header u otro sitio)
+    this.eventoEncuesta.encuestaActivada$.subscribe(() => {
       this.mostrarEncuesta = true;
       this.mostrarFormulario = false;
-      console.log('Encuesta activada desde el header');
+      setTimeout(() => this.scrollBottom(), 0);
     });
   }
 
+  /* ---------------- Wizard (manteniendo el estilo/HTML original) ---------------- */
+  currentList(): SelectItem[] {
+    return this.step === 1 ? this.temas : this.step === 2 ? this.keywords : this.documentos;
+  }
+
+  toggle(opt: SelectItem) {
+    opt.selected = !opt.selected;
+  }
+
+  canContinue(): boolean {
+    const list = this.currentList();
+    const min = this.step === 3 ? 1 : 5; // 5 en pasos 1 y 2; 1 en paso 3
+    return list.filter(x => x.selected).length >= min;
+  }
+
+  next() {
+    if (this.step < 3 && this.canContinue()) this.step++;
+  }
+
+  prev() {
+    if (this.step > 1) this.step--;
+  }
+
+  async savePreferences() {
+    this.savingPrefs = true;
+    try {
+      const payload = {
+        temas: this.temas.filter(t => t.selected).map(t => t.label),
+        keywords: this.keywords.filter(k => k.selected).map(k => k.label),
+        documentos: this.documentos.filter(d => d.selected).map(d => d.label),
+      };
+      // Método local en vez de chatService.saveProfilePrefs (no existe en tu servicio)
+      await firstValueFrom(this.http.post('/api/recommender/profile/create/', payload));
+      this.showWizard = false;
+    } catch (e) {
+      console.error(e);
+    } finally {
+      this.savingPrefs = false;
+    }
+  }
+
+  /* ---------------- Encuesta ---------------- */
   iniciarEncuesta() {
     this.mostrarFormulario = true;
   }
@@ -131,34 +163,6 @@ export class ChatComponent implements OnInit {
     this.mostrarEncuesta = false;
   }
 
-  preguntas = [
-    { texto: '1. Creo que me gustaría utilizar este sistema con frecuencia.' },
-    { texto: '2. Me pareció que el sistema era innecesariamente complejo.' },
-    { texto: '3. Pienso que el sistema fue fácil de usar.' },
-    { texto: '4. Creo que necesitaría la ayuda de un técnico para poder utilizar este sistema.' },
-    { texto: '5. He comprobado que las diversas funciones de este sistema están bien integradas.' },
-    { texto: '6. Pienso que hay demasiadas inconsistencias en este sistema.' },
-    { texto: '7. Me imagino que la mayoría de la gente aprendería a utilizar este sistema muy rápidamente.' },
-    { texto: '8. El sistema me pareció muy incómodo de usar.' },
-    { texto: '9. Me sentí muy seguro al utilizar el sistema.' },
-    { texto: '10. Necesite aprender muchas cosas antes de poder poner en marcha este sistema.' }
-  ];
-  
-  
-  opciones = [
-    { valor: 1, texto: '1' },
-    { valor: 2, texto: '2' },
-    { valor: 3, texto: '3' },
-    { valor: 4, texto: '4' },
-    { valor: 5, texto: '5' }
-  ];
-
-  respuestas: any = {
-    q1: 0, q2: 0, q3: 0, q4: 0, q5: 0,
-    q6: 0, q7: 0, q8: 0, q9: 0, q10: 0,
-    comments: ''
-  };
-
   enviarEncuesta() {
     for (let i = 1; i <= 10; i++) {
       if (!this.respuestas['q' + i]) {
@@ -166,28 +170,50 @@ export class ChatComponent implements OnInit {
         return;
       }
     }
-  
+
     const payload = {
-      version: "1.0",
-      survey: JSON.stringify(this.respuestas)  // <-- aquí está la clave
+      version: 'sus-1.0',
+      survey: {
+        rating_items: {
+          q1: this.respuestas.q1, q2: this.respuestas.q2, q3: this.respuestas.q3, q4: this.respuestas.q4, q5: this.respuestas.q5,
+          q6: this.respuestas.q6, q7: this.respuestas.q7, q8: this.respuestas.q8, q9: this.respuestas.q9, q10: this.respuestas.q10,
+        },
+        comments: this.respuestas.comments || '',
+        meta: {
+          session_id: this.sessionId || null,
+          feature: 'chat',
+          locale: navigator.language || 'es',
+          user_type: 'unknown'
+        }
+      }
     };
-  
-    this.http.post('/api/feedback/', payload).subscribe({
+
+    const headers = new HttpHeaders({ 'Idempotency-Key': this.uuid() });
+    this.isSubmittingSurvey = true;
+
+    this.http.post('/api/feedback/', payload, { headers }).subscribe({
       next: () => {
-        alert('Encuesta enviada con éxito');
+        alert('¡Gracias! Encuesta enviada.');
         this.mostrarEncuesta = false;
         this.mostrarFormulario = false;
+        this.isSubmittingSurvey = false;
+        this.respuestas = {
+          q1: 0, q2: 0, q3: 0, q4: 0, q5: 0,
+          q6: 0, q7: 0, q8: 0, q9: 0, q10: 0,
+          comments: ''
+        };
       },
       error: (error) => {
         console.error('Error al enviar la encuesta:', error);
-        alert('Hubo un error al enviar la encuesta');
+        alert('Hubo un error al enviar la encuesta. Inténtalo de nuevo.');
+        this.isSubmittingSurvey = false;
       }
     });
   }
 
-  /* ================= chat ================= */
-  async send(): Promise<void> {
-    const text = this.newText.trim();
+  /* ---------------- Chat ---------------- */
+  async send() {
+    const text = this.newText?.trim();
     if (!text) return;
 
     this.isSending = true;
@@ -207,80 +233,11 @@ export class ChatComponent implements OnInit {
     this.router.navigate(['/document']);
   }
 
-  /* ================= wizard ================= */
-  closeWizard(): void {
-    this.showWizard = false;
-  }
-
-  toggle(opt: SelectOption): void {
-    opt.selected = !opt.selected;
-  }
-
-  currentList(): SelectOption[] {
-    if (this.step === 1) return this.topics;
-    if (this.step === 2) return this.keywords;
-    return this.documents; // step 3
-  }
-
-  canContinue(): boolean {
-    const sel = this.currentList().filter((o) => o.selected).length;
-    return this.step === 3 ? sel > 0 : sel >= 5;
-  }
-
-  next(): void {
-    if (this.step === 0) {
-      this.step = 1;
-      return;
-    }
-
-    if (this.step < 3) {
-      if (!this.canContinue()) return;
-      this.step++;
-      return;
-    }
-
-    /* step === 3 -> Guardar preferencias */
-    if (!this.canContinue()) return;
-    this.finishWizard();
-  }
-
-  prev(): void {
-    if (this.step > 1) this.step--;
-  }
-
-  finishWizard(): void {
-    this.savingPrefs = true;
-
-    const interests = [
-      ...this.topics.filter((o) => o.selected).map((o) => o.label),
-      ...this.keywords.filter((o) => o.selected).map((o) => o.label),
-    ];
-    const docTitles = this.documents
-      .filter((o) => o.selected)
-      .map((o) => o.label);
-
-    this.chatService.submitProfile(interests, docTitles).subscribe({
-      next: () => {
-        this.savingPrefs = false;
-        this.showWizard = false;
-      },
-      error: (err) => {
-        console.error(err);
-        this.savingPrefs = false;
-        alert('No se pudo guardar el perfil.');
-      },
-    });
-  }
-
-  resetWizard(): void {
-    [...this.topics, ...this.keywords, ...this.documents].forEach(
-      (o) => (o.selected = false)
-    );
-    this.step = 0;
-    this.savingPrefs = false;
-  }
-
   /* ---------------- utilidades ---------------- */
+  get isTyping(): boolean {
+    return this.messages.some(m => (m as any).isLoading);
+  }
+
   trackByIndex(i: number) {
     return i;
   }
@@ -290,5 +247,14 @@ export class ChatComponent implements OnInit {
       const el = this.msgContainer.nativeElement;
       el.scrollTop = el.scrollHeight;
     } catch {}
+  }
+
+  private uuid(): string {
+    if ('randomUUID' in crypto) return (crypto as any).randomUUID();
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === 'x' ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
   }
 }
