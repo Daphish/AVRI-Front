@@ -132,16 +132,16 @@ export class ChatComponent implements OnInit {
   }
 
   preguntas = [
-    { texto: '1. I think that I would like to use this system frequently.' },
-    { texto: '2. I found the system unnecessarily complex.' },
-    { texto: '3. I thought the system was easy to use.' },
-    { texto: '4. I think that I would need the support of a technical person to be able to use this system.' },
-    { texto: '5. I found the various functions in this system were well integrated.' },
-    { texto: '6. I thought there was too much inconsistency in this system.' },
-    { texto: '7. I would imagine that most people would learn to use this system very quickly.' },
-    { texto: '8. I found the system very awkward to use.' },
-    { texto: '9. I felt very confident using the system.' },
-    { texto: '10. I needed to learn a lot of things before I could get going with this system.' }
+    { texto: '1. Creo que me gustaría utilizar este sistema con frecuencia.' },
+    { texto: '2. Me pareció que el sistema era innecesariamente complejo.' },
+    { texto: '3. Pienso que el sistema fue fácil de usar.' },
+    { texto: '4. Creo que necesitaría la ayuda de un técnico para poder utilizar este sistema.' },
+    { texto: '5. He comprobado que las diversas funciones de este sistema están bien integradas.' },
+    { texto: '6. Pienso que hay demasiadas inconsistencias en este sistema.' },
+    { texto: '7. Me imagino que la mayoría de la gente aprendería a utilizar este sistema muy rápidamente.' },
+    { texto: '8. El sistema me pareció muy incómodo de usar.' },
+    { texto: '9. Me sentí muy seguro al utilizar el sistema.' },
+    { texto: '10. Necesité aprender muchas cosas antes de poder poner en marcha este sistema.' }
   ];
   
   
