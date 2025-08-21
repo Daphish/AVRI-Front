@@ -65,7 +65,7 @@ export class ChatComponent implements OnInit {
     { id: 'q4',  texto: 'El sistema es innecesariamente complejo.' },
     { id: 'q5',  texto: 'Considero que el sistema es consistente.' },
     { id: 'q6',  texto: 'Creo que la mayoría de la gente aprendería a usarlo rápidamente.' },
-    { id: 'q7',  texto: 'El sistema es muy engorroso.' },
+    { id: 'q7',  texto: 'El sistema es muy dificil de usar.' },
     { id: 'q8',  texto: 'Me sentí muy confiado usando el sistema.' },
     { id: 'q9',  texto: 'Necesité aprender muchas cosas antes de comenzar.' },
     { id: 'q10', texto: 'En general estoy satisfecho con el sistema.' },
