@@ -20,6 +20,11 @@
   border-top-right-radius: 8px;
 }
 
+.top-left img {
+  height: auto;
+  width: 30%;
+}
+
 .left-title {
   color: white;
   margin-left: 1rem;
@@ -301,7 +306,7 @@
 
 /* resalta el chat activo */
 .sidebar-chat.active {
-  background-color: #ffffff;   /* o #f5f5f5 si prefieres un gris clarito */
+  background-color: #ffffff; /* o #f5f5f5 si prefieres un gris clarito */
 }
 
 /* opcional: si quieres una pequeña sombra o borde lateral */
