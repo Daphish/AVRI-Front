@@ -103,7 +103,7 @@ export class AuthService {
       this.currentUserSource.next(user);
 
       if (user && 'anonymous_id' in user) {
-        this.profileSetupCompleteSource.next(true); // Para anónimos, se considera completo o no aplica
+        this.profileSetupCompleteSource.next(false); // Para anónimos, se considera completo o no aplica
       } else if (user) {
         this.profileSetupCompleteSource.next(
           !!(user as User).profile_preferences_set
