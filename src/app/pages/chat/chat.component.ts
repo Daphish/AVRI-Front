@@ -39,19 +39,47 @@ export class ChatComponent implements OnInit {
   savingPrefs = false;
 
   temas: SelectItem[] = [
-    'Ingeniería','Ciencias Sociales','Ciencias Naturales','Humanidades','Arquitectura',
-    'Administración','Psicología','Comunicación','Lenguas','Química','Biología','Derecho',
-    'Física','Matemáticas','Medicina','Artes','Economía','Educación','Historia',
-  ].map(label => ({ label, selected: false }));
+    'Ingeniería',
+    'Ciencias Sociales',
+    'Ciencias Naturales',
+    'Humanidades',
+    'Arquitectura',
+    'Administración',
+    'Psicología',
+    'Comunicación',
+    'Lenguas',
+    'Química',
+    'Biología',
+    'Derecho',
+    'Física',
+    'Matemáticas',
+    'Medicina',
+    'Artes',
+    'Economía',
+    'Educación',
+    'Historia',
+  ].map((label) => ({ label, selected: false }));
 
   keywords: SelectItem[] = [
-    'Minería de datos','Inteligencia Artificial','Sistemas Operativos','Algoritmos','Compiladores',
-    'Redes','Bases de Datos','Visión por Computador','Aprendizaje Automático','Ciberseguridad',
-  ].map(label => ({ label, selected: false }));
+    'Minería de datos',
+    'Inteligencia Artificial',
+    'Sistemas Operativos',
+    'Algoritmos',
+    'Compiladores',
+    'Redes',
+    'Bases de Datos',
+    'Visión por Computador',
+    'Aprendizaje Automático',
+    'Ciberseguridad',
+  ].map((label) => ({ label, selected: false }));
 
   documentos: SelectItem[] = [
-    'Manual de laboratorio','Tesis Doctoral','Artículo de revista','Reporte técnico','Capítulo de libro',
-  ].map(label => ({ label, selected: false }));
+    'Manual de laboratorio',
+    'Tesis Doctoral',
+    'Artículo de revista',
+    'Reporte técnico',
+    'Capítulo de libro',
+  ].map((label) => ({ label, selected: false }));
 
   /* ---------- encuesta de satisfacción ---------- */
   mostrarEncuesta = false;
@@ -59,24 +87,35 @@ export class ChatComponent implements OnInit {
   isSubmittingSurvey = false;
 
   preguntas = [
-    { id: 'q1',  texto: 'Encontré que el sistema es fácil de usar.' },
-    { id: 'q2',  texto: 'Me gustaría usar el sistema con frecuencia.' },
-    { id: 'q3',  texto: 'Las funciones del sistema están bien integradas.' },
-    { id: 'q4',  texto: 'El sistema es innecesariamente complejo.' },
-    { id: 'q5',  texto: 'Considero que el sistema es consistente.' },
-    { id: 'q6',  texto: 'Creo que la mayoría de la gente aprendería a usarlo rápidamente.' },
-    { id: 'q7',  texto: 'El sistema es muy engorroso.' },
-    { id: 'q8',  texto: 'Me sentí muy confiado usando el sistema.' },
-    { id: 'q9',  texto: 'Necesité aprender muchas cosas antes de comenzar.' },
+    { id: 'q1', texto: 'Encontré que el sistema es fácil de usar.' },
+    { id: 'q2', texto: 'Me gustaría usar el sistema con frecuencia.' },
+    { id: 'q3', texto: 'Las funciones del sistema están bien integradas.' },
+    { id: 'q4', texto: 'El sistema es innecesariamente complejo.' },
+    { id: 'q5', texto: 'Considero que el sistema es consistente.' },
+    {
+      id: 'q6',
+      texto: 'Creo que la mayoría de la gente aprendería a usarlo rápidamente.',
+    },
+    { id: 'q7', texto: 'El sistema es muy engorroso.' },
+    { id: 'q8', texto: 'Me sentí muy confiado usando el sistema.' },
+    { id: 'q9', texto: 'Necesité aprender muchas cosas antes de comenzar.' },
     { id: 'q10', texto: 'En general estoy satisfecho con el sistema.' },
   ];
 
-  opciones = [1,2,3,4,5].map(v => ({ valor: v, texto: String(v) }));
+  opciones = [1, 2, 3, 4, 5].map((v) => ({ valor: v, texto: String(v) }));
 
   respuestas: any = {
-    q1: 0, q2: 0, q3: 0, q4: 0, q5: 0,
-    q6: 0, q7: 0, q8: 0, q9: 0, q10: 0,
-    comments: ''
+    q1: 0,
+    q2: 0,
+    q3: 0,
+    q4: 0,
+    q5: 0,
+    q6: 0,
+    q7: 0,
+    q8: 0,
+    q9: 0,
+    q10: 0,
+    comments: '',
   };
 
   constructor(
@@ -115,7 +154,11 @@ export class ChatComponent implements OnInit {
 
   /* ---------------- Wizard (manteniendo el estilo/HTML original) ---------------- */
   currentList(): SelectItem[] {
-    return this.step === 1 ? this.temas : this.step === 2 ? this.keywords : this.documentos;
+    return this.step === 1
+      ? this.temas
+      : this.step === 2
+      ? this.keywords
+      : this.documentos;
   }
 
   toggle(opt: SelectItem) {
@@ -125,7 +168,7 @@ export class ChatComponent implements OnInit {
   canContinue(): boolean {
     const list = this.currentList();
     const min = this.step === 3 ? 1 : 5; // 5 en pasos 1 y 2; 1 en paso 3
-    return list.filter(x => x.selected).length >= min;
+    return list.filter((x) => x.selected).length >= min;
   }
 
   next() {
@@ -140,12 +183,20 @@ export class ChatComponent implements OnInit {
     this.savingPrefs = true;
     try {
       const payload = {
-        temas: this.temas.filter(t => t.selected).map(t => t.label),
-        keywords: this.keywords.filter(k => k.selected).map(k => k.label),
-        documentos: this.documentos.filter(d => d.selected).map(d => d.label),
+        profile: {
+          interests: [
+            ...this.temas.filter((t) => t.selected).map((t) => t.label),
+            ...this.keywords.filter((k) => k.selected).map((k) => k.label),
+          ],
+          document_titles: this.documentos
+            .filter((d) => d.selected)
+            .map((d) => d.label),
+        },
       };
       // Método local en vez de chatService.saveProfilePrefs (no existe en tu servicio)
-      await firstValueFrom(this.http.post('/api/recommender/profile/create/', payload));
+      await firstValueFrom(
+        this.http.post('/api/recommender/profile/create/', payload)
+      );
       this.showWizard = false;
     } catch (e) {
       console.error(e);
@@ -175,17 +226,25 @@ export class ChatComponent implements OnInit {
       version: 'sus-1.0',
       survey: {
         rating_items: {
-          q1: this.respuestas.q1, q2: this.respuestas.q2, q3: this.respuestas.q3, q4: this.respuestas.q4, q5: this.respuestas.q5,
-          q6: this.respuestas.q6, q7: this.respuestas.q7, q8: this.respuestas.q8, q9: this.respuestas.q9, q10: this.respuestas.q10,
+          q1: this.respuestas.q1,
+          q2: this.respuestas.q2,
+          q3: this.respuestas.q3,
+          q4: this.respuestas.q4,
+          q5: this.respuestas.q5,
+          q6: this.respuestas.q6,
+          q7: this.respuestas.q7,
+          q8: this.respuestas.q8,
+          q9: this.respuestas.q9,
+          q10: this.respuestas.q10,
         },
         comments: this.respuestas.comments || '',
         meta: {
           session_id: this.sessionId || null,
           feature: 'chat',
           locale: navigator.language || 'es',
-          user_type: 'unknown'
-        }
-      }
+          user_type: 'unknown',
+        },
+      },
     };
 
     const headers = new HttpHeaders({ 'Idempotency-Key': this.uuid() });
@@ -198,16 +257,24 @@ export class ChatComponent implements OnInit {
         this.mostrarFormulario = false;
         this.isSubmittingSurvey = false;
         this.respuestas = {
-          q1: 0, q2: 0, q3: 0, q4: 0, q5: 0,
-          q6: 0, q7: 0, q8: 0, q9: 0, q10: 0,
-          comments: ''
+          q1: 0,
+          q2: 0,
+          q3: 0,
+          q4: 0,
+          q5: 0,
+          q6: 0,
+          q7: 0,
+          q8: 0,
+          q9: 0,
+          q10: 0,
+          comments: '',
         };
       },
       error: (error) => {
         console.error('Error al enviar la encuesta:', error);
         alert('Hubo un error al enviar la encuesta. Inténtalo de nuevo.');
         this.isSubmittingSurvey = false;
-      }
+      },
     });
   }
 
@@ -235,7 +302,7 @@ export class ChatComponent implements OnInit {
 
   /* ---------------- utilidades ---------------- */
   get isTyping(): boolean {
-    return this.messages.some(m => (m as any).isLoading);
+    return this.messages.some((m) => (m as any).isLoading);
   }
 
   trackByIndex(i: number) {
