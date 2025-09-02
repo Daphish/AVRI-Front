@@ -10,8 +10,9 @@ import { Documents, Message } from '../../interfaces/chat.interface';
 
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { EventoEncuestaService } from '../../services/evento-encuesta.service';
+import { AuthService } from '../../services/auth.service';
 
-/* Unificamos a un solo tipo para el wizard */
+/** Único tipo para las listas del wizard */
 interface SelectItem {
   label: string;
   selected: boolean;
@@ -33,7 +34,7 @@ export class ChatComponent implements OnInit {
   newText = '';
   isSending = false;
 
-  /* ---------- wizard ---------- */
+  /* ---------- wizard (profiler) ---------- */
   showWizard = false;
   step = 0;
   savingPrefs = false;
@@ -103,7 +104,6 @@ export class ChatComponent implements OnInit {
   ];
 
   opciones = [1, 2, 3, 4, 5].map((v) => ({ valor: v, texto: String(v) }));
-
   respuestas: any = {
     q1: 0,
     q2: 0,
@@ -123,11 +123,18 @@ export class ChatComponent implements OnInit {
     private docService: DocumentService,
     private router: Router,
     private http: HttpClient,
-    private eventoEncuesta: EventoEncuestaService
+    private eventoEncuesta: EventoEncuestaService,
+    private auth: AuthService
   ) {}
 
   async ngOnInit(): Promise<void> {
-    // Sesión y wizard
+    // 1) Mostrar el wizard primero para usuarios anónimos o sin perfil completo
+    this.auth.profileSetupComplete$.subscribe((isComplete) => {
+      this.showWizard = !isComplete;
+      if (!isComplete) this.step = 0;
+    });
+
+    // 2) Gestión de sesión y wizard pendiente (flujo existente)
     this.chatService.idChat$.subscribe((id) => {
       this.sessionId = id;
       this.messages = [];
@@ -138,13 +145,13 @@ export class ChatComponent implements OnInit {
       }
     });
 
-    // Mensajes
+    // 3) Flujo de mensajes
     this.chatService.messages$.subscribe((msgs) => {
       this.messages = msgs;
       setTimeout(() => this.scrollBottom(), 0);
     });
 
-    // Encuesta (disparo desde header u otro sitio)
+    // 4) Encuesta (disparo desde header u otro sitio)
     this.eventoEncuesta.encuestaActivada$.subscribe(() => {
       this.mostrarEncuesta = true;
       this.mostrarFormulario = false;
@@ -152,7 +159,7 @@ export class ChatComponent implements OnInit {
     });
   }
 
-  /* ---------------- Wizard (manteniendo el estilo/HTML original) ---------------- */
+  /* ---------------- Wizard ---------------- */
   currentList(): SelectItem[] {
     return this.step === 1
       ? this.temas
@@ -193,11 +200,14 @@ export class ChatComponent implements OnInit {
             .map((d) => d.label),
         },
       };
-      // Método local en vez de chatService.saveProfilePrefs (no existe en tu servicio)
-      await firstValueFrom(
-        this.http.post('/api/recommender/profile/create/', payload)
-      );
+      try {
+        await firstValueFrom(this.http.put('/api/recommender/profile/me/', payload));
+      } catch {
+        await firstValueFrom(this.http.post('/api/recommender/profile/create/', payload));
+      }
+      this.auth.markProfileAsCompleted(true);
       this.showWizard = false;
+
     } catch (e) {
       console.error(e);
     } finally {
@@ -205,7 +215,7 @@ export class ChatComponent implements OnInit {
     }
   }
 
-  /* ---------------- Encuesta ---------------- */
+  /* ---------------- Encuesta de satisfacción ---------------- */
   iniciarEncuesta() {
     this.mostrarFormulario = true;
   }
@@ -277,7 +287,6 @@ export class ChatComponent implements OnInit {
       },
     });
   }
-
   /* ---------------- Chat ---------------- */
   async send() {
     const text = this.newText?.trim();
@@ -302,7 +311,8 @@ export class ChatComponent implements OnInit {
 
   /* ---------------- utilidades ---------------- */
   get isTyping(): boolean {
-    return this.messages.some((m) => (m as any).isLoading);
+    // si tu interfaz Message no trae isLoading, este getter no se usa en la plantilla
+    return this.messages.some((m: any) => m?.isLoading);
   }
 
   trackByIndex(i: number) {
@@ -314,14 +324,5 @@ export class ChatComponent implements OnInit {
       const el = this.msgContainer.nativeElement;
       el.scrollTop = el.scrollHeight;
     } catch {}
-  }
-
-  private uuid(): string {
-    if ('randomUUID' in crypto) return (crypto as any).randomUUID();
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-      const r = (Math.random() * 16) | 0;
-      const v = c === 'x' ? r : (r & 0x3) | 0x8;
-      return v.toString(16);
-    });
   }
 }

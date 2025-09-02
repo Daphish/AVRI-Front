@@ -1,0 +1,468 @@
+/* ====================== ENCUESTA DE SATISFACCIÓN MEJORADA ========================= */
+
+/* Base para el overlay modal */
+.wizard-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+}
+
+.wizard-card {
+  background: white;
+  border-radius: 12px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+/* Overlay específico para la encuesta */
+.wizard-overlay .wizard-card:has(.modal-encuesta) {
+  max-width: 700px !important;
+  width: 90% !important;
+  max-height: 70vh !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
+
+.modal-encuesta {
+  background: linear-gradient(135deg, #163a5c 0%, #21405f 50%, #0056a3 100%);
+  color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 20px;
+  box-shadow: 
+    0 20px 40px rgba(22, 58, 92, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+  margin: 0 auto;
+  max-height: 70vh;
+  box-sizing: border-box;
+}
+
+/* Efecto de brillo sutil en la parte superior */
+.modal-encuesta::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #4299e1, #63b3ed, #90cdf4, #bee3f8);
+  opacity: 0.8;
+}
+
+/* Efecto decorativo de fondo */
+.modal-encuesta::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.modal-encuesta h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-align: center;
+  letter-spacing: -0.5px;
+  position: relative;
+  z-index: 2;
+}
+
+.modal-encuesta h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  line-height: 1.4;
+  opacity: 0.95;
+  position: relative;
+  z-index: 2;
+}
+
+.modal-encuesta p {
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  opacity: 0.92;
+  text-align: justify;
+  position: relative;
+  z-index: 2;
+}
+
+/* Botones mejorados */
+.modal-encuesta .secundario,
+.modal-encuesta .primario {
+  padding: 14px 28px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  min-width: 150px;
+  margin: 0 8px;
+  z-index: 2;
+}
+
+.modal-encuesta .secundario {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+}
+
+.modal-encuesta .secundario:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 255, 255, 0.15);
+}
+
+.modal-encuesta .primario {
+  background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+  color: #2d3748;
+  border: 2px solid transparent;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.25);
+}
+
+.modal-encuesta .primario:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.35);
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+}
+
+.modal-encuesta .primario:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
+}
+
+/* Contenedor de botones */
+.modal-encuesta .botones-container {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+/* Centrar botones cuando están sueltos (intro de encuesta) */
+.modal-encuesta {
+  text-align: center;
+}
+
+.modal-encuesta p {
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  opacity: 0.92;
+  text-align: justify;
+  position: relative;
+  z-index: 2;
+}
+
+/* Contenedor para botones de la pantalla inicial */
+.modal-encuesta > .secundario,
+.modal-encuesta > .primario {
+  display: inline-block;
+  margin: 8px;
+}
+
+/* Estilo para formulario */
+.modal-encuesta form {
+  position: relative;
+  z-index: 2;
+}
+
+/* Preguntas mejoradas */
+.modal-encuesta .pregunta {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.modal-encuesta .pregunta:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.modal-encuesta .pregunta strong {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+/* Opciones de radio mejoradas - HORIZONTAL */
+.modal-encuesta .opciones {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  overflow: visible;
+}
+
+.modal-encuesta .opciones label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 12px 8px;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  text-align: center;
+  flex: 1;
+  min-width: 60px;
+  max-width: 100px;
+}
+
+.modal-encuesta .opciones label:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Radio buttons personalizados */
+.modal-encuesta .opciones input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  accent-color: #63b3ed;
+  cursor: pointer;
+}
+
+/* Área de comentarios mejorada */
+.modal-encuesta label:not(.opciones label) {
+  display: block;
+  margin: 2rem 0 12px 0;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #ffffff;
+}
+
+.modal-encuesta textarea {
+  width: 100%;
+  padding: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 100px;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.modal-encuesta textarea::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.modal-encuesta textarea:focus {
+  outline: none;
+  border-color: #63b3ed;
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.1);
+}
+
+/* Botón de envío del formulario */
+.modal-encuesta form button[type="submit"] {
+  width: 100%;
+  margin-top: 1.5rem;
+  padding: 16px;
+  font-size: 1.1rem;
+  border-radius: 12px;
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+  .wizard-overlay .wizard-card:has(.modal-encuesta) {
+    width: 98% !important;
+    max-width: none !important;
+  }
+  
+  .modal-encuesta {
+    padding: 1.5rem;
+    border-radius: 16px;
+  }
+  
+  .modal-encuesta .opciones {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .modal-encuesta .opciones label {
+    flex-direction: row;
+    justify-content: flex-start;
+    max-width: none;
+    width: 100%;
+  }
+}
+  
+  .modal-encuesta h2 {
+    font-size: 1.8rem;
+  }
+  
+  .modal-encuesta h3 {
+    font-size: 1.2rem;
+  }
+  
+  .modal-encuesta .secundario,
+  .modal-encuesta .primario {
+    min-width: 120px;
+    padding: 12px 20px;
+    font-size: 0.95rem;
+    margin: 4px;
+  }
+  
+  .modal-encuesta .pregunta {
+    padding: 1rem;
+  }
+  
+  .modal-encuesta .opciones label {
+    padding: 10px 12px;
+  }
+
+
+@media (max-width: 480px) {
+  .modal-encuesta .botones-container {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .modal-encuesta .secundario,
+  .modal-encuesta .primario {
+    width: 100%;
+    max-width: 250px;
+  }
+}
+
+/* Animaciones suaves */
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-encuesta {
+  animation: fadeInScale 0.3s ease-out;
+}
+
+/* Scroll personalizado para la encuesta */
+.modal-encuesta::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-encuesta::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.modal-encuesta::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+.modal-encuesta::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+.modal-encuesta .primario:disabled {
+  background: rgba(255, 255, 255, 0.3);
+  color: rgba(45, 55, 72, 0.6);
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.modal-encuesta .secundario:disabled {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.4);
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ====================== BOTÓN DE CERRAR ========================= */
+.boton-cerrar {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #ffffff;
+  transition: all 0.3s ease;
+  z-index: 10;
+  backdrop-filter: blur(10px);
+}
+
+.boton-cerrar:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: scale(1.05);
+}
+
+.boton-cerrar:active {
+  transform: scale(0.95);
+}
+
+.boton-cerrar svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Responsive: ajustar posición en pantallas pequeñas */
+@media (max-width: 600px) {
+  .boton-cerrar {
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+  }
+  
+  .boton-cerrar svg {
+    width: 16px;
+    height: 16px;
+  }
+}
