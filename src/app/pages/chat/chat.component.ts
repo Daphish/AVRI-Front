@@ -168,7 +168,6 @@ export class ChatComponent implements OnInit {
     }
   }
 
-
   /* ---------------- Encuesta de satisfacción ---------------- */
   iniciarEncuesta() {
     this.mostrarFormulario = true;
@@ -225,7 +224,6 @@ export class ChatComponent implements OnInit {
       }
     });
   }
-
   /* ---------------- Chat ---------------- */
   async send() {
     const text = this.newText?.trim();
@@ -263,14 +261,5 @@ export class ChatComponent implements OnInit {
       const el = this.msgContainer.nativeElement;
       el.scrollTop = el.scrollHeight;
     } catch {}
-  }
-
-  private uuid(): string {
-    if ('randomUUID' in crypto) return (crypto as any).randomUUID();
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-      const r = (Math.random() * 16) | 0;
-      const v = c === 'x' ? r : (r & 0x3) | 0x8;
-      return v.toString(16);
-    });
   }
 }
