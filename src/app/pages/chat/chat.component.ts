@@ -19,7 +19,7 @@ interface SelectItem {
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [NgIf, NgFor, NgClass, NgTemplateOutlet, FormsModule],
+  imports: [NgIf, NgFor, NgClass, FormsModule],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.css',
 })
