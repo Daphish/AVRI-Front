@@ -15,6 +15,22 @@ import { DocumentDetail } from '../../services/document.service';
   styleUrl: './recommendations.component.css',
 })
 export class RecommendationsComponent implements OnInit {
+  /* ---------- toast notifications ---------- */
+  showToast = false;
+  toastMessage = '';
+  toastType: 'success' | 'error' | 'warning' = 'error';
+
+  /* ---------- método para mostrar toast ---------- */
+  private showToastMessage(message: string, type: 'success' | 'error' | 'warning' = 'error') {
+    this.toastMessage = message;
+    this.toastType = type;
+    this.showToast = true;
+    
+    setTimeout(() => {
+      this.showToast = false;
+    }, 4000);
+  }
+
   // Implementado OnInit
   recommendedDocs: RepositoryDocument[] = [
     {
@@ -77,15 +93,28 @@ export class RecommendationsComponent implements OnInit {
 
   // ngOninit -> debe ser ngOnInit (camelCase)
   ngOnInit(): void {
-    this.recommendationService.getDetailedDocuments();
-    this.recommendationService.documents$.subscribe((documents) => {
-      if (documents && documents.length > 0) {
-        this.recommendedDocsBack = documents;
-      } else {
-        // Opcional: Mantener los datos de ejemplo o mostrar mensaje si no hay recomendaciones
-        console.log('No se recibieron documentos recomendados del servicio.');
+    try {
+      this.recommendationService.getDetailedDocuments();
+    } catch (error) {
+      console.error('Error al solicitar documentos:', error);
+      this.showToastMessage('Error al solicitar documentos.');
+    }
+  
+    this.recommendationService.documents$.subscribe({
+      next: (documents) => {
+        if (documents && documents.length > 0) {
+          this.recommendedDocsBack = documents;
+        } else {
+          console.log('No se recibieron documentos recomendados.');
+          this.showToastMessage('Error al recibir los documentos recomendados.');
+        }
+      },
+      error: (error) => {
+        console.error('Error al obtener documentos:', error);
+        this.showToastMessage('Error al cargar documentos recomendados.');
       }
     });
+    
     // CORREGIDO: nombre del método y tipo de retorno
     // Descomenta y ajusta esto si es necesario
     /*
