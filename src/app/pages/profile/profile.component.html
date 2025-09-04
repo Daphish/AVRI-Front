@@ -122,19 +122,15 @@
             class="document-item"
             style="margin-bottom: 0.5em"
           >
-            <strong>{{ item.title }}</strong>
+            <strong>{{ item.document.title }}</strong>
             <br />
-            <small *ngIf="item.repository_uri">{{ item.repository_uri }}</small>
+            <small *ngIf="item.document.repository_uri">{{
+              item.document.repository_uri
+            }}</small>
           </div>
         </ng-container>
         <ng-template #noDocumentsTemplate>
-          <p>
-            {{
-              documents.length > 0 && documents[0]
-                ? documents[0].title
-                : "No hay documentos para mostrar."
-            }}
-          </p>
+          <p>No hay documentos guardados.</p>
         </ng-template>
       </div>
     </div>
@@ -149,7 +145,7 @@
   </div>
 
   <!-- Toast notification -->
-  <div *ngIf="showToast" class="toast toast-{{toastType}}">
+  <div *ngIf="showToast" class="toast toast-{{ toastType }}">
     <span>{{ toastMessage }}</span>
     <i class="bi bi-x" (click)="showToast = false"></i>
   </div>
