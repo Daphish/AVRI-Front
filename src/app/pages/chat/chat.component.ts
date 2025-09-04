@@ -27,6 +27,11 @@ interface SelectItem {
 export class ChatComponent implements OnInit {
   @ViewChild('msgContainer') msgContainer!: ElementRef<HTMLDivElement>;
 
+  /* ---------- toast notifications ---------- */
+  showToast = false;
+  toastMessage = '';
+  toastType: 'success' | 'error' | 'warning' = 'error';
+
   /* ---------- estado chat ---------- */
   sessionId = '';
   messages: Message[] = [];
@@ -141,6 +146,17 @@ export class ChatComponent implements OnInit {
     if (this.step > 1) this.step--;
   }
 
+  /* ---------- método para mostrar toast ---------- */
+  private showToastMessage(message: string, type: 'success' | 'error' | 'warning' = 'error') {
+    this.toastMessage = message;
+    this.toastType = type;
+    this.showToast = true;
+    
+    setTimeout(() => {
+      this.showToast = false;
+    }, 4000);
+  }
+
   async savePreferences() {
     this.savingPrefs = true;
     try {
@@ -166,8 +182,10 @@ export class ChatComponent implements OnInit {
       }
       this.auth.markProfileAsCompleted(true);
       this.showWizard = false;
+      this.showToastMessage('Preferencias guardadas correctamente', 'success');
     } catch (e) {
       console.error(e);
+       this.showToastMessage('Hubo un error al enviar las respuestas. Inténtalo de nuevo.');
     } finally {
       this.savingPrefs = false;
     }
@@ -175,25 +193,38 @@ export class ChatComponent implements OnInit {
 
   /* ---------------- Chat ---------------- */
   async send() {
-    const text = this.newText?.trim();
-    if (!text) return;
+  const text = this.newText?.trim();
+  if (!text) return;
 
-    this.isSending = true;
-    this.showWizard = false;
+  this.isSending = true;
+  this.showWizard = false;
 
+  try { // ← AGREGAR TRY-CATCH
     if (!this.sessionId) {
       await firstValueFrom(this.chatService.createSession(text));
     }
     this.chatService.sendMessage(this.sessionId, text);
-
+    
     this.newText = '';
+  } catch (error) {
+    console.error('Error enviando mensaje:', error);
+    // manejo de errores
+    this.showToastMessage('Hubo un error al enviar el mensaje. Inténtalo de nuevo.');
+  } finally {
     this.isSending = false;
   }
+}
 
   openDocument(document: Documents): void {
+  try { 
     this.docService.setCurrentDocument(document);
     this.router.navigate(['/document']);
+  } catch (error) {
+    console.error('Error abriendo documento:', error);
+    // manejo de errores
+    this.showToastMessage('No se pudo abrir el documento. Inténtalo de nuevo.');
   }
+}
 
   /* ---------------- utilidades ---------------- */
   get isTyping(): boolean {

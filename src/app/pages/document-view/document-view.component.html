@@ -70,4 +70,9 @@
       </div>
     </div>
   </div>
+   <!-- Toast notification -->
+  <div *ngIf="showToast" class="toast toast-{{toastType}}">
+    <span>{{ toastMessage }}</span>
+    <i class="bi bi-x" (click)="showToast = false"></i>
+  </div>
 </div>

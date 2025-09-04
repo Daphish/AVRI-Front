@@ -24,6 +24,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private subscriptions = new Subscription();
 
+  /* ---------- toast notifications ---------- */
+  showToast = false;
+  toastMessage = '';
+  toastType: 'success' | 'error' | 'warning' = 'error';
+
   userDisplay: User | null = null;
   isActuallyAnonymous: boolean = true; // Usado para controlar la vista
   preferences: String[] = [];
@@ -37,6 +42,17 @@ export class ProfileComponent implements OnInit, OnDestroy {
     );
 
   constructor() {}
+
+  /* ---------- método para mostrar toast ---------- */
+  private showToastMessage(message: string, type: 'success' | 'error' | 'warning' = 'error') {
+    this.toastMessage = message;
+    this.toastType = type;
+    this.showToast = true;
+    
+    setTimeout(() => {
+      this.showToast = false;
+    }, 4000);
+  }
 
   ngOnInit() {
     this.subscriptions.add(
@@ -121,6 +137,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
             'Error al cargar preferencias. Intenta configurar tu perfil.',
           ];
           this.authService.markProfileAsCompleted(false);
+          this.showToastMessage('Error al cargar tu perfil. Inténtalo de nuevo.');
         },
       })
     );
@@ -153,11 +170,15 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   logout(): void {
+  try {
     this.chatService.clearSessions();
     this.authService.logout();
     this.router.navigate(['/home']);
-    this.chatService.pendingWizard = false;
+    this.showToastMessage('Sesión cerrada correctamente.', 'success');
+  } catch (error) {
+    this.showToastMessage('Error al cerrar sesión.');
   }
+}
 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();

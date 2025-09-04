@@ -15,6 +15,12 @@ import {
   imports: [CommonModule],
 })
 export class DocumentViewComponent implements OnInit, OnDestroy {
+
+  /* ---------- toast notifications ---------- */
+  showToast = false;
+  toastMessage = '';
+  toastType: 'success' | 'error' | 'warning' = 'error';
+
   document: DocumentDetail | null = null;
   loading = false;
   error: string | null = null;
@@ -26,15 +32,33 @@ export class DocumentViewComponent implements OnInit, OnDestroy {
 
   constructor(private docs: DocumentService) {}
 
+  /* ---------- método para mostrar toast ---------- */
+  private showToastMessage(message: string, type: 'success' | 'error' | 'warning' = 'error') {
+    this.toastMessage = message;
+    this.toastType = type;
+    this.showToast = true;
+    
+    setTimeout(() => {
+      this.showToast = false;
+    }, 4000);
+  }
+
   /* ---------------- ciclo de vida ---------------- */
   ngOnInit(): void {
-    this.document = this.docs.currentDocument; // ← toma el valor actual si ya existe
+    this.document = this.docs.currentDocument;
     this.loading = false;
 
-    this.docs.document$.pipe(takeUntil(this.destroy$)).subscribe((doc) => {
-      this.document = doc;
-      this.loading = false;
-    });
+    this.docs.document$.pipe(takeUntil(this.destroy$)).subscribe({
+      next: (doc) => {
+          this.document = doc;
+          this.loading = false;
+        },
+        error: (error) => {
+          console.error('Error cargando documento:', error);
+          this.loading = false;
+          this.showToastMessage('Error al cargar el documento. Inténtalo de nuevo.');
+        }
+      });
   }
 
   ngOnDestroy(): void {
@@ -45,43 +69,82 @@ export class DocumentViewComponent implements OnInit, OnDestroy {
   /* ---------------- acciones UI ---------------- */
 
   viewInRepository(): void {
-    if (this.document?.repository_uri) {
-      window.open(this.document.repository_uri, '_blank');
+    try {
+      if (this.document?.repository_uri) {
+        // validar que la URL sea válida antes de abrir
+        const url = new URL(this.document.repository_uri);
+        window.open(this.document.repository_uri, '_blank');
+      } else {
+        this.showToastMessage('El documento no tiene URL de repositorio disponible.', 'warning');
+      }
+    } catch (error) {
+      console.error('Error abriendo repositorio:', error);
+      this.showToastMessage('No se pudo abrir el enlace del repositorio.', 'error');
     }
   }
 
   toggleSave(): void {
-    if (!this.document) return;
+    if (!this.document) {
+      this.showToastMessage('No hay documento seleccionado.', 'warning');
+      return;
+    }
 
     const id = this.document.id;
 
     if (this.saved) {
       this.docs.removeSaved(id).subscribe({
-        next: () => (this.saved = false),
-        error: (e) => console.error('Error unsaving:', e),
+        next: () => {
+          this.saved = false;
+          this.showToastMessage('Documento eliminado de guardados.', 'success');
+        },
+        error: (e) => {
+          console.error('Error unsaving:', e);
+          this.showToastMessage('Error al eliminar de guardados. Inténtalo de nuevo.');
+        },
       });
     } else {
       this.docs.saveDocument(id).subscribe({
-        next: () => (this.saved = true),
-        error: (e) => console.error('Error saving:', e),
+        next: () => {
+          this.saved = true;
+          this.showToastMessage('Documento guardado correctamente.', 'success');
+        },
+        error: (e) => {
+          console.error('Error saving:', e);
+          this.showToastMessage('Error al guardar documento. Inténtalo de nuevo.');
+        },
       });
     }
   }
 
   toggleClaim(): void {
-    if (!this.document) return;
+    if (!this.document) {
+      this.showToastMessage('No hay documento seleccionado.', 'warning');
+      return;
+    }
 
     const id = this.document.id;
 
     if (this.claimed) {
       this.docs.unclaimDocument(id).subscribe({
-        next: () => (this.claimed = false),
-        error: (e) => console.error('Error un-claiming:', e),
+        next: () => {
+          this.claimed = false;
+          this.showToastMessage('Documento liberado correctamente.', 'success');
+        },
+        error: (e) => {
+          console.error('Error un-claiming:', e);
+          this.showToastMessage('Error al liberar documento. Inténtalo de nuevo.');
+        },
       });
     } else {
       this.docs.claimDocument(id).subscribe({
-        next: () => (this.claimed = true),
-        error: (e) => console.error('Error claiming:', e),
+        next: () => {
+          this.claimed = true;
+          this.showToastMessage('Documento reclamado correctamente.', 'success');
+        },
+        error: (e) => {
+          console.error('Error claiming:', e);
+          this.showToastMessage('Error al reclamar documento. Inténtalo de nuevo.');
+        },
       });
     }
   }
