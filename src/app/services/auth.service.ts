@@ -105,9 +105,12 @@ export class AuthService {
       if (user && 'anonymous_id' in user) {
         this.profileSetupCompleteSource.next(false); // Para anónimos, se considera completo o no aplica
       } else if (user) {
-        this.profileSetupCompleteSource.next(
-          !!(user as User).profile_preferences_set
+        const profile = await firstValueFrom(
+          this.http.get<any>(`/api/recommender/profile/me/`)
         );
+        profile.profile === null
+          ? this.profileSetupCompleteSource.next(false)
+          : this.profileSetupCompleteSource.next(true);
       } else {
         this.logout(); // Si user es null inesperadamente
       }

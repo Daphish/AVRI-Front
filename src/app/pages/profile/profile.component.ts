@@ -44,11 +44,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
   constructor() {}
 
   /* ---------- método para mostrar toast ---------- */
-  private showToastMessage(message: string, type: 'success' | 'error' | 'warning' = 'error') {
+  private showToastMessage(
+    message: string,
+    type: 'success' | 'error' | 'warning' = 'error'
+  ) {
     this.toastMessage = message;
     this.toastType = type;
     this.showToast = true;
-    
+
     setTimeout(() => {
       this.showToast = false;
     }, 4000);
@@ -124,12 +127,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
               data.profile.interests.length > 0
                 ? data.profile.interests
                 : ['Aún no has configurado tus preferencias.'];
-            this.authService.markProfileAsCompleted(true);
           } else {
             this.preferences = [
               'Configura tus preferencias para mejores recomendaciones.',
             ];
-            this.authService.markProfileAsCompleted(false);
           }
         },
         error: () => {
@@ -137,7 +138,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
             'Error al cargar preferencias. Intenta configurar tu perfil.',
           ];
           this.authService.markProfileAsCompleted(false);
-          this.showToastMessage('Error al cargar tu perfil. Inténtalo de nuevo.');
+          this.showToastMessage(
+            'Error al cargar tu perfil. Inténtalo de nuevo.'
+          );
         },
       })
     );
@@ -170,15 +173,15 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   logout(): void {
-  try {
-    this.chatService.clearSessions();
-    this.authService.logout();
-    this.router.navigate(['/home']);
-    this.showToastMessage('Sesión cerrada correctamente.', 'success');
-  } catch (error) {
-    this.showToastMessage('Error al cerrar sesión.');
+    try {
+      this.chatService.clearSessions();
+      this.authService.logout();
+      this.router.navigate(['/home']);
+      this.showToastMessage('Sesión cerrada correctamente.', 'success');
+    } catch (error) {
+      this.showToastMessage('Error al cerrar sesión.');
+    }
   }
-}
 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
