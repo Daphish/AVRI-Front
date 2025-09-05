@@ -2,13 +2,17 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgFor, NgIf } from '@angular/common';
-import { Observable, Subscription, map } from 'rxjs';
+import { Observable, Subscription, map, take } from 'rxjs';
 
 import { AuthService } from '../../services/auth.service';
 import { ChatService } from '../../services/chat.service';
 import { RecommendationService } from '../../services/recommendation.service';
 import { User } from '../../interfaces/user.interface';
-import { Document } from '../../interfaces/document.interface'; // Asumo que esta interfaz tiene id: string y repository_id: string
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {
+  DocumentService,
+  SavedDocument,
+} from '../../services/document.service';
 
 @Component({
   selector: 'app-profile',
@@ -21,6 +25,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private chatService = inject(ChatService);
   private recommendationService = inject(RecommendationService);
+  private documentService = inject(DocumentService);
   private router = inject(Router);
   private subscriptions = new Subscription();
 
@@ -32,7 +37,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   userDisplay: User | null = null;
   isActuallyAnonymous: boolean = true; // Usado para controlar la vista
   preferences: String[] = [];
-  documents: Document[] = [];
+  documents: SavedDocument[] = [];
   profileNeedsSetup: boolean = false; // Se actualizará en base a profileSetupComplete$
 
   // Para el botón de cerrar sesión y otras lógicas de plantilla
@@ -59,56 +64,48 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscriptions.add(
-      this.authService.currentUser$.subscribe((currentUser) => {
-        if (currentUser) {
-          if ('anonymous_id' in currentUser) {
-            this.isActuallyAnonymous = true;
-            this.userDisplay = null;
-            this.preferences = [
-              'El perfil de preferencias no está disponible para invitados.',
-            ];
-            this.documents = this.getDefaultDocumentsPlaceholder();
-            this.profileNeedsSetup = false; // Anónimos no necesitan wizard de perfilamiento
-          } else {
-            this.isActuallyAnonymous = false;
-            this.userDisplay = currentUser as User;
-            if (
-              this.userDisplay &&
-              (this.userDisplay.field_of_study === undefined ||
-                this.userDisplay.field_of_study === '')
-            ) {
-              this.userDisplay.field_of_study = 'Sin estudios previos';
-            }
-            this.loadProfileData();
-          }
+      this.authService.currentUser$.pipe(take(1)).subscribe((currentUser) => {
+        if (currentUser && !('anonymous_id' in currentUser)) {
+          this.isActuallyAnonymous = false;
+          this.userDisplay = currentUser as User;
+          this.loadProfileData();
         } else {
           this.isActuallyAnonymous = true;
           this.userDisplay = null;
           this.preferences = ['Inicia sesión para ver y configurar tu perfil.'];
           this.documents = this.getDefaultDocumentsPlaceholder();
-          this.profileNeedsSetup = false;
         }
       })
     );
 
     this.subscriptions.add(
-      this.authService.profileSetupComplete$.subscribe((isComplete) => {
-        if (!this.isActuallyAnonymous) {
-          // Solo para usuarios registrados
-          this.profileNeedsSetup = !isComplete;
-        }
-      })
+      this.authService.profileSetupComplete$
+        .pipe(takeUntilDestroyed())
+        .subscribe((isComplete) => {
+          if (!this.isActuallyAnonymous) {
+            this.profileNeedsSetup = !isComplete;
+          }
+        })
     );
   }
 
-  private getDefaultDocumentsPlaceholder(): Document[] {
+  private getDefaultDocumentsPlaceholder(): SavedDocument[] {
     return [
       {
-        id: 'default-doc-placeholder', // Asegurar que coincida con la interfaz Document
-        title: 'No hay documentos para mostrar.',
-        repository_uri: '',
-        repository_id: 'N/A_placeholder', // Obligatorio si la interfaz lo define
-        status: 'L',
+        id: 'default-doc-placeholder',
+        document: {
+          id: 'default-doc-placeholder',
+          title: 'No hay documentos para mostrar.',
+          author: 'Sin autor',
+          publication_date: '0',
+          knowledge_area: 'Sin área',
+          license: 'Sin licencia',
+          repository_uri: '',
+          repository_id: 'N/A_placeholder',
+          status: 'L',
+          created_at: '0',
+          updated_at: '0',
+        },
       },
     ];
   }
@@ -147,7 +144,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
     // Este getDocuments es del RecommendationService, asumo que es para historial o similares.
     this.subscriptions.add(
-      this.recommendationService.getDocuments().subscribe((docs) => {
+      this.documentService.getSavedDocuments().subscribe((docs) => {
         if (docs && docs.length > 0) {
           this.documents = docs;
         } else {

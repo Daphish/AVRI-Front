@@ -66,6 +66,9 @@ export class DocumentService {
   removeSaved(id: string): Observable<void> {
     return this.http.delete<void>(`${this.api}/saved/delete/${id}/`);
   }
+  getSavedDocuments(): Observable<SavedDocument[]> {
+    return this.http.get<SavedDocument[]>(`${this.api}/saved/list/`);
+  }
 
   /* ---- autoría ---- */
   claimDocument(id: string): Observable<AuthoredDocument> {
