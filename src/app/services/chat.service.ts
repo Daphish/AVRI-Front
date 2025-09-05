@@ -207,7 +207,7 @@ export class ChatService {
       ),
       catchError((err) => {
         return this.http.post(urlCreate, payload).pipe(
-          tap(() => this.authService.markProfileAsCompleted(true)),
+          tap(() => this.authService.markProfileAsCompleted(false)),
           catchError((error) => throwError(() => error))
         );
       })

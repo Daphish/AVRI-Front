@@ -8,7 +8,7 @@ import { ChatService } from '../../services/chat.service';
 import { DocumentService } from '../../services/document.service';
 import { Documents, Message } from '../../interfaces/chat.interface';
 
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
 
 /** Único tipo para las listas del wizard */
@@ -147,11 +147,14 @@ export class ChatComponent implements OnInit {
   }
 
   /* ---------- método para mostrar toast ---------- */
-  private showToastMessage(message: string, type: 'success' | 'error' | 'warning' = 'error') {
+  private showToastMessage(
+    message: string,
+    type: 'success' | 'error' | 'warning' = 'error'
+  ) {
     this.toastMessage = message;
     this.toastType = type;
     this.showToast = true;
-    
+
     setTimeout(() => {
       this.showToast = false;
     }, 4000);
@@ -185,7 +188,9 @@ export class ChatComponent implements OnInit {
       this.showToastMessage('Preferencias guardadas correctamente', 'success');
     } catch (e) {
       console.error(e);
-       this.showToastMessage('Hubo un error al enviar las respuestas. Inténtalo de nuevo.');
+      this.showToastMessage(
+        'Hubo un error al enviar las respuestas. Inténtalo de nuevo.'
+      );
     } finally {
       this.savingPrefs = false;
     }
@@ -193,38 +198,43 @@ export class ChatComponent implements OnInit {
 
   /* ---------------- Chat ---------------- */
   async send() {
-  const text = this.newText?.trim();
-  if (!text) return;
+    const text = this.newText?.trim();
+    if (!text) return;
 
-  this.isSending = true;
-  this.showWizard = false;
+    this.isSending = true;
+    this.showWizard = false;
 
-  try { // ← AGREGAR TRY-CATCH
-    if (!this.sessionId) {
-      await firstValueFrom(this.chatService.createSession(text));
+    try {
+      // ← AGREGAR TRY-CATCH
+      if (!this.sessionId) {
+        await firstValueFrom(this.chatService.createSession(text));
+      }
+      this.chatService.sendMessage(this.sessionId, text);
+
+      this.newText = '';
+    } catch (error) {
+      console.error('Error enviando mensaje:', error);
+      // manejo de errores
+      this.showToastMessage(
+        'Hubo un error al enviar el mensaje. Inténtalo de nuevo.'
+      );
+    } finally {
+      this.isSending = false;
     }
-    this.chatService.sendMessage(this.sessionId, text);
-    
-    this.newText = '';
-  } catch (error) {
-    console.error('Error enviando mensaje:', error);
-    // manejo de errores
-    this.showToastMessage('Hubo un error al enviar el mensaje. Inténtalo de nuevo.');
-  } finally {
-    this.isSending = false;
   }
-}
 
   openDocument(document: Documents): void {
-  try { 
-    this.docService.setCurrentDocument(document);
-    this.router.navigate(['/document']);
-  } catch (error) {
-    console.error('Error abriendo documento:', error);
-    // manejo de errores
-    this.showToastMessage('No se pudo abrir el documento. Inténtalo de nuevo.');
+    try {
+      this.docService.setCurrentDocument(document);
+      this.router.navigate(['/document']);
+    } catch (error) {
+      console.error('Error abriendo documento:', error);
+      // manejo de errores
+      this.showToastMessage(
+        'No se pudo abrir el documento. Inténtalo de nuevo.'
+      );
+    }
   }
-}
 
   /* ---------------- utilidades ---------------- */
   get isTyping(): boolean {
