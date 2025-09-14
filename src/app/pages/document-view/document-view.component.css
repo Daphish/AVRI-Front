@@ -165,3 +165,38 @@
     max-width: none;
   }
 }
+
+/* ====================== LOADING SPINNER ========================= */
+
+.loading-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Spinner del color del texto en lugar de blanco */
+.see-more-button .spinner {
+  border: 2px solid rgba(0,0,0,0.3);
+  border-top: 2px solid #0056a3;
+}

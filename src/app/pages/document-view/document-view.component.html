@@ -49,8 +49,15 @@
           class="see-more-button"
           [class.active]="saved"
           (click)="toggleSave()"
+          [disabled]="savingDocument"
         >
-          {{ saved ? "Guardado" : "Guardar" }}
+          <span *ngIf="!savingDocument">
+            {{ saved ? "Guardado" : "Guardar" }}
+          </span>
+          <span *ngIf="savingDocument" class="loading-content">
+            <span class="spinner"></span>
+            {{ saved ? "Eliminando..." : "Guardando..." }}
+          </span>
         </button>
 
         <div class="title-tag">
@@ -64,8 +71,15 @@
           class="see-more-button"
           [class.active]="claimed"
           (click)="toggleClaim()"
+          [disabled]="claimingDocument"
         >
-          {{ claimed ? "Ya eres el autor" : "Soy el autor" }}
+          <span *ngIf="!claimingDocument">
+            {{ claimed ? "Ya eres el autor" : "Soy el autor" }}
+          </span>
+          <span *ngIf="claimingDocument" class="loading-content">
+            <span class="spinner"></span>
+            {{ claimed ? "Liberando..." : "Reclamando..." }}
+          </span>
         </button>
       </div>
     </div>

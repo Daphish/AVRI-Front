@@ -15,6 +15,22 @@ import { ChatService } from '../../services/chat.service';
   styleUrl: './survey-modal.component.css',
 })
 export class SurveyModalComponent implements OnInit {
+  /* ---------- toast notifications ---------- */
+  showToast = false;
+  toastMessage = '';
+  toastType: 'success' | 'error' | 'warning' = 'error';
+
+  /* ---------- método para mostrar toast ---------- */
+  private showToastMessage(message: string, type: 'success' | 'error' | 'warning' = 'error') {
+    this.toastMessage = message;
+    this.toastType = type;
+    this.showToast = true;
+    
+    setTimeout(() => {
+      this.showToast = false;
+    }, 4000);
+  }
+
   mostrarEncuesta = false;
   mostrarFormulario = false;
   isSubmittingSurvey = false;
@@ -48,15 +64,30 @@ export class SurveyModalComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.eventoEncuesta.encuestaActivada$.subscribe(() => {
-      this.mostrarEncuesta = true;
-      this.mostrarFormulario = false;
-    });
+    try {
+      this.eventoEncuesta.encuestaActivada$.subscribe({
+        next: () => {
+          this.mostrarEncuesta = true;
+          this.mostrarFormulario = false;
+        },
+        error: (error) => {
+          console.error('Error en evento encuesta:', error);
+          this.showToastMessage('Error al activar la encuesta.');
+        }
+      });
 
-    // Mantener el session ID actualizado
-    this.chatService.idChat$.subscribe(id => {
-      this.currentSessionId = id;
-    });
+      this.chatService.idChat$.subscribe({
+        next: (id) => {
+          this.currentSessionId = id;
+        },
+        error: (error) => {
+          console.error('Error al obtener session ID:', error);
+        }
+      });
+    } catch (error) {
+      console.error('Error al inicializar encuesta:', error);
+      this.showToastMessage('Error al inicializar la encuesta.');
+    }
   }
 
   iniciarEncuesta(): void {
@@ -81,7 +112,7 @@ export class SurveyModalComponent implements OnInit {
     // Validar que todas las preguntas estén respondidas
     for (let i = 1; i <= 10; i++) {
       if (!this.respuestas['q' + i]) {
-        alert('Por favor responde todas las preguntas');
+        this.showToastMessage('Por favor responde todas las preguntas.', 'warning');
         return;
       }
     }
@@ -110,12 +141,13 @@ export class SurveyModalComponent implements OnInit {
 
     this.http.post('/api/feedback/', payload, { headers }).subscribe({
       next: () => {
-        alert('¡Gracias! Tu encuesta ha sido enviada exitosamente.');
+        this.showToastMessage('¡Gracias! Tu encuesta ha sido enviada exitosamente.', 'success');
+        this.isSubmittingSurvey = false;
         this.cerrarEncuesta();
       },
       error: (error) => {
         console.error('Error al enviar la encuesta:', error);
-        alert('Hubo un error al enviar la encuesta. Inténtalo de nuevo.');
+        this.showToastMessage('Hubo un error al enviar la encuesta. Inténtalo de nuevo.');
         this.isSubmittingSurvey = false;
       }
     });
@@ -130,11 +162,17 @@ export class SurveyModalComponent implements OnInit {
   }
 
   private generateUUID(): string {
-    if ('randomUUID' in crypto) return (crypto as any).randomUUID();
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-      const r = (Math.random() * 16) | 0;
-      const v = c === 'x' ? r : (r & 0x3) | 0x8;
-      return v.toString(16);
-    });
+    try {
+      if ('randomUUID' in crypto) return (crypto as any).randomUUID();
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        const r = (Math.random() * 16) | 0;
+        const v = c === 'x' ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      });
+    } catch (error) {
+      console.error('Error al generar UUID:', error);
+      // Fallback simple
+      return Date.now().toString() + Math.random().toString();
+    }
   }
 }

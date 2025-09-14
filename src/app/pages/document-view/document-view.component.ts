@@ -28,6 +28,9 @@ export class DocumentViewComponent implements OnInit, OnDestroy {
   saved = false;
   claimed = false;
 
+  savingDocument = false;
+  claimingDocument = false;
+
   private destroy$ = new Subject<void>();
 
   constructor(private docs: DocumentService) {}
@@ -89,16 +92,20 @@ export class DocumentViewComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.savingDocument = true;
+
     const id = this.document.id;
 
     if (this.saved) {
       this.docs.removeSaved(id).subscribe({
         next: () => {
           this.saved = false;
+          this.savingDocument = false;
           this.showToastMessage('Documento eliminado de guardados.', 'success');
         },
         error: (e) => {
           console.error('Error unsaving:', e);
+          this.savingDocument = false;
           this.showToastMessage('Error al eliminar de guardados. Inténtalo de nuevo.');
         },
       });
@@ -106,10 +113,12 @@ export class DocumentViewComponent implements OnInit, OnDestroy {
       this.docs.saveDocument(id).subscribe({
         next: () => {
           this.saved = true;
+          this.savingDocument = false;
           this.showToastMessage('Documento guardado correctamente.', 'success');
         },
         error: (e) => {
           console.error('Error saving:', e);
+          this.savingDocument = false;
           this.showToastMessage('Error al guardar documento. Inténtalo de nuevo.');
         },
       });
@@ -122,16 +131,19 @@ export class DocumentViewComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.savingDocument = true;
     const id = this.document.id;
 
     if (this.claimed) {
       this.docs.unclaimDocument(id).subscribe({
         next: () => {
           this.claimed = false;
+          this.savingDocument = false;
           this.showToastMessage('Documento liberado correctamente.', 'success');
         },
         error: (e) => {
           console.error('Error un-claiming:', e);
+          this.savingDocument = false;
           this.showToastMessage('Error al liberar documento. Inténtalo de nuevo.');
         },
       });
@@ -139,10 +151,12 @@ export class DocumentViewComponent implements OnInit, OnDestroy {
       this.docs.claimDocument(id).subscribe({
         next: () => {
           this.claimed = true;
+          this.savingDocument = false;
           this.showToastMessage('Documento reclamado correctamente.', 'success');
         },
         error: (e) => {
           console.error('Error claiming:', e);
+          this.savingDocument = false;
           this.showToastMessage('Error al reclamar documento. Inténtalo de nuevo.');
         },
       });

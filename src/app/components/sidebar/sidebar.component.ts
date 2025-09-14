@@ -38,6 +38,26 @@ export class SidebarComponent implements OnInit, OnDestroy {
   activeSessionId: string | null = null;
   isModalOpen = false;
 
+  /* ---------- loading states ---------- */
+  deletingChatId: string | null = null; 
+  loadingSessions = false;
+
+  /* ---------- toast notifications ---------- */
+  showToast = false;
+  toastMessage = '';
+  toastType: 'success' | 'error' | 'warning' = 'error';
+
+  /* ---------- método para mostrar toast ---------- */
+  private showToastMessage(message: string, type: 'success' | 'error' | 'warning' = 'error') {
+    this.toastMessage = message;
+    this.toastType = type;
+    this.showToast = true;
+    
+    setTimeout(() => {
+      this.showToast = false;
+    }, 4000);
+  }
+
   /* ------------ streams para la plantilla ------------ */
   isLoggedIn$: Observable<boolean> = this.authService.isLoggedIn$;
   chats$: Observable<Chat[]> = this.chatService.sessions$;
@@ -57,13 +77,27 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   /* ---------------- ciclo de vida ---------------- */
   ngOnInit() {
-    this.authService.autoLogin(); // auto-login al iniciar
+    try {
+      this.authService.autoLogin();
+    } catch (error) {
+      console.error('Error en auto-login:', error);
+      this.showToastMessage('Error al verificar sesión.');
+    }
+
     this.subs.add(
       this.authService.isLoggedIn$.subscribe((loggedIn) => {
         const current = this.authService.getCurrentUserSnapshot();
         if (loggedIn && current && !('anonymous_id' in current)) {
-          this.chatService.loadSessions();
-          this.isModalOpen = false;
+          this.loadingSessions = true; 
+          try {
+            this.chatService.loadSessions();
+            this.loadingSessions = false; 
+            this.isModalOpen = false;
+          } catch (error) {
+            this.loadingSessions = false; 
+            console.error('Error al cargar sesiones:', error);
+            this.showToastMessage('Error al cargar conversaciones.');
+          }
         }
         if (!loggedIn) {
           this.chatService.clearSessions();
@@ -72,6 +106,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       })
     );
   }
+
   ngOnDestroy() {
     this.subs.unsubscribe();
   }
@@ -81,24 +116,44 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.chatService.clearIdChat();
     this.router.navigate(['/home']);
   }
+
   loadMessages(id: string) {
-    this.activeSessionId = id;
-    this.chatService.loadMessages(id);
-    this.router.navigate(['/home']);
+    try {
+      this.activeSessionId = id;
+      this.chatService.loadMessages(id);
+      this.router.navigate(['/home']);
+    } catch (error) {
+      console.error('Error al cargar mensajes:', error);
+      this.showToastMessage('Error al cargar la conversación.');
+    }
   }
+
+
   deleteChat(id: string, ev?: Event) {
-    ev?.stopPropagation(); // evitar que se abra el chat al borrar
+    ev?.stopPropagation();
     if (confirm('¿Eliminar esta conversación?')) {
-      this.chatService.deleteSession(id);
+      this.deletingChatId = id;
+      
+      try {
+        this.chatService.deleteSession(id);
+        this.deletingChatId = null;
+        this.showToastMessage('Conversación eliminada.', 'success');
+      } catch (error) {
+        console.error('Error al eliminar chat:', error);
+        this.showToastMessage('Error al eliminar la conversación.');
+        this.deletingChatId = null;
+      }
     }
   }
 
   openModal() {
     this.isModalOpen = true;
   }
+
   closeModal() {
     this.isModalOpen = false;
   }
+
   viewProfile() {
     this.router.navigate(['/profile']);
   }

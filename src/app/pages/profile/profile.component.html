@@ -1,7 +1,8 @@
 <div class="profile-container">
   <div class="column-left">
-    <button class="back-button" aria-label="Volver al chat" (click)="goBack()">
-      <i class="bi bi-arrow-left"></i>
+    <button class="back-button" aria-label="Volver al chat" (click)="goBack()" [disabled]="isNavigating">
+      <i *ngIf="!isNavigating" class="bi bi-arrow-left"></i>
+      <i *ngIf="isNavigating" class="bi bi-arrow-clockwise spinner"></i>
     </button>
     <div class="avatar-circle">
       <i
@@ -20,14 +21,17 @@
       *ngIf="isActuallyAnonymous; else logoutButton"
       class="logout-button"
       (click)="logout()"
+      [disabled]="isLoggingOut"
     >
-      <i class="bi bi-box-arrow-in-right" style="margin-right: 5px"></i>
-      Iniciar sesión
+      <i *ngIf="!isLoggingOut" class="bi bi-box-arrow-in-right" style="margin-right: 5px"></i>
+      <i *ngIf="isLoggingOut" class="bi bi-arrow-clockwise spinner" style="margin-right: 5px"></i>
+      {{ isLoggingOut ? 'Iniciando sesión...' : 'Iniciar sesión' }}
     </button>
     <ng-template #logoutButton>
-      <button class="logout-button" (click)="logout()">
-        <i class="bi bi-box-arrow-right" style="margin-right: 5px"></i>
-        Cerrar sesión
+      <button class="logout-button" (click)="logout()" [disabled]="isLoggingOut">
+        <i *ngIf="!isLoggingOut" class="bi bi-box-arrow-right" style="margin-right: 5px"></i>
+        <i *ngIf="isLoggingOut" class="bi bi-arrow-clockwise spinner" style="margin-right: 5px"></i>
+        {{ isLoggingOut ? 'Cerrando sesión...' : 'Cerrar sesión' }}
       </button>
     </ng-template>
   </div>
@@ -37,7 +41,7 @@
       {{ userDisplay.name }} {{ userDisplay.first_name }}
       {{ userDisplay.last_name }}
     </h1>
-    <div class="row-container">
+    < class="row-container">
       <div class="row-child">
         <div class="title-tag">
           <i
@@ -63,41 +67,55 @@
           ></i>
           Preferencias
         </div>
-        <p
-          *ngIf="
-            preferences.length === 0 ||
-            preferences[0]?.startsWith('Sin ') ||
-            preferences[0]?.startsWith('Configura ') ||
-            preferences[0]?.startsWith('Error ')
-          "
-        >
-          {{ preferences[0] || "No has configurado preferencias." }}
-        </p>
-        <ng-container
-          *ngIf="
-            preferences.length > 0 &&
-            !preferences[0]?.startsWith('Sin ') &&
-            !preferences[0]?.startsWith('Configura ') &&
-            !preferences[0]?.startsWith('Error ')
-          "
-        >
-          <p *ngFor="let preference of preferences">
-            {{ preference }}
+
+        <!-- Loading spinner para preferencias -->
+        <div *ngIf="isLoadingPreferences" class="loading-section">
+          <i class="bi bi-arrow-clockwise spinner"></i>
+          <span>Cargando preferencias...</span>
+        </div>
+
+        <!-- Contenido de preferencias cuando no está cargando -->
+        <div *ngIf="!isLoadingPreferences">
+          <p
+            *ngIf="
+              preferences.length === 0 ||
+              preferences[0]?.startsWith('Sin ') ||
+              preferences[0]?.startsWith('Configura ') ||
+              preferences[0]?.startsWith('Error ')
+            "
+          >
+            {{ preferences[0] || "No has configurado preferencias." }}
           </p>
-        </ng-container>
+          <ng-container
+            *ngIf="
+              preferences.length > 0 &&
+              !preferences[0]?.startsWith('Sin ') &&
+              !preferences[0]?.startsWith('Configura ') &&
+              !preferences[0]?.startsWith('Error ')
+            "
+          >
+            <p *ngFor="let preference of preferences">
+              {{ preference }}
+            </p>
+          </ng-container>
+        </div>
 
         <button
           class="see-more-button"
           *ngIf="profileNeedsSetup && !isActuallyAnonymous"
           (click)="showWizard()"
+          [disabled]="isNavigating"
         >
+          <i *ngIf="isNavigating" class="bi bi-arrow-clockwise spinner" style="margin-right: 5px"></i>
           Configurar Preferencias
         </button>
         <button
           class="see-more-button"
           *ngIf="!profileNeedsSetup && !isActuallyAnonymous"
           (click)="showWizard()"
+          [disabled]="isNavigating"
         >
+          <i *ngIf="isNavigating" class="bi bi-arrow-clockwise spinner" style="margin-right: 5px"></i>
           Reconfigurar Preferencias
         </button>
       </div>
@@ -110,30 +128,39 @@
           ></i>
           Historial / Elementos guardados
         </div>
-        <ng-container
-          *ngIf="
-            documents.length > 0 &&
-              documents[0].id !== 'default-doc-placeholder';
-            else noDocumentsTemplate
-          "
-        >
-          <div
-            *ngFor="let item of documents"
-            class="document-item"
-            style="margin-bottom: 0.5em"
+
+        <!-- Loading spinner para documentos -->
+        <div *ngIf="isLoadingDocuments" class="loading-section">
+          <i class="bi bi-arrow-clockwise spinner"></i>
+          <span>Cargando documentos...</span>
+        </div>
+
+        <!-- Contenido de documentos cuando no está cargando -->
+        <div *ngIf="!isLoadingDocuments">
+          <ng-container
+            *ngIf="
+              documents.length > 0 &&
+                documents[0].id !== 'default-doc-placeholder';
+              else noDocumentsTemplate
+            "
           >
-            <strong>{{ item.document.title }}</strong>
-            <br />
-            <small *ngIf="item.document.repository_uri">{{
-              item.document.repository_uri
-            }}</small>
-          </div>
-        </ng-container>
-        <ng-template #noDocumentsTemplate>
-          <p>No hay documentos guardados.</p>
-        </ng-template>
+            <div
+              *ngFor="let item of documents"
+              class="document-item"
+              style="margin-bottom: 0.5em"
+            >
+              <strong>{{ item.document.title }}</strong>
+              <br />
+              <small *ngIf="item.document.repository_uri">{{
+                item.document.repository_uri
+              }}</small>
+            </div>
+          </ng-container>
+          <ng-template #noDocumentsTemplate>
+            <p>No hay documentos guardados.</p>
+          </ng-template>
+        </div>
       </div>
-    </div>
   </div>
 
   <div *ngIf="isActuallyAnonymous" class="column">

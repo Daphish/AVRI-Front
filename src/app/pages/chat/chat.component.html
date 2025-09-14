@@ -36,15 +36,16 @@
             (click)="toggle(opt)"
             [ngClass]="{ selected: opt.selected }"
             [title]="opt.label"
+            [disabled]="savingPrefs"
           >
             {{ opt.label }}
           </button>
         </div>
 
         <div class="wizard-nav">
-          <button (click)="prev()" [disabled]="step === 1">&laquo;</button>
+          <button (click)="prev()" [disabled]="step === 1 || savingPrefs">&laquo;</button>
           <span>{{ step }}/3</span>
-          <button (click)="next()" [disabled]="!canContinue()">
+          <button (click)="next()" [disabled]="!canContinue() || savingPrefs">
             {{ step < 3 ? "&raquo;" : "✓" }}
           </button>
         </div>
@@ -53,14 +54,14 @@
           <button
             class="wizard-btn"
             (click)="savePreferences()"
-            [disabled]="savingPrefs"
+            [disabled]="!canContinue() || savingPrefs"
           >
-            Guardar preferencias
+            <span *ngIf="!savingPrefs">Guardar preferencias</span>
+            <span *ngIf="savingPrefs" class="loading-content">
+              <span class="spinner"></span>
+              Guardando...
+            </span>
           </button>
-        </div>
-
-        <div *ngIf="savingPrefs" class="saving-msg">
-          Guardando preferencias…
         </div>
       </ng-container>
     </div>
@@ -147,8 +148,9 @@
         (keyup.enter)="send()"
         [disabled]="isSending"
       />
-      <div class="chat-send-button" (click)="send()">
-        <i class="bi bi-arrow-up"></i>
+      <div class="chat-send-button" (click)="send()" [class.sending]="isSending">
+        <i *ngIf="!isSending" class="bi bi-arrow-up"></i>
+        <span *ngIf="isSending" class="spinner-small"></span>
       </div>
     </div>
 

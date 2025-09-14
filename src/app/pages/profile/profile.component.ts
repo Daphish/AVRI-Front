@@ -29,6 +29,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private subscriptions = new Subscription();
 
+  isLoadingProfile = false;
+  isLoadingPreferences = false;
+  isLoadingDocuments = false;
+  isLoggingOut = false;
+  isNavigating = false;
+
   /* ---------- toast notifications ---------- */
   showToast = false;
   toastMessage = '';
@@ -63,6 +69,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.isLoadingProfile = true;
+
     this.subscriptions.add(
       this.authService.currentUser$.pipe(take(1)).subscribe((currentUser) => {
         if (currentUser && !('anonymous_id' in currentUser)) {
@@ -74,6 +82,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
           this.userDisplay = null;
           this.preferences = ['Inicia sesión para ver y configurar tu perfil.'];
           this.documents = this.getDefaultDocumentsPlaceholder();
+          this.isLoadingProfile = false;
         }
       })
     );
@@ -113,9 +122,15 @@ export class ProfileComponent implements OnInit, OnDestroy {
   loadProfileData(): void {
     if (this.isActuallyAnonymous || !this.userDisplay) return;
 
+    this.isLoadingPreferences = true;
+    this.isLoadingDocuments = true;
+
     this.subscriptions.add(
       this.recommendationService.get().subscribe({
         next: (data) => {
+          this.isLoadingPreferences = false;
+          this.isLoadingProfile = false;
+
           if (
             data?.profile?.interests &&
             Array.isArray(data.profile.interests)
@@ -131,6 +146,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
           }
         },
         error: () => {
+          this.isLoadingPreferences = false;
+          this.isLoadingProfile = false;
+
           this.preferences = [
             'Error al cargar preferencias. Intenta configurar tu perfil.',
           ];
@@ -144,39 +162,60 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
     // Este getDocuments es del RecommendationService, asumo que es para historial o similares.
     this.subscriptions.add(
-      this.documentService.getSavedDocuments().subscribe((docs) => {
-        if (docs && docs.length > 0) {
-          this.documents = docs;
-        } else {
+      this.documentService.getSavedDocuments().subscribe({
+        next: (docs) => {
+          if (docs && docs.length > 0) {
+            this.documents = docs;
+          } else {
+            this.documents = this.getDefaultDocumentsPlaceholder();
+          }
+          this.isLoadingDocuments = false;
+        },
+        error: () => {
           this.documents = this.getDefaultDocumentsPlaceholder();
+          this.isLoadingDocuments = false;
+          this.showToastMessage('Error al cargar documentos guardados.');
         }
       })
     );
   }
 
   async goBack(): Promise<void> {
-    /* Siempre queremos volver a mostrar el wizard */
-    this.authService.profileSetupComplete$.subscribe((isComplete) => {
-      if (!isComplete) {
-        this.chatService.pendingWizard = true;
-      }
-    });
-    await this.router.navigate(['/home']);
+    this.isNavigating = true;
+    try {
+      /* Siempre queremos volver a mostrar el wizard */
+      this.authService.profileSetupComplete$.subscribe((isComplete) => {
+        if (!isComplete) {
+          this.chatService.pendingWizard = true;
+        }
+      });
+      await this.router.navigate(['/home']);
+    } finally {
+      this.isNavigating = false;
+    }
   }
 
   async showWizard(): Promise<void> {
-    this.chatService.pendingWizard = true;
-    await this.router.navigate(['/home']);
+    this.isNavigating = true;
+    try {
+      this.chatService.pendingWizard = true;
+      await this.router.navigate(['/home']);
+    } finally {
+      this.isNavigating = false;
+    }
   }
 
-  logout(): void {
+  async logout(): Promise<void> {
+    this.isLoggingOut = true;
     try {
       this.chatService.clearSessions();
       this.authService.logout();
-      this.router.navigate(['/home']);
+      await this.router.navigate(['/home']);
       this.showToastMessage('Sesión cerrada correctamente.', 'success');
     } catch (error) {
       this.showToastMessage('Error al cerrar sesión.');
+    } finally {
+      this.isLoggingOut = false;
     }
   }
 

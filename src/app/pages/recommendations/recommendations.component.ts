@@ -91,29 +91,57 @@ export class RecommendationsComponent implements OnInit {
 
   constructor(private recommendationService: RecommendationService) {}
 
+  isLoadingRecommendations = false;
+  hasError = false;
+  errorMessage = '';
+
   // ngOninit -> debe ser ngOnInit (camelCase)
   ngOnInit(): void {
+    this.loadRecommendations();
+  }
+  
+  private loadRecommendations(): void {
+    this.isLoadingRecommendations = true;
+    this.hasError = false;
+    this.errorMessage = '';
+
     try {
       this.recommendationService.getDetailedDocuments();
     } catch (error) {
       console.error('Error al solicitar documentos:', error);
+      this.hasError = true;
+      this.errorMessage = 'Error al solicitar documentos.';
       this.showToastMessage('Error al solicitar documentos.');
+      this.isLoadingRecommendations = false;
+      return;
     }
-  
+
     this.recommendationService.documents$.subscribe({
       next: (documents) => {
+        this.isLoadingRecommendations = false;
         if (documents && documents.length > 0) {
           this.recommendedDocsBack = documents;
+          this.hasError = false;
         } else {
           console.log('No se recibieron documentos recomendados.');
-          this.showToastMessage('Error al recibir los documentos recomendados.');
+          this.hasError = true;
+          this.errorMessage = 'No hay documentos recomendados disponibles.';
+          this.showToastMessage('No se encontraron documentos recomendados.', 'warning');
         }
       },
       error: (error) => {
         console.error('Error al obtener documentos:', error);
+        this.isLoadingRecommendations = false;
+        this.hasError = true;
+        this.errorMessage = 'Error al cargar documentos recomendados.';
         this.showToastMessage('Error al cargar documentos recomendados.');
       }
     });
+  }
+
+   retryLoadRecommendations(): void {
+    this.loadRecommendations();
+  }
     
     // CORREGIDO: nombre del método y tipo de retorno
     // Descomenta y ajusta esto si es necesario
@@ -127,5 +155,4 @@ export class RecommendationsComponent implements OnInit {
       }
     });
     */
-  }
 }
