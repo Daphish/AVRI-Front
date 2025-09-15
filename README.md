@@ -138,8 +138,7 @@ Este proyecto está construido con:
 - **[npm](https://www.npmjs.com/)** - Gestor de paquetes
 
 ### 📦 Versiones de Dependencias
-```json
-avri@0.0.0
+
 ├── @angular-devkit/build-angular@18.2.14
 ├── @angular/animations@18.2.13
 ├── @angular/cli@18.2.14
