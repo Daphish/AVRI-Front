@@ -138,7 +138,7 @@ Este proyecto está construido con:
 - **[npm](https://www.npmjs.com/)** - Gestor de paquetes
 
 ### 📦 Versiones de Dependencias
-
+```json
 ├── @angular-devkit/build-angular@18.2.14
 ├── @angular/animations@18.2.13
 ├── @angular/cli@18.2.14
@@ -170,6 +170,7 @@ Este proyecto está construido con:
 ├── tslib@2.8.1
 ├── typescript@5.5.4
 └── zone.js@0.14.10
+```
 ---
 
 ## 📝 Comandos Útiles
