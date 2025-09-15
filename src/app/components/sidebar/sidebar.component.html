@@ -74,9 +74,12 @@
   </div>
 
    <!-- Toast notification -->
-  <div *ngIf="showToast" class="toast toast-{{toastType}}">
+  <div *ngIf="showToast" 
+      class="toast toast-{{toastType}}"
+      [class.clickable-warning]="toastType === 'warning' && pendingDeleteId"
+      (click)="toastType === 'warning' && pendingDeleteId ? confirmDelete() : null">
     <span>{{ toastMessage }}</span>
-    <i class="bi bi-x" (click)="showToast = false"></i>
+    <i class="bi bi-x" (click)="showToast = false; pendingDeleteId = null; $event.stopPropagation()"></i>
   </div>
 </div>
 

@@ -53,9 +53,16 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.toastType = type;
     this.showToast = true;
     
+    const timeout = type === 'warning' ? 8000 : 4000; // Más tiempo para confirmar
+    
     setTimeout(() => {
-      this.showToast = false;
-    }, 4000);
+      if (this.showToast && this.toastType === type) {
+        this.showToast = false;
+        if (type === 'warning') {
+          this.pendingDeleteId = null; // Limpiar si no confirmó
+        }
+      }
+    }, timeout);
   }
 
   /* ------------ streams para la plantilla ------------ */
@@ -128,15 +135,26 @@ export class SidebarComponent implements OnInit, OnDestroy {
     }
   }
 
+  /* ---------- confirmación para eliminar ---------- */
+  pendingDeleteId: string | null = null;
 
   deleteChat(id: string, ev?: Event) {
     ev?.stopPropagation();
-    if (confirm('¿Eliminar esta conversación?')) {
-      this.deletingChatId = id;
+    
+  // Guardar el ID que se quiere eliminar y mostrar warning
+    this.pendingDeleteId = id;
+    this.showToastMessage('¿Eliminar esta conversación? Toca para confirmar.', 'warning');
+  }
+
+  // Método para confirmar eliminación
+  confirmDelete() {
+    if (this.pendingDeleteId) {
+      this.deletingChatId = this.pendingDeleteId;
       
       try {
-        this.chatService.deleteSession(id);
+        this.chatService.deleteSession(this.pendingDeleteId);
         this.deletingChatId = null;
+        this.pendingDeleteId = null;
         this.showToastMessage('Conversación eliminada.', 'success');
       } catch (error) {
         console.error('Error al eliminar chat:', error);
@@ -144,6 +162,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
         this.deletingChatId = null;
       }
     }
+    this.showToast = false;
   }
 
   openModal() {

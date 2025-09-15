@@ -398,6 +398,20 @@
   }
 }
 
+.toast.clickable-warning {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toast.clickable-warning:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.toast.clickable-warning:active {
+  transform: translateY(0);
+}
+
 /* ====================== LOADING SPINNER ========================= */
 
 /* Spinner principal */
