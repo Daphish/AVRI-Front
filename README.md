@@ -137,6 +137,40 @@ Este proyecto está construido con:
 - **[Node.js](https://nodejs.org/)** - Entorno de ejecución
 - **[npm](https://www.npmjs.com/)** - Gestor de paquetes
 
+### 📦 Versiones de Dependencias
+```json
+avri@0.0.0
+├── @angular-devkit/build-angular@18.2.14
+├── @angular/animations@18.2.13
+├── @angular/cli@18.2.14
+├── @angular/common@18.2.13
+├── @angular/compiler-cli@18.2.13
+├── @angular/compiler@18.2.13
+├── @angular/core@18.2.13
+├── @angular/forms@18.2.13
+├── @angular/platform-browser-dynamic@18.2.13
+├── @angular/platform-browser@18.2.13
+├── @angular/platform-server@18.2.13
+├── @angular/router@18.2.13
+├── @angular/ssr@18.2.14
+├── @types/express@4.17.21
+├── @types/jasmine@5.1.5
+├── @types/node@18.19.74
+├── body-parser@1.20.3
+├── bootstrap-icons@1.11.3
+├── cors@2.8.5
+├── express@4.21.2
+├── jasmine-core@5.2.0
+├── karma-chrome-launcher@3.2.0
+├── karma-coverage@2.2.1
+├── karma-jasmine-html-reporter@2.1.0
+├── karma-jasmine@5.1.0
+├── karma@6.4.4
+├── router@2.2.0
+├── rxjs@7.8.1
+├── tslib@2.8.1
+├── typescript@5.5.4
+└── zone.js@0.14.10
 ---
 
 ## 📝 Comandos Útiles
