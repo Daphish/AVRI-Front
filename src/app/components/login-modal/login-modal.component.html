@@ -23,15 +23,30 @@
       (keyup.enter)="startSession()"
     />
 
-    <div class="error-message" *ngIf="error">
-      Las credenciales no son correctas
-    </div>
-
     <div class="modal-actions">
-      <button class="btn login" (click)="startSession()">Iniciar Sesión</button>
-      <button class="btn guest" (click)="continueAsGuest()">
-        Continuar como invitado
+      <button class="btn login" (click)="startSession()" [disabled]="loggingIn">
+        <span *ngIf="!loggingIn">Iniciar Sesión</span>
+        <span *ngIf="loggingIn" class="loading-content">
+          <span class="spinner"></span>
+          Iniciando...
+        </span>
+      </button>
+      
+      <button class="btn guest" (click)="continueAsGuest()" [disabled]="loggingIn">
+        <span *ngIf="!loggingIn">Continuar como invitado</span>
+        <span *ngIf="loggingIn" class="loading-content">
+          <span class="spinner"></span>
+          Conectando...
+        </span>
       </button>
     </div>
   </div>
+
+  <!-- Toast notification -->
+  <div *ngIf="showToast" class="toast toast-{{toastType}}">
+    <span>{{ toastMessage }}</span>
+    <i class="bi bi-x" (click)="showToast = false"></i>
+  </div>
+
 </div>
+

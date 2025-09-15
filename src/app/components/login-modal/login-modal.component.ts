@@ -19,7 +19,23 @@ export class LoginModalComponent {
 
   user: string = '';
   password: string = '';
-  error: boolean = false;
+  loggingIn: boolean = false;
+
+  /* ---------- toast notifications ---------- */
+  showToast = false;
+  toastMessage = '';
+  toastType: 'success' | 'error' | 'warning' = 'error';
+
+  /* ---------- método para mostrar toast ---------- */
+  private showToastMessage(message: string, type: 'success' | 'error' | 'warning' = 'error') {
+    this.toastMessage = message;
+    this.toastType = type;
+    this.showToast = true;
+    
+    setTimeout(() => {
+      this.showToast = false;
+    }, 4000);
+  }
 
   @Output() closeModalEvent = new EventEmitter<void>();
 
@@ -28,29 +44,39 @@ export class LoginModalComponent {
   }
 
   startSession() {
+    this.loggingIn = true;
     this.authService.login(this.user, this.password).then((success) => {
+      this.loggingIn = false;
       if (success) {
         this.chatService.loadSessions();
         this.closeModal();
+        this.showToastMessage('Sesión iniciada correctamente.', 'success');
       } else {
-        this.error = true;
-        setTimeout(() => {
-          this.error = false;
-        }, 2000);
+        this.showToastMessage('Credenciales incorrectas.');
       }
+    })
+     .catch((error) => {
+      this.loggingIn = false;
+      console.error('Error al iniciar sesión:', error);
+      this.showToastMessage('Error al conectar con el servidor.');
     });
   }
 
   continueAsGuest() {
+    this.loggingIn = true;
     this.authService.createAnonymous().then((success) => {
+      this.loggingIn = false;
       if (success) {
         this.closeModal();
+        this.showToastMessage('Sesión anónima iniciada.', 'success');
       } else {
-        this.error = true;
-        setTimeout(() => {
-          this.error = false;
-        }, 2000);
+        this.showToastMessage('Error al crear sesión anónima.');
       }
+    })
+    .catch((error) => {
+      this.loggingIn = false;
+      console.error('Error al crear sesión anónima:', error);
+      this.showToastMessage('Error al conectar con el servidor.');
     });
   }
 }

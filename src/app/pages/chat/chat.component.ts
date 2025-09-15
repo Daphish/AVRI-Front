@@ -202,22 +202,20 @@ export class ChatComponent implements OnInit {
     if (!text) return;
 
     this.isSending = true;
-    this.showWizard = false;
 
     try {
-      // ← AGREGAR TRY-CATCH
       if (!this.sessionId) {
         await firstValueFrom(this.chatService.createSession(text));
       }
-      this.chatService.sendMessage(this.sessionId, text);
+
+      await this.chatService.sendMessage(this.sessionId, text);
 
       this.newText = '';
+      this.showWizard = false;
+
     } catch (error) {
       console.error('Error enviando mensaje:', error);
-      // manejo de errores
-      this.showToastMessage(
-        'Hubo un error al enviar el mensaje. Inténtalo de nuevo.'
-      );
+      this.showToastMessage('Hubo un error al enviar el mensaje. Inténtalo de nuevo.');
     } finally {
       this.isSending = false;
     }
@@ -230,9 +228,7 @@ export class ChatComponent implements OnInit {
     } catch (error) {
       console.error('Error abriendo documento:', error);
       // manejo de errores
-      this.showToastMessage(
-        'No se pudo abrir el documento. Inténtalo de nuevo.'
-      );
+      this.showToastMessage('No se pudo abrir el documento. Inténtalo de nuevo.');
     }
   }
 

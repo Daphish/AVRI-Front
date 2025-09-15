@@ -3,7 +3,7 @@
       <div class="wizard-card">
         <div class="modal-encuesta">
 
-          <button class="boton-cerrar" (click)="cerrarEncuesta()" type="button" aria-label="Cerrar encuesta">
+          <button class="boton-cerrar" (click)="cerrarEncuesta()" [disabled]="isSubmittingSurvey" type="button" aria-label="Cerrar encuesta">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -39,6 +39,7 @@
                     name="q{{i+1}}"
                     [(ngModel)]="respuestas['q' + (i+1)]"
                     [value]="o.valor"
+                    [disabled]="isSubmittingSurvey"
                     required
                   />
                   {{ o.texto }}
@@ -47,12 +48,28 @@
             </div>
 
             <label>Comentarios</label>
-            <textarea [(ngModel)]="respuestas.comments" name="comments" rows="3" placeholder="Comparte cualquier comentario adicional..."></textarea>
+            <textarea 
+              [(ngModel)]="respuestas.comments" 
+              name="comments" 
+              rows="3" 
+              [disabled]="isSubmittingSurvey" 
+              placeholder="Comparte cualquier comentario adicional...">
+            </textarea>
 
             <button type="submit" class="primario" [disabled]="isSubmittingSurvey">
-              {{ isSubmittingSurvey ? 'Enviando...' : 'Enviar' }}
+              <span *ngIf="!isSubmittingSurvey">Enviar</span>
+              <span *ngIf="isSubmittingSurvey" class="loading-content">
+                <span class="spinner"></span>
+                Enviando...
+              </span>
             </button>
+
           </form>
         </div>
+      </div>
+            <!-- Toast notification -->
+      <div *ngIf="showToast" class="toast toast-{{toastType}}">
+        <span>{{ toastMessage }}</span>
+        <i class="bi bi-x" (click)="showToast = false"></i>
       </div>
     </div>

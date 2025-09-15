@@ -38,6 +38,33 @@ export class SidebarComponent implements OnInit, OnDestroy {
   activeSessionId: string | null = null;
   isModalOpen = false;
 
+  /* ---------- loading states ---------- */
+  deletingChatId: string | null = null; 
+  loadingSessions = false;
+
+  /* ---------- toast notifications ---------- */
+  showToast = false;
+  toastMessage = '';
+  toastType: 'success' | 'error' | 'warning' = 'error';
+
+  /* ---------- método para mostrar toast ---------- */
+  private showToastMessage(message: string, type: 'success' | 'error' | 'warning' = 'error') {
+    this.toastMessage = message;
+    this.toastType = type;
+    this.showToast = true;
+    
+    const timeout = type === 'warning' ? 8000 : 4000; // Más tiempo para confirmar
+    
+    setTimeout(() => {
+      if (this.showToast && this.toastType === type) {
+        this.showToast = false;
+        if (type === 'warning') {
+          this.pendingDeleteId = null; // Limpiar si no confirmó
+        }
+      }
+    }, timeout);
+  }
+
   /* ------------ streams para la plantilla ------------ */
   isLoggedIn$: Observable<boolean> = this.authService.isLoggedIn$;
   chats$: Observable<Chat[]> = this.chatService.sessions$;
@@ -57,13 +84,27 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   /* ---------------- ciclo de vida ---------------- */
   ngOnInit() {
-    this.authService.autoLogin(); // auto-login al iniciar
+    try {
+      this.authService.autoLogin();
+    } catch (error) {
+      console.error('Error en auto-login:', error);
+      this.showToastMessage('Error al verificar sesión.');
+    }
+
     this.subs.add(
       this.authService.isLoggedIn$.subscribe((loggedIn) => {
         const current = this.authService.getCurrentUserSnapshot();
         if (loggedIn && current && !('anonymous_id' in current)) {
-          this.chatService.loadSessions();
-          this.isModalOpen = false;
+          this.loadingSessions = true; 
+          try {
+            this.chatService.loadSessions();
+            this.loadingSessions = false; 
+            this.isModalOpen = false;
+          } catch (error) {
+            this.loadingSessions = false; 
+            console.error('Error al cargar sesiones:', error);
+            this.showToastMessage('Error al cargar conversaciones.');
+          }
         }
         if (!loggedIn) {
           this.chatService.clearSessions();
@@ -72,6 +113,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       })
     );
   }
+
   ngOnDestroy() {
     this.subs.unsubscribe();
   }
@@ -81,24 +123,56 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.chatService.clearIdChat();
     this.router.navigate(['/home']);
   }
+
   loadMessages(id: string) {
-    this.activeSessionId = id;
-    this.chatService.loadMessages(id);
-    this.router.navigate(['/home']);
-  }
-  deleteChat(id: string, ev?: Event) {
-    ev?.stopPropagation(); // evitar que se abra el chat al borrar
-    if (confirm('¿Eliminar esta conversación?')) {
-      this.chatService.deleteSession(id);
+    try {
+      this.activeSessionId = id;
+      this.chatService.loadMessages(id);
+      this.router.navigate(['/home']);
+    } catch (error) {
+      console.error('Error al cargar mensajes:', error);
+      this.showToastMessage('Error al cargar la conversación.');
     }
+  }
+
+  /* ---------- confirmación para eliminar ---------- */
+  pendingDeleteId: string | null = null;
+
+  deleteChat(id: string, ev?: Event) {
+    ev?.stopPropagation();
+    
+  // Guardar el ID que se quiere eliminar y mostrar warning
+    this.pendingDeleteId = id;
+    this.showToastMessage('¿Eliminar esta conversación? Toca para confirmar.', 'warning');
+  }
+
+  // Método para confirmar eliminación
+  confirmDelete() {
+    if (this.pendingDeleteId) {
+      this.deletingChatId = this.pendingDeleteId;
+      
+      try {
+        this.chatService.deleteSession(this.pendingDeleteId);
+        this.deletingChatId = null;
+        this.pendingDeleteId = null;
+        this.showToastMessage('Conversación eliminada.', 'success');
+      } catch (error) {
+        console.error('Error al eliminar chat:', error);
+        this.showToastMessage('Error al eliminar la conversación.');
+        this.deletingChatId = null;
+      }
+    }
+    this.showToast = false;
   }
 
   openModal() {
     this.isModalOpen = true;
   }
+
   closeModal() {
     this.isModalOpen = false;
   }
+
   viewProfile() {
     this.router.navigate(['/profile']);
   }

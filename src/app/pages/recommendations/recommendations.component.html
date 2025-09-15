@@ -1,42 +1,77 @@
 <div class="recommendations-container">
   <div class="recommendation-title">Recomendaciones para ti</div>
-  <div *ngIf="recommendedDocs.length > 0" class="recommendation-grid">
-    <div
-      class="recommendation-card"
-      *ngFor="let doc of recommendedDocsBack"
-      [ngClass]="{
-        blue: doc.status === 'L',
-        red: doc.status === 'R',
-        yellow: doc.status === 'E'
-      }"
-    >
-      <div class="doc-title">{{ doc.title }}</div>
-      <div
-        class="doc-author"
-        [ngClass]="{
-          'blue-icon': doc.status === 'L' || doc.status === 'E',
-          'red-icon': doc.status === 'R'
-        }"
-      >
-        {{ doc.author }}
-      </div>
-      <div
-        class="doc-icons"
-        [ngClass]="{
-          'blue-icon': doc.status === 'L' || doc.status === 'E',
-          'red-icon': doc.status === 'R'
-        }"
-      >
-        <i class="bi bi-file-earmark-text"></i>
-        <i class="bi bi-quote"></i>
-      </div>
+
+   <!-- Loading Spinner -->
+  <div *ngIf="isLoadingRecommendations" class="loading-container">
+    <div class="loading-spinner">
+      <div class="spinner-large"></div>
+      <p class="loading-text">Cargando recomendaciones...</p>
     </div>
   </div>
-  <div *ngIf="recommendedDocsBack.length === 0" class="recommendation-grid">
-    <div class="no-recommendations-message">
-      No hay recomendaciones disponibles para ti
+
+  <!-- Error State -->
+  <div *ngIf="hasError && !isLoadingRecommendations" class="error-container">
+    <div class="error-content">
+      <i class="bi bi-exclamation-triangle error-icon"></i>
+      <h3>Algo salió mal</h3>
+      <p class="error-message">{{ errorMessage }}</p>
+      <button class="retry-button" (click)="retryLoadRecommendations()" [disabled]="isLoadingRecommendations">
+        <div *ngIf="isLoadingRecommendations" class="loading-content">
+          <div class="spinner"></div>
+          <span>Reintentando...</span>
+        </div>
+        <span *ngIf="!isLoadingRecommendations">Reintentar</span>
+      </button>
     </div>
   </div>
+
+
+  <!-- Content with recommendations -->
+  <div *ngIf="!isLoadingRecommendations && !hasError">
+    <!-- Recommendations from backend -->
+    <div *ngIf="recommendedDocsBack.length > 0" class="recommendation-grid">
+      <div
+        class="recommendation-card"
+        *ngFor="let doc of recommendedDocsBack"
+        [ngClass]="{
+          blue: doc.status === 'L',
+          red: doc.status === 'R',
+          yellow: doc.status === 'E'
+        }"
+      >
+        <div class="doc-title">{{ doc.title }}</div>
+        <div
+          class="doc-author"
+          [ngClass]="{
+            'blue-icon': doc.status === 'L' || doc.status === 'E',
+            'red-icon': doc.status === 'R'
+          }"
+        >
+          {{ doc.author }}
+        </div>
+        <div
+          class="doc-icons"
+          [ngClass]="{
+            'blue-icon': doc.status === 'L' || doc.status === 'E',
+            'red-icon': doc.status === 'R'
+          }"
+        >
+          <i class="bi bi-file-earmark-text"></i>
+          <i class="bi bi-quote"></i>
+        </div>
+      </div>
+    </div>
+
+
+  <!-- No recommendations message -->
+  <div *ngIf="recommendedDocsBack.length === 0 && recommendedDocs.length === 0" class="no-recommendations-container">
+      <div class="no-recommendations-content">
+        <i class="bi bi-search no-recommendations-icon"></i>
+        <h3>No hay recomendaciones disponibles</h3>
+        <p>Intenta explorar más contenido para obtener recomendaciones personalizadas.</p>
+      </div>
+    </div>
+  
   <!-- Toast notification -->
   <div *ngIf="showToast" class="toast toast-{{toastType}}">
     <span>{{ toastMessage }}</span>
