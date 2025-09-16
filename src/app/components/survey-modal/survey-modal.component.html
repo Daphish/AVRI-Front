@@ -1,17 +1,17 @@
- <!-- Reutilizando el overlay del wizard -->
-    <div *ngIf="mostrarEncuesta" class="wizard-overlay">
+ <!-- Reusing wizard overlay -->
+    <div *ngIf="showSurvey" class="wizard-overlay">
       <div class="wizard-card">
-        <div class="modal-encuesta">
+        <div class="survey-modal">
 
-          <button class="boton-cerrar" (click)="cerrarEncuesta()" [disabled]="isSubmittingSurvey" type="button" aria-label="Cerrar encuesta">
+          <button class="close-button" (click)="closeSurvey()" [disabled]="isSubmittingSurvey" type="button" aria-label="Cerrar encuesta">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
           </button>
 
-          <!-- Intro de la encuesta -->
-          <ng-container *ngIf="!mostrarFormulario">
+          <!-- Survey intro -->
+          <ng-container *ngIf="!showForm">
             <h2>Encuesta de satisfacción</h2>
             <p>
               Queremos brindarte la mejor experiencia posible en nuestro sistema.
@@ -20,43 +20,43 @@
             </p>
             <p>Tus respuestas serán anónimas.</p>
             
-            <div class="botones-container">
-              <button class="secundario" (click)="cancelarEncuesta()">Responder más tarde</button>
-              <button class="primario" (click)="iniciarEncuesta()">Iniciar</button>
+            <div class="buttons-container">
+              <button class="secondary" (click)="cancelSurvey()">Responder más tarde</button>
+              <button class="primary" (click)="startSurvey()">Iniciar</button>
             </div>
           </ng-container>
 
-          <!-- Formulario de la encuesta -->
-          <form *ngIf="mostrarFormulario" (ngSubmit)="enviarEncuesta()">
+          <!-- Survey form -->
+          <form *ngIf="showForm" (ngSubmit)="sendSurvey()">
             <h3>Selecciona la opción que mejor describa tu experiencia con el sistema</h3>
 
-            <div *ngFor="let p of preguntas; let i = index" class="pregunta">
-              <div><strong>{{ p.texto }}</strong></div>
-              <div class="opciones">
-                <label *ngFor="let o of opciones">
+            <div *ngFor="let a of answers; let i = index" class="question">
+              <div><strong>{{ a.texto }}</strong></div>
+              <div class="options">
+                <label *ngFor="let o of options">
                   <input
                     type="radio"
                     name="q{{i+1}}"
-                    [(ngModel)]="respuestas['q' + (i+1)]"
-                    [value]="o.valor"
+                    [(ngModel)]="answers['q' + (i+1)]"
+                    [value]="o.value"
                     [disabled]="isSubmittingSurvey"
                     required
                   />
-                  {{ o.texto }}
+                  {{ o.text }}
                 </label>
               </div>
             </div>
 
             <label>Comentarios</label>
             <textarea 
-              [(ngModel)]="respuestas.comments" 
+              [(ngModel)]="answers.comments" 
               name="comments" 
               rows="3" 
               [disabled]="isSubmittingSurvey" 
               placeholder="Comparte cualquier comentario adicional...">
             </textarea>
 
-            <button type="submit" class="primario" [disabled]="isSubmittingSurvey">
+            <button type="submit" class="primary" [disabled]="isSubmittingSurvey">
               <span *ngIf="!isSubmittingSurvey">Enviar</span>
               <span *ngIf="isSubmittingSurvey" class="loading-content">
                 <span class="spinner"></span>

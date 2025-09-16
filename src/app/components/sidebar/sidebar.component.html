@@ -1,18 +1,18 @@
 <div class="left">
   <!-- ---------- logo ---------- -->
   <div class="top-left">
-    <img src="/Logo-AVRI-Alt.png" alt="Logo AVRI" />
+    <img src="/Logo-AVRI-Alt.png" alt="AVRI Logo" />
     <div class="left-title">Asistente Virtual RI</div>
   </div>
 
-  <!-- ---------- nuevo chat ---------- -->
+  <!-- ---------- new chat ---------- -->
   <button class="new-chat-button" (click)="viewHome()">
     Nueva conversación +
   </button>
 
-  <!-- ---------- lista de chats ---------- -->
+  <!-- ---------- chat list ---------- -->
   <div class="left-chats">
-      <!-- Spinner cuando está cargando sesiones -->
+      <!-- Spinner loading sessions -->
     <div *ngIf="loadingSessions" class="loading-sessions">
       <div class="spinner"></div>
       <span>Cargando conversaciones...</span>
@@ -37,12 +37,12 @@
           {{ chat.session_name }}
         </span>
 
-          <!-- icono borrar -->
+          <!-- delete icon -->
         <div class="delete-container">
-          <!-- Spinner cuando está eliminando -->
+          <!-- spinner when deleting -->
           <div *ngIf="deletingChatId === chat.session_id" class="spinner-small"></div>
           
-          <!-- Ícono normal cuando no está eliminando -->
+          <!-- normal icon if not deleting -->
           <i
             *ngIf="deletingChatId !== chat.session_id"
             class="bi bi-trash delete-icon"
@@ -54,7 +54,7 @@
     </ng-container>
   </div>
 
-  <!-- ---------- login / cuenta ---------- -->
+  <!-- ---------- login / account ---------- -->
   <div class="left-login" *ngIf="isLoggedIn$ | async as logged">
     <button *ngIf="!logged" class="login-button" (click)="openModal()">
       Iniciar sesión
@@ -67,8 +67,7 @@
       {{ currentUserName$ | async }}
     </button>
   </div>
-
-  <!-- segundo bloque login para usuarios no logueados (mantengo tu lógica) -->
+  
   <div class="left-login" *ngIf="!(isLoggedIn$ | async)">
     <button class="login-button" (click)="openModal()">Iniciar sesión</button>
   </div>

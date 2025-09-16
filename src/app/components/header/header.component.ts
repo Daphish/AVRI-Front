@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { NgIf } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { EventoEncuestaService } from '../../services/evento-encuesta.service';
+import { SurveyEventService } from '../../services/evento-encuesta.service';
 
 @Component({
   selector: 'app-header',
@@ -18,7 +18,7 @@ export class HeaderComponent {
   constructor(
     private auth: AuthService,
     private router: Router,
-    private encuesta: EventoEncuestaService
+    private survey: SurveyEventService
   ) {}
 
   ngOnInit() {
@@ -28,12 +28,12 @@ export class HeaderComponent {
         this.is_staff = false;
         return;
       }
-      // Usuario anónimo
+      // Anonymous user
       if ('anonymous_id' in user) {
         this.is_author = false;
         this.is_staff = false;
       }
-      // Flags de staff/autor si existen
+      // Staff/autor flags if present
       if ('is_staff' in user) this.is_staff = !!user.is_staff;
       if ('is_author' in user) this.is_author = !!user.is_author;
     });
@@ -43,7 +43,7 @@ export class HeaderComponent {
     this.router.navigate(['/fyp']);
   }
 
-  abrirEncuesta() {
-    this.encuesta.lanzarEncuesta();
+  openSurvey() {
+    this.survey.launchSurvey();
   }
 }
