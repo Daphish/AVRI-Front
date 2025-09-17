@@ -34,7 +34,7 @@ export class ChatService {
   readonly idChat$ = this.idChat$$.asObservable();
 
   /* --------------- sesiones ---------------------- */
-  cleanMessage(text: string): string {
+  cleanText(text: string): string {
     return text
       .replace(/<think>.*?<\/think>/gs, '') // remove thinking
       .replace(/##\d+\$\$/g, '') // remove cite
@@ -44,6 +44,14 @@ export class ChatService {
   loadSessions(): void {
     this.http
       .get<Chat[]>(`${this.BASE_URL}/`)
+      .pipe(
+        map((list) =>
+          list.map((s) => ({
+            ...s,
+            session_name: this.cleanText(s.session_name),
+          })),
+        ),
+      )
       .subscribe((list) => this.sessions$$.next(list));
   }
 
@@ -57,6 +65,7 @@ export class ChatService {
       .post<Chat>(`${this.BASE_URL}/`, { session_name: name })
       .pipe(
         tap((s) => {
+          s.session_name = this.cleanText(s.session_name); // remove thinking pattern
           this.sessions$$.next([s, ...this.sessions$$.value]);
           this.idChat$$.next(s.session_id);
           this.messages$$.next([]); // sin mensaje automático
@@ -124,7 +133,7 @@ export class ChatService {
               });
             return {
               fromUser: m.role === 'user',
-              text: this.cleanMessage(m.content ?? m.answer ?? ''),
+              text: this.cleanText(m.content ?? m.answer ?? ''),
               references: detailedDocs,
             } as Message;
           }),
@@ -147,7 +156,7 @@ export class ChatService {
       .pipe(
         map((r) => r.data),
         map((raw) => {
-          const answer = this.cleanMessage(raw.answer ?? raw.content ?? '');
+          const answer = this.cleanText(raw.answer ?? raw.content ?? '');
           const chunks: ReferenceChunk[] = raw.reference?.chunks ?? [];
           const uniqueRefs = chunks.filter(
             (c, i, a) =>
