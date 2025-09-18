@@ -1,5 +1,3 @@
-// src/main.ts
-
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
@@ -16,9 +14,7 @@ export function initializeApp(authService: AuthService): () => Promise<void> {
 
 bootstrapApplication(AppComponent, {
   providers: [
-    // Configura el interceptor funcional correctamente
     provideHttpClient(withInterceptors([authInterceptor])),
-    // Rutas de la aplicación
     provideRouter(routes),
     {
       provide: APP_INITIALIZER,

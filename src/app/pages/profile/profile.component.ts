@@ -41,12 +41,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
   toastType: 'success' | 'error' | 'warning' = 'error';
 
   userDisplay: User | null = null;
-  isActuallyAnonymous: boolean = true; // Usado para controlar la vista
+  isActuallyAnonymous: boolean = true; // For controlling the display
   preferences: String[] = [];
   documents: SavedDocument[] = [];
-  profileNeedsSetup: boolean = false; // Se actualizará en base a profileSetupComplete$
+  profileNeedsSetup: boolean = false;
 
-  // Para el botón de cerrar sesión y otras lógicas de plantilla
+  // For closing session
   isUserLoggedInAndNotAnonymous$: Observable<boolean> =
     this.authService.currentUser$.pipe(
       map((user) => !!user && !('anonymous_id' in user))
@@ -54,7 +54,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   constructor() {}
 
-  /* ---------- método para mostrar toast ---------- */
+  /* ---------- Method for showing toast ---------- */
   private showToastMessage(
     message: string,
     type: 'success' | 'error' | 'warning' = 'error'
@@ -160,7 +160,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
       })
     );
 
-    // Este getDocuments es del RecommendationService, asumo que es para historial o similares.
     this.subscriptions.add(
       this.documentService.getSavedDocuments().subscribe({
         next: (docs) => {
@@ -175,7 +174,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
           this.documents = this.getDefaultDocumentsPlaceholder();
           this.isLoadingDocuments = false;
           this.showToastMessage('Error al cargar documentos guardados.');
-        }
+        },
       })
     );
   }
@@ -183,7 +182,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
   async goBack(): Promise<void> {
     this.isNavigating = true;
     try {
-      /* Siempre queremos volver a mostrar el wizard */
       this.authService.profileSetupComplete$.subscribe((isComplete) => {
         if (!isComplete) {
           this.chatService.pendingWizard = true;

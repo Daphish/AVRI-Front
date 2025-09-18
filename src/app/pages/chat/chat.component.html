@@ -2,13 +2,13 @@
   <!-- ====================== overlay wizard ====================== -->
   <div *ngIf="showWizard" class="wizard-overlay">
     <div class="wizard-card">
-      <!-- barra superior -->
+      <!-- header -->
       <div class="wizard-header">
         <span>Conócenos</span>
         <i class="bi bi-x-lg close-ico" (click)="showWizard = false"></i>
       </div>
 
-      <!-- paso 0 : intro -->
+      <!-- step 0 -->
       <ng-container *ngIf="step === 0">
         <h2 class="wizard-title">¡Bienvenido!</h2>
         <p class="wizard-intro">
@@ -18,7 +18,7 @@
         <button class="wizard-btn" (click)="step = 1">Comenzar</button>
       </ng-container>
 
-      <!-- paso 1-2-3 : listas (manteniendo estilo/estructura) -->
+      <!-- steps 1-2-3 -->
       <ng-container *ngIf="step > 0">
         <h3 class="wizard-title">
           {{
@@ -67,20 +67,20 @@
     </div>
   </div>
 
-  <!-- ====================== área de mensajes ===================== -->
+  <!-- ====================== message area ===================== -->
   <div class="messages" #msgContainer>
-    <!-- bienvenida -->
+    <!-- welcome -->
     <div
       *ngIf="messages.length === 0 && !showWizard"
       class="column welcome-block"
-      aria-label="Bienvenida del sistema"
+      aria-label="System welcome"
     >
       <div class="welcome-title">¡Bienvenido!</div>
       <img class="welcome-img" src="/Logo-AVRI.png" alt="logo AVRI" />
       <div class="welcome-body">¿Cómo puedo ayudar hoy?</div>
     </div>
 
-    <!-- historial -->
+    <!-- message history -->
     <ng-container *ngFor="let m of messages; trackBy: trackByIndex">
       <div class="column">
         <div
@@ -93,12 +93,12 @@
 
           <div class="column">
             <div class="message-text">
-              <!-- burbuja normal -->
+              <!-- normal bubble -->
               <ng-container *ngIf="!m.isLoading; else typingDots">
                 {{ m.text }}
               </ng-container>
 
-              <!-- burbuja “escribiendo…” -->
+              <!-- "writing..." bubble -->
               <ng-template #typingDots>
                 <span
                   class="dot"
@@ -109,7 +109,7 @@
               </ng-template>
             </div>
 
-            <!-- referencias (manteniendo estilos) -->
+            <!-- references -->
             <div
               *ngIf="!m.fromUser && m.references?.length"
               class="message-references"

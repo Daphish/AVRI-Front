@@ -20,10 +20,10 @@ export class ChatService {
   private documentService = inject(DocumentService);
   private readonly BASE_URL = '/api/chat';
 
-  /* Flag para volver a mostrar el wizard después de perfil */
+  /* Showing wizard after profile */
   public pendingWizard = false;
 
-  /* --------------- estado reactivo --------------- */
+  /* --------------- reactive state --------------- */
   private sessions$$ = new BehaviorSubject<Chat[]>([]);
   readonly sessions$ = this.sessions$$.asObservable();
 
@@ -33,7 +33,7 @@ export class ChatService {
   private idChat$$ = new BehaviorSubject<string>('');
   readonly idChat$ = this.idChat$$.asObservable();
 
-  /* --------------- sesiones ---------------------- */
+  /* --------------- sessions ---------------------- */
   loadSessions(): void {
     this.http
       .get<Chat[]>(`${this.BASE_URL}/`)
@@ -52,7 +52,7 @@ export class ChatService {
         tap((s) => {
           this.sessions$$.next([s, ...this.sessions$$.value]);
           this.idChat$$.next(s.session_id);
-          this.messages$$.next([]); // sin mensaje automático
+          this.messages$$.next([]);
         })
       );
   }
@@ -72,16 +72,14 @@ export class ChatService {
     });
   }
 
-  /** Utilizado al cerrar sesión / modo invitado: borra todo lo local */
   clearSessions(): void {
     this.sessions$$.next([]);
     this.idChat$$.next('');
     this.messages$$.next([]);
   }
 
-  /* --------------- mensajes ---------------------- */
+  /* --------------- messages ---------------------- */
   loadMessages(id: string): void {
-    // Reordenar: seleccionado al principio
     const arr = this.sessions$$.value;
     const idx = arr.findIndex((s) => s.session_id === id);
     if (idx !== -1) {
@@ -128,7 +126,7 @@ export class ChatService {
       .subscribe((msgs) => this.messages$$.next(msgs));
   }
 
-  /** Envía texto y agrega burbuja “escribiendo…” */
+  /** Sends text and adds “writing…” */
   sendMessage(sessionId: string, text: string): void {
     const userMsg: Message = { fromUser: true, text };
     const typingMsg: Message = { fromUser: false, text: '', isLoading: true };
@@ -181,7 +179,7 @@ export class ChatService {
       });
   }
 
-  /* --------------- preferencias perfil --------------- */
+  /* --------------- preferences profile --------------- */
   getProfile(): Observable<any> {
     return this.http.get('/api/recommender/profile/me/');
   }

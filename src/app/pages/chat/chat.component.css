@@ -1,14 +1,12 @@
-/* ---------- layout general del chat ---------- */
 .chat-container {
   height: 100%;
   width: 100%;
   display: flex;
   flex-direction: column;
   position: relative;
-  background: #ffffff; /* ← fondo blanco, no azul-gris */
+  background: #ffffff;
 }
 
-/* ---------- área de mensajes ---------- */
 .messages {
   flex: 1 1 auto;
   min-height: 0;
@@ -33,14 +31,13 @@
   background: #5a6d84;
 }
 
-/* ----- columna contenedora de cada mensaje ----- */
 .column {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
 }
 
-/* bienvenida ---------------------------------------------------- */
+/* welcome ---------------------------------------------------- */
 .welcome-block {
   width: 100%;
   display: flex;
@@ -62,7 +59,7 @@
   color: #21405f;
 }
 
-/* ----- burbujas ------------------------------------------------ */
+/* ----- bubbles ------------------------------------------------ */
 .message-bubble {
   display: flex;
   align-items: flex-start;
@@ -96,7 +93,7 @@
   white-space: pre-line;
 }
 
-/* mini-referencias ---------------------------------------------- */
+/* references ---------------------------------------------- */
 .message-references {
   display: flex;
   flex-wrap: wrap;
@@ -117,7 +114,7 @@
   background: #e0e0e0;
 }
 
-/* ---------- input area (estilo original) ----------------------- */
+/* ---------- input area ----------------------- */
 .chat-input {
   margin: 10px 16px 20px;
   background: #d9d9d9;
@@ -180,7 +177,7 @@
   flex-direction: column;
   align-items: center;
 }
-/* cabecera */
+/* header */
 .wizard-header {
   align-self: stretch;
   display: flex;
@@ -193,7 +190,7 @@
 .close-ico {
   cursor: pointer;
 }
-/* títulos y textos */
+/* titles and texts */
 .wizard-title {
   text-align: center;
   margin: 0.4rem 0 1rem;
@@ -202,7 +199,7 @@
   text-align: center;
   margin-bottom: 2rem;
 }
-/* opciones */
+/* options */
 .options-grid {
   width: 100%;
   display: grid;
@@ -230,7 +227,7 @@
   background: #0056a3;
   color: #fff;
 }
-/* navegación */
+/* nav */
 .wizard-nav {
   display: flex;
   align-items: center;
@@ -249,7 +246,6 @@
   opacity: 0.35;
   cursor: not-allowed;
 }
-/* CTA grande */
 .wizard-btn {
   background: #0060c0;
   color: #fff;
@@ -264,12 +260,11 @@
 .wizard-btn:hover {
   background: #004e9b;
 }
-/* guardando */
 .saving-msg {
   margin-top: 1rem;
   font-style: italic;
 }
-/* ----------- dots “escribiendo…” ----------- */
+/* ----------- dots “writing…” ----------- */
 .dot {
   font-weight: bold;
   font-size: 1.3rem;
@@ -379,7 +374,7 @@
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* Tipos de toast */
+/* toast types */
 .toast-error {
   background: #d9b6b7;
   color: #871414;
@@ -398,7 +393,7 @@
   border-left-color: #b8860b;
 }
 
-/* Animación de entrada */
+/* Animations */
 @keyframes slideInRight {
   from {
     transform: translateX(100%);
