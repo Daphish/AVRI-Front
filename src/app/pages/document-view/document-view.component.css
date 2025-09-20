@@ -124,7 +124,7 @@
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* Tipos de toast */
+/* Toast types */
 .toast-error {
   background: #d9b6b7;
   color: #871414;
@@ -143,7 +143,7 @@
   border-left-color: #b8860b;
 }
 
-/* Animación */
+/* Animation */
 @keyframes slideInRight {
   from {
     transform: translateX(100%);
@@ -195,7 +195,6 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* Spinner del color del texto en lugar de blanco */
 .see-more-button .spinner {
   border: 2px solid rgba(0,0,0,0.3);
   border-top: 2px solid #0056a3;

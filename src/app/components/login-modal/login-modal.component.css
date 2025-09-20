@@ -152,7 +152,7 @@ input:focus {
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* Tipos de toast */
+/* Toast types */
 .toast-error {
   background: #d9b6b7;
   color: #871414;
@@ -171,7 +171,7 @@ input:focus {
   border-left-color: #b8860b;
 }
 
-/* Animación */
+/* Animation */
 @keyframes slideInRight {
   from {
     transform: translateX(100%);

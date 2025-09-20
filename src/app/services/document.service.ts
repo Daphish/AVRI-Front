@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, forkJoin, Observable, tap } from 'rxjs';
 
-/* ------------ modelos ------------ */
+/* ------------ interfaces ------------ */
 export interface DocumentDetail {
   id: string;
   title: string;
@@ -31,7 +31,7 @@ export interface AuthoredDocument {
 export class DocumentService {
   private readonly api = '/api/documents';
 
-  /* ---- documento activo ---- */
+  /* ---- active document ---- */
   private currentId$$ = new BehaviorSubject<string | null>(null);
   readonly currentDocumentId$ = this.currentId$$.asObservable();
 
@@ -49,7 +49,7 @@ export class DocumentService {
     const requests = ids.map((id) =>
       this.http.get<DocumentDetail>(`${this.api}/${id}/repository`)
     );
-    return forkJoin(requests); // Devuelve un Observable<DocumentDetail[]>
+    return forkJoin(requests);
   }
 
   /** GET /api/documents/{id}/ */
@@ -59,7 +59,7 @@ export class DocumentService {
       .pipe(tap((d) => this.detail$$.next(d)));
   }
 
-  /* ---- guardados ---- */
+  /* ---- saved ---- */
   saveDocument(id: string): Observable<SavedDocument> {
     return this.http.post<SavedDocument>(`${this.api}/saved/add/${id}/`, {});
   }
@@ -70,7 +70,7 @@ export class DocumentService {
     return this.http.get<SavedDocument[]>(`${this.api}/saved/list/`);
   }
 
-  /* ---- autoría ---- */
+  /* ---- auth ---- */
   claimDocument(id: string): Observable<AuthoredDocument> {
     return this.http.post<AuthoredDocument>(
       `${this.api}/authored/add/${id}/`,
@@ -81,7 +81,6 @@ export class DocumentService {
     return this.http.delete<void>(`${this.api}/authored/delete/${id}/`);
   }
 
-  /* opcional: limpiar al logout */
   clear(): void {
     this.currentId$$.next(null);
     this.detail$$.next(null);

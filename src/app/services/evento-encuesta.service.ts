@@ -3,10 +3,10 @@ import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
-export class EventoEncuestaService {
-  private encuesta$$ = new Subject<void>();
-  encuestaActivada$ = this.encuesta$$.asObservable();
-  lanzarEncuesta() {
-    this.encuesta$$.next();
+export class SurveyEventService {
+  private survey$$ = new Subject<void>();
+  surveyOn$ = this.survey$$.asObservable();
+  launchSurvey() {
+    this.survey$$.next();
   }
 }

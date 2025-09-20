@@ -26,7 +26,7 @@ export class LoginModalComponent {
   toastMessage = '';
   toastType: 'success' | 'error' | 'warning' = 'error';
 
-  /* ---------- método para mostrar toast ---------- */
+  /* ---------- method for showing toast ---------- */
   private showToastMessage(message: string, type: 'success' | 'error' | 'warning' = 'error') {
     this.toastMessage = message;
     this.toastType = type;

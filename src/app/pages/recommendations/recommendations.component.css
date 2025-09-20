@@ -101,7 +101,7 @@
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* Tipos de toast */
+/* Toast types */
 .toast-error {
   background: #d9b6b7;
   color: #871414;
@@ -120,7 +120,7 @@
   border-left-color: #b8860b;
 }
 
-/* Animación */
+/* Animation */
 @keyframes slideInRight {
   from {
     transform: translateX(100%);
@@ -144,8 +144,6 @@
 }
 
 /* ====================== LOADING SPINNER ========================= */
-
-/* ====================== LOADING STATES - USANDO TU SPINNER EXISTENTE ========================= */
 
 .loading-container {
   display: flex;
@@ -282,12 +280,15 @@
 /* ====================== RESPONSIVE ========================= */
 
 @media (max-width: 640px) {
-  .loading-container, .error-container, .no-recommendations-container {
+  .loading-container,
+  .error-container,
+  .no-recommendations-container {
     min-height: 250px;
     padding: 1rem;
   }
-  
-  .error-content, .no-recommendations-content {
+
+  .error-content,
+  .no-recommendations-content {
     padding: 1.5rem;
   }
 }

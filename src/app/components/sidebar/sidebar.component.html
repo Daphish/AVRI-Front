@@ -1,23 +1,23 @@
 <div class="left">
   <!-- ---------- logo ---------- -->
   <div class="top-left">
-    <img src="/Logo-AVRI-Alt.png" alt="Logo AVRI" />
+    <img src="/Logo-AVRI-Alt.png" alt="AVRI Logo" />
     <div class="left-title">Asistente Virtual RI</div>
   </div>
 
-  <!-- ---------- nuevo chat ---------- -->
+  <!-- ---------- new chat ---------- -->
   <button class="new-chat-button" (click)="viewHome()">
     Nueva conversación +
   </button>
 
-  <!-- ---------- lista de chats ---------- -->
+  <!-- ---------- chat list ---------- -->
   <div class="left-chats">
-      <!-- Spinner cuando está cargando sesiones -->
+    <!-- Spinner loading sessions -->
     <div *ngIf="loadingSessions" class="loading-sessions">
       <div class="spinner"></div>
       <span>Cargando conversaciones...</span>
     </div>
-    
+
     <ng-container *ngIf="chats$ | async as chatList">
       <div *ngIf="chatList.length === 0" class="no-chats-message">
         Aún no hay conversaciones
@@ -27,22 +27,25 @@
         *ngFor="let chat of chatList"
         class="sidebar-chat"
         (click)="loadMessages(chat.session_id)"
-        [ngClass]="{ 'active': chat.session_id === activeSessionId }"
+        [ngClass]="{ active: chat.session_id === activeSessionId }"
         tabindex="0"
         (keyup.enter)="loadMessages(chat.session_id)"
-        [attr.aria-label]="'Cargar chat: ' + chat.session_name"
+        [attr.aria-label]="'Load chat: ' + chat.session_name"
       >
         <span class="chat-name">
           <i class="bi bi-chat-left" style="margin-right: 4px"></i>
           {{ chat.session_name }}
         </span>
 
-          <!-- icono borrar -->
+        <!-- delete icon -->
         <div class="delete-container">
-          <!-- Spinner cuando está eliminando -->
-          <div *ngIf="deletingChatId === chat.session_id" class="spinner-small"></div>
-          
-          <!-- Ícono normal cuando no está eliminando -->
+          <!-- spinner when deleting -->
+          <div
+            *ngIf="deletingChatId === chat.session_id"
+            class="spinner-small"
+          ></div>
+
+          <!-- normal icon if not deleting -->
           <i
             *ngIf="deletingChatId !== chat.session_id"
             class="bi bi-trash delete-icon"
@@ -54,7 +57,7 @@
     </ng-container>
   </div>
 
-  <!-- ---------- login / cuenta ---------- -->
+  <!-- ---------- login / account ---------- -->
   <div class="left-login" *ngIf="isLoggedIn$ | async as logged">
     <button *ngIf="!logged" class="login-button" (click)="openModal()">
       Iniciar sesión
@@ -68,18 +71,26 @@
     </button>
   </div>
 
-  <!-- segundo bloque login para usuarios no logueados (mantengo tu lógica) -->
   <div class="left-login" *ngIf="!(isLoggedIn$ | async)">
     <button class="login-button" (click)="openModal()">Iniciar sesión</button>
   </div>
 
-   <!-- Toast notification -->
-  <div *ngIf="showToast" 
-      class="toast toast-{{toastType}}"
-      [class.clickable-warning]="toastType === 'warning' && pendingDeleteId"
-      (click)="toastType === 'warning' && pendingDeleteId ? confirmDelete() : null">
+  <!-- Toast notification -->
+  <div
+    *ngIf="showToast"
+    class="toast toast-{{ toastType }}"
+    [class.clickable-warning]="toastType === 'warning' && pendingDeleteId"
+    (click)="
+      toastType === 'warning' && pendingDeleteId ? confirmDelete() : null
+    "
+  >
     <span>{{ toastMessage }}</span>
-    <i class="bi bi-x" (click)="showToast = false; pendingDeleteId = null; $event.stopPropagation()"></i>
+    <i
+      class="bi bi-x"
+      (click)="
+        showToast = false; pendingDeleteId = null; $event.stopPropagation()
+      "
+    ></i>
   </div>
 </div>
 

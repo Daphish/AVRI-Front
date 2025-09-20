@@ -47,25 +47,25 @@ export class SidebarComponent implements OnInit, OnDestroy {
   toastMessage = '';
   toastType: 'success' | 'error' | 'warning' = 'error';
 
-  /* ---------- método para mostrar toast ---------- */
+  /* ---------- method for showing toast ---------- */
   private showToastMessage(message: string, type: 'success' | 'error' | 'warning' = 'error') {
     this.toastMessage = message;
     this.toastType = type;
     this.showToast = true;
     
-    const timeout = type === 'warning' ? 8000 : 4000; // Más tiempo para confirmar
+    const timeout = type === 'warning' ? 8000 : 4000;
     
     setTimeout(() => {
       if (this.showToast && this.toastType === type) {
         this.showToast = false;
         if (type === 'warning') {
-          this.pendingDeleteId = null; // Limpiar si no confirmó
+          this.pendingDeleteId = null;
         }
       }
     }, timeout);
   }
 
-  /* ------------ streams para la plantilla ------------ */
+  /* ------------ template streams ------------ */
   isLoggedIn$: Observable<boolean> = this.authService.isLoggedIn$;
   chats$: Observable<Chat[]> = this.chatService.sessions$;
 
@@ -82,7 +82,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     map((n) => (n ? n.charAt(0) : '?'))
   );
 
-  /* ---------------- ciclo de vida ---------------- */
+  /* ---------------- life cycle ---------------- */
   ngOnInit() {
     try {
       this.authService.autoLogin();
@@ -118,7 +118,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.subs.unsubscribe();
   }
 
-  /* ---------------- acciones UI ---------------- */
+  /* ---------------- UI actions ---------------- */
   viewHome() {
     this.chatService.clearIdChat();
     this.router.navigate(['/home']);
@@ -135,18 +135,16 @@ export class SidebarComponent implements OnInit, OnDestroy {
     }
   }
 
-  /* ---------- confirmación para eliminar ---------- */
+  /* ---------- deleting confirmation ---------- */
   pendingDeleteId: string | null = null;
 
   deleteChat(id: string, ev?: Event) {
     ev?.stopPropagation();
-    
-  // Guardar el ID que se quiere eliminar y mostrar warning
     this.pendingDeleteId = id;
     this.showToastMessage('¿Eliminar esta conversación? Toca para confirmar.', 'warning');
   }
 
-  // Método para confirmar eliminación
+  // Confirming deletion
   confirmDelete() {
     if (this.pendingDeleteId) {
       this.deletingChatId = this.pendingDeleteId;

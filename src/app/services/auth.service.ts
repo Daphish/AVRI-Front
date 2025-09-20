@@ -1,4 +1,3 @@
-// src/app/services/auth.service.ts
 import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
@@ -32,25 +31,23 @@ export class AuthService {
     this.profileSetupCompleteSource.asObservable();
 
   constructor() {
-    // autoLogin se llama desde AppComponent para controlar el inicio
+    // autoLogin called from appComponent
   }
 
-  // Getter público para el valor actual si es estrictamente necesario (usar con precaución)
   public getCurrentUserSnapshot(): User | AnonymousUser | null {
     return this.currentUserSource.getValue();
   }
 
   async autoLogin(): Promise<void> {
     if (!isPlatformBrowser(this.platformId)) {
-      return; // No hacer nada si no estamos en el navegador
+      return;
     }
     const token = localStorage.getItem('authToken');
     console.log(token);
     if (!token) {
-      this.logout(); // Limpia todos los estados si no hay token
+      this.logout(); // Cleans states if no token
       return;
     }
-    // Si hay token, fetchAndSetCurrentUser determinará el estado de login y usuario.
     await this.fetchAndSetCurrentUser();
   }
 
@@ -80,7 +77,7 @@ export class AuthService {
         })
       );
       localStorage.setItem('authToken', resp.token);
-      await this.fetchAndSetCurrentUser(); // Esto establecerá el usuario anónimo
+      await this.fetchAndSetCurrentUser();
       return true;
     } catch (error) {
       console.error('Error creando usuario anónimo:', error);
@@ -103,7 +100,7 @@ export class AuthService {
       this.currentUserSource.next(user);
 
       if (user && 'anonymous_id' in user) {
-        this.profileSetupCompleteSource.next(false); // Para anónimos, se considera completo o no aplica
+        this.profileSetupCompleteSource.next(false);
       } else if (user) {
         const profile = await firstValueFrom(
           this.http.get<any>(`/api/recommender/profile/me/`)
@@ -112,14 +109,14 @@ export class AuthService {
           ? this.profileSetupCompleteSource.next(false)
           : this.profileSetupCompleteSource.next(true);
       } else {
-        this.logout(); // Si user es null inesperadamente
+        this.logout();
       }
     } catch (error) {
       console.error(
         'Error al obtener datos del usuario actual en fetchAndSetCurrentUser:',
         error
       );
-      this.logout(); // Si /me/ falla con un token válido, es un problema, hacemos logout
+      this.logout();
     }
   }
 
