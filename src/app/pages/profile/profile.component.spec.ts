@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { ProfileComponent } from './profile.component';
+
+import { AuthService } from '../../services/auth.service';
+import { AuthServiceStub } from '../../../testing/test-stubs';
 
 describe('ProfileComponent', () => {
   let component: ProfileComponent;
@@ -8,9 +10,9 @@ describe('ProfileComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ProfileComponent]
-    })
-    .compileComponents();
+      imports: [ProfileComponent],
+      providers: [{ provide: AuthService, useClass: AuthServiceStub }],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(ProfileComponent);
     component = fixture.componentInstance;

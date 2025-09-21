@@ -16,24 +16,21 @@ describe('DocumentService', () => {
     http = TestBed.inject(HttpTestingController);
   });
 
-  it('getDocumentsByIds() fetches once per unique id and preserves order', (done) => {
+  it('getDocumentsByIds() preserves order and does NOT dedupe internally', (done) => {
     const ids = ['doc-1', 'doc-2', 'doc-1'];
 
     service.getDocumentsByIds(ids).subscribe(docs => {
-      expect(docs.map(d => d.id)).toEqual(['doc-1', 'doc-2']);
+      expect(docs.map(d => d.id)).toEqual(['doc-1', 'doc-2', 'doc-1']);
       done();
     });
 
     const reqs = http.match(req => req.url.includes('/api/documents/') && req.url.includes('/repository'));
-    expect(reqs.length).toBe(2);
+    expect(reqs.length).toBe(3); // one per id
 
-    for (const r of reqs) {
-      if (r.request.url.includes('doc-1')) {
-        r.flush({ id: 'doc-1', title: 'One', repository_uri: 'https://x/1' } as DocumentDetail);
-      } else if (r.request.url.includes('doc-2')) {
-        r.flush({ id: 'doc-2', title: 'Two', repository_uri: 'https://x/2' } as DocumentDetail);
-      }
-    }
+    reqs.forEach(r => {
+      const id = r.request.url.match(/documents\/([^/]+)/)?.[1]!;
+      r.flush({ id, title: id.toUpperCase(), repository_uri: `https://x/${id}` } as DocumentDetail);
+    });
 
     http.verify();
   });
@@ -41,7 +38,7 @@ describe('DocumentService', () => {
   it('loadDocument() updates document$ after HTTP resolves', (done) => {
     const sub = service.document$.subscribe((d: any) => {
       if (d?.id === 'doc-9') {
-        expect(d.title).toBe('Ninth');
+        expect(d.title).toBe('NINTH');
         sub.unsubscribe();
         done();
       }
@@ -49,9 +46,13 @@ describe('DocumentService', () => {
 
     service.loadDocument('doc-9').subscribe();
 
-    const r = http.expectOne(req => req.url.includes('/api/documents/') && req.url.includes('/doc-9') && req.url.includes('/repository'));
+    const r = http.expectOne(req =>
+      req.url.includes('/api/documents/') &&
+      req.url.includes('/doc-9') &&
+      req.url.includes('/repository')
+    );
     expect(r.request.method).toBe('GET');
-    r.flush({ id: 'doc-9', title: 'Ninth', repository_uri: 'https://x/9' } as DocumentDetail);
+    r.flush({ id: 'doc-9', title: 'NINTH', repository_uri: 'https://x/9' } as DocumentDetail);
 
     http.verify();
   });

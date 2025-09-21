@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { LoginModalComponent } from './login-modal.component';
+
+import { AuthService } from '../../services/auth.service';
+import { AuthServiceStub } from '../../../testing/test-stubs';
 
 describe('LoginModalComponent', () => {
   let component: LoginModalComponent;
@@ -8,9 +10,9 @@ describe('LoginModalComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [LoginModalComponent]
-    })
-    .compileComponents();
+      imports: [LoginModalComponent],
+      providers: [{ provide: AuthService, useClass: AuthServiceStub }],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(LoginModalComponent);
     component = fixture.componentInstance;
