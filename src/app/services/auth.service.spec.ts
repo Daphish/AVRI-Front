@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { PLATFORM_ID } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withFetch } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 
 import { AuthService } from './auth.service';
@@ -30,7 +30,7 @@ describe('AuthService (aligned with project code)', () => {
       TestBed.configureTestingModule({
         providers: [
           AuthService,
-          provideHttpClient(),
+          provideHttpClient(withFetch()),
           provideHttpClientTesting(),
           { provide: PLATFORM_ID, useValue: 'browser' },
         ],
@@ -113,7 +113,7 @@ describe('AuthService (aligned with project code)', () => {
       TestBed.configureTestingModule({
         providers: [
           AuthService,
-          provideHttpClient(),
+          provideHttpClient(withFetch()),
           provideHttpClientTesting(),
           { provide: PLATFORM_ID, useValue: 'server' },
         ],

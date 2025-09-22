@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { DocumentViewComponent } from './document-view.component';
-
+import { provideHttpClient, withFetch } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { DocumentService } from '../../services/document.service';
 import { DocumentServiceStub } from '../../../testing/test-stubs';
 
@@ -14,7 +15,7 @@ describe('DocumentViewComponent', () => {
       imports: [DocumentViewComponent],
       providers: [
         provideRouter([]),
-        { provide: DocumentService, useClass: DocumentServiceStub },
+        { provide: DocumentService, useClass: DocumentServiceStub }, provideHttpClient(withFetch()), provideHttpClientTesting()
       ],
     }).compileComponents();
 

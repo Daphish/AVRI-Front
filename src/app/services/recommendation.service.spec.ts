@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withFetch } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { of } from 'rxjs';
 
@@ -23,7 +23,7 @@ describe('RecommendationService', () => {
       providers: [
         RecommendationService,
         { provide: DocumentService, useClass: MockDocumentService },
-        provideHttpClient(),
+        provideHttpClient(withFetch()),
         provideHttpClientTesting(),
       ],
     });

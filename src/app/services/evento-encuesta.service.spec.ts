@@ -1,13 +1,15 @@
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom, take } from 'rxjs';
 import { EventoEncuestaService } from './evento-encuesta.service';
+import { provideHttpClient, withFetch } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('EventoEncuestaService (trigger only)', () => {
   let service: EventoEncuestaService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [EventoEncuestaService],
+      providers: [EventoEncuestaService, provideHttpClient(withFetch()), provideHttpClientTesting()],
     });
     service = TestBed.inject(EventoEncuestaService);
   });

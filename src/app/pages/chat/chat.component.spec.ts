@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { ChatComponent } from './chat.component';
-
+import { provideHttpClient, withFetch } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { AuthService } from '../../services/auth.service';
 import { ChatService } from '../../services/chat.service';
 import { DocumentService } from '../../services/document.service';
@@ -24,6 +25,8 @@ describe('ChatComponent', () => {
         { provide: AuthService, useClass: AuthServiceStub },
         { provide: ChatService, useClass: ChatServiceStub },
         { provide: DocumentService, useClass: DocumentServiceStub },
+        provideHttpClient(withFetch()),
+        provideHttpClientTesting()
       ],
     }).compileComponents();
 

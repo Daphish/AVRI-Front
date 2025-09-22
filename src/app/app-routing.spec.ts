@@ -3,6 +3,8 @@ import { Router, RouterOutlet } from '@angular/router';
 import { Location } from '@angular/common';
 import { provideRouter } from '@angular/router';
 import { Component } from '@angular/core';
+import { provideHttpClient, withFetch } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 @Component({ selector: 'app-dummy', template: 'dummy' }) class DummyComponent {}
 
@@ -19,7 +21,7 @@ describe('App Routing (starter suite)', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RouterOutlet],
-      providers: [provideRouter(routes)],
+      providers: [provideRouter(routes), provideHttpClient(withFetch()), provideHttpClientTesting()],
     }).compileComponents();
     router = TestBed.inject(Router);
     location = TestBed.inject(Location);

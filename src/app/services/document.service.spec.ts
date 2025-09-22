@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withFetch } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 
 import { DocumentService, DocumentDetail } from './document.service';
@@ -10,7 +10,7 @@ describe('DocumentService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [DocumentService, provideHttpClient(), provideHttpClientTesting()],
+      providers: [DocumentService, provideHttpClient(withFetch()), provideHttpClientTesting()],
     });
     service = TestBed.inject(DocumentService);
     http = TestBed.inject(HttpTestingController);
