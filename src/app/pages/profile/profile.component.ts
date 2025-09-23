@@ -1,5 +1,11 @@
 // src/app/pages/profile/profile.component.ts
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  inject,
+  DestroyRef,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { NgFor, NgIf } from '@angular/common';
 import { Observable, Subscription, map, take } from 'rxjs';
@@ -52,7 +58,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       map((user) => !!user && !('anonymous_id' in user))
     );
 
-  constructor() {}
+  constructor(private destroyRef: DestroyRef) {}
 
   /* ---------- Method for showing toast ---------- */
   private showToastMessage(
@@ -71,8 +77,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.isLoadingProfile = true;
 
-    this.subscriptions.add(
-      this.authService.currentUser$.pipe(take(1)).subscribe((currentUser) => {
+    this.authService.currentUser$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((currentUser) => {
         if (currentUser && !('anonymous_id' in currentUser)) {
           this.isActuallyAnonymous = false;
           this.userDisplay = currentUser as User;
@@ -84,18 +91,15 @@ export class ProfileComponent implements OnInit, OnDestroy {
           this.documents = this.getDefaultDocumentsPlaceholder();
           this.isLoadingProfile = false;
         }
-      })
-    );
+      });
 
-    this.subscriptions.add(
-      this.authService.profileSetupComplete$
-        .pipe(takeUntilDestroyed())
-        .subscribe((isComplete) => {
-          if (!this.isActuallyAnonymous) {
-            this.profileNeedsSetup = !isComplete;
-          }
-        })
-    );
+    this.authService.profileSetupComplete$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((isComplete) => {
+        if (!this.isActuallyAnonymous) {
+          this.profileNeedsSetup = !isComplete;
+        }
+      });
   }
 
   private getDefaultDocumentsPlaceholder(): SavedDocument[] {
