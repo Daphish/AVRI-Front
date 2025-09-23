@@ -48,9 +48,9 @@
           Selecciona la opción que mejor describa tu experiencia con el sistema
         </h3>
 
-        <div *ngFor="let a of answers; let i = index" class="question">
+        <div *ngFor="let q of questions; let i = index" class="question">
           <div>
-            <strong>{{ a.texto }}</strong>
+            <strong>{{ q.text }}</strong>
           </div>
           <div class="options">
             <label *ngFor="let o of options">
