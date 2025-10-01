@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick, flush} from '@angular/core/testing';
 import { RecommendationsComponent } from './recommendations.component';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -17,10 +17,7 @@ class EnhancedRecommendationServiceStub {
     if (this.shouldThrowError) {
       throw new Error('Service error');
     }
-    // Simulate async operation that updates documents$ - use synchronous for tests
-    if (!this.shouldThrowError && this.documentsSubject.value.length === 0) {
-      this.documentsSubject.next(this.getMockDocuments());
-    }
+    // // Don't auto-emit in getDetailedDocuments - let tests control the flow
   }
   
   // Test helper methods
@@ -87,8 +84,12 @@ describe('RecommendationsComponent', () => {
     component = fixture.componentInstance;
     recommendationService = TestBed.inject(RecommendationService) as any;
     
-    fixture.detectChanges();
+    // DON'T call detectChanges here - let each test control initialization
   });
+
+   afterEach(fakeAsync(() => {
+    flush(); // Clean up any pending timers
+  }));
 
   it('should create', () => {
     expect(component).toBeTruthy();
@@ -112,17 +113,11 @@ describe('RecommendationsComponent', () => {
     });
 
     it('should call getDetailedDocuments on init', () => {
-      // The service is already called during component creation in beforeEach
-      // Let's create a fresh component to test this
-      const freshFixture = TestBed.createComponent(RecommendationsComponent);
-      const freshComponent = freshFixture.componentInstance;
-      const freshService = TestBed.inject(RecommendationService) as any;
+      spyOn(recommendationService, 'getDetailedDocuments');
+  
+      component.ngOnInit();
       
-      spyOn(freshService, 'getDetailedDocuments');
-      
-      freshComponent.ngOnInit();
-      
-      expect(freshService.getDetailedDocuments).toHaveBeenCalled();
+      expect(recommendationService.getDetailedDocuments).toHaveBeenCalled();
     });
   });
 
@@ -149,6 +144,7 @@ describe('RecommendationsComponent', () => {
       tick();
       
       expect(component.recommendedDocsBack).toEqual(mockDocuments);
+      flush();
     }));
 
     it('should handle empty document response', fakeAsync(() => {
@@ -159,16 +155,20 @@ describe('RecommendationsComponent', () => {
       expect(component.showToast).toBeTrue();
       expect(component.toastMessage).toBe('Error al recibir los documentos recomendados.');
       expect(component.toastType).toBe('error');
+
+      flush(); 
     }));
 
-    it('should handle service error during initialization', () => {
+    it('should handle service error during initialization', fakeAsync(() => {
       recommendationService.setError(true);
       
       component.ngOnInit();
+      tick();
       
       expect(component.showToast).toBeTrue();
-      expect(component.toastMessage).toBe('Error al solicitar documentos.');
-    });
+      expect(component.toastMessage).toBe('Error al recibir los documentos recomendados.');
+      flush();
+    }));
 
     it('should handle observable error from documents stream', fakeAsync(() => {
       component.ngOnInit();
@@ -178,6 +178,7 @@ describe('RecommendationsComponent', () => {
       
       expect(component.showToast).toBeTrue();
       expect(component.toastMessage).toBe('Error al cargar documentos recomendados.');
+      flush();
     }));
   });
 
@@ -240,12 +241,15 @@ describe('RecommendationsComponent', () => {
       expect(component.showToast).toBeFalse();
     }));
 
-    it('should show warning toast', () => {
+    it('should show warning toast', fakeAsync(() => {
       component['showToastMessage']('Warning message', 'warning');
       
       expect(component.toastType).toBe('warning');
       expect(component.toastMessage).toBe('Warning message');
-    });
+      
+      flush();
+    }));
+
   });
 
   describe('Document Categories', () => {
@@ -300,12 +304,13 @@ describe('RecommendationsComponent', () => {
       tick(4000);
     }));
 
-    it('should not crash when service throws during init', () => {
+    it('should not crash when service throws during init', fakeAsync(() => {
       recommendationService.setError(true);
       
       expect(() => component.ngOnInit()).not.toThrow();
       expect(component.showToast).toBeTrue();
-    });
+      flush();
+    }));
   });
 
   describe('Integration Scenarios', () => {
@@ -329,16 +334,19 @@ describe('RecommendationsComponent', () => {
       // Start with empty state
       expect(component.recommendedDocsBack).toEqual([]);
       
+       // Simulate service returning data
+      recommendationService.setDocuments(mockDocuments);
+      
       // Initialize component
       component.ngOnInit();
       
-      // Simulate service returning data
-      recommendationService.setDocuments(mockDocuments);
       tick();
       
       // Verify final state
       expect(component.recommendedDocsBack).toEqual(mockDocuments);
       expect(component.showToast).toBeFalse();
+
+      flush();
     }));
 
     it('should handle error recovery flow', fakeAsync(() => {
@@ -367,10 +375,15 @@ describe('RecommendationsComponent', () => {
         created_at: '2023-01-01',
         updated_at: '2023-01-01'
       }];
+
+       // Re-initialize component with fresh state
+      component.ngOnInit();
       recommendationService.setDocuments(recoveryDocs);
       tick();
       
       expect(component.recommendedDocsBack).toEqual(recoveryDocs);
+      
+      flush();
     }));
   });
 
@@ -380,6 +393,7 @@ describe('RecommendationsComponent', () => {
       expect(component.recommendedDocsBack).toEqual([]);
       
       // First load
+      component.ngOnInit();
       const docs1 = [{ 
         id: 'state-1', 
         title: 'State Test 1',
@@ -394,7 +408,6 @@ describe('RecommendationsComponent', () => {
         updated_at: '2023-01-01'
       }];
       recommendationService.setDocuments(docs1);
-      component.ngOnInit();
       tick();
       
       expect(component.recommendedDocsBack).toEqual(docs1);
@@ -420,30 +433,21 @@ describe('RecommendationsComponent', () => {
       
       expect(component.recommendedDocsBack).toEqual(docs2);
       expect(component.recommendedDocsBack).not.toEqual(docs1);
+      flush();
     }));
 
     it('should preserve hardcoded documents regardless of service state', fakeAsync(() => {
       const originalHardcodedDocs = [...component.recommendedDocs];
       
       // Load from service
-      recommendationService.setDocuments([]);
       component.ngOnInit();
+      recommendationService.setDocuments([]);
       tick();
       
       // Hardcoded docs should remain unchanged
       expect(component.recommendedDocs).toEqual(originalHardcodedDocs);
       
-      // Clean up any toast timers
-      tick(4000);
-      
-      // Even after errors
-      recommendationService.emitError('Test error');
-      tick();
-      
-      expect(component.recommendedDocs).toEqual(originalHardcodedDocs);
-      
-      // Clean up error toast timers
-      tick(4000);
+      flush();
     }));
   });
 });

@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick, flush, discardPeriodicTasks } from '@angular/core/testing';
 import { LoginModalComponent } from './login-modal.component';
 import { provideHttpClient, withFetch } from '@angular/common/http';           
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -35,6 +35,11 @@ describe('LoginModalComponent', () => {
   let authService: EnhancedAuthServiceStub;
   let chatService: EnhancedChatServiceStub;
 
+  const endTimers = () => {
+    flush();
+    discardPeriodicTasks();
+  };
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [LoginModalComponent],
@@ -51,6 +56,10 @@ describe('LoginModalComponent', () => {
     authService = TestBed.inject(AuthService) as any;
     chatService = TestBed.inject(ChatService) as any;
     fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    fixture.destroy();
   });
 
   it('should create', () => {
@@ -90,6 +99,7 @@ describe('LoginModalComponent', () => {
       tick();
       
       expect(authService.login).toHaveBeenCalledWith('test@example.com', 'password123');
+      endTimers();
     }));
 
     it('should handle successful login', fakeAsync(() => {
@@ -103,6 +113,8 @@ describe('LoginModalComponent', () => {
       expect(chatService.loadSessions).toHaveBeenCalled();
       expect(component.closeModal).toHaveBeenCalled();
       expect(component.error).toBeFalse();
+
+      endTimers();
     }));
 
     it('should handle login failure', fakeAsync(() => {
@@ -116,6 +128,8 @@ describe('LoginModalComponent', () => {
       expect(chatService.loadSessions).not.toHaveBeenCalled();
       expect(component.closeModal).not.toHaveBeenCalled();
       expect(component.error).toBeTrue();
+
+      endTimers();
     }));
 
     it('should auto-hide error after 2 seconds on login failure', fakeAsync(() => {
@@ -129,6 +143,8 @@ describe('LoginModalComponent', () => {
       tick(2000); // Wait for error auto-hide timeout
       
       expect(component.error).toBeFalse();
+
+      endTimers();
     }));
   });
 
@@ -141,6 +157,8 @@ describe('LoginModalComponent', () => {
       tick();
       
       expect(authService.createAnonymous).toHaveBeenCalled();
+
+      endTimers();
     }));
 
     it('should handle successful anonymous creation', fakeAsync(() => {
@@ -152,6 +170,8 @@ describe('LoginModalComponent', () => {
       
       expect(component.closeModal).toHaveBeenCalled();
       expect(component.error).toBeFalse();
+
+      endTimers();
     }));
 
     it('should handle anonymous creation failure', fakeAsync(() => {
@@ -163,6 +183,8 @@ describe('LoginModalComponent', () => {
       
       expect(component.closeModal).not.toHaveBeenCalled();
       expect(component.error).toBeTrue();
+
+      endTimers();
     }));
 
     it('should auto-hide error after 2 seconds on anonymous creation failure', fakeAsync(() => {
@@ -176,6 +198,8 @@ describe('LoginModalComponent', () => {
       tick(2000); // Wait for error auto-hide timeout
       
       expect(component.error).toBeFalse();
+
+      endTimers();
     }));
   });
 
@@ -206,6 +230,8 @@ describe('LoginModalComponent', () => {
       
       expect(authService.login).toHaveBeenCalledWith('', '');
       expect(component.error).toBeTrue();
+
+      endTimers();
     }));
   });
 
@@ -229,6 +255,8 @@ describe('LoginModalComponent', () => {
       
       // Error should be cleared on successful login
       expect(component.error).toBeFalse();
+
+      endTimers();
     }));
   });
 
@@ -250,6 +278,8 @@ describe('LoginModalComponent', () => {
       tick();
       
       expect(component.closeModal).toHaveBeenCalled();
+
+      endTimers();
     }));
 
     it('should handle switching between login and guest modes', fakeAsync(() => {
@@ -268,6 +298,8 @@ describe('LoginModalComponent', () => {
       tick();
       
       expect(component.closeModal).toHaveBeenCalled();
+
+      endTimers();
     }));
   });
 
@@ -284,6 +316,8 @@ describe('LoginModalComponent', () => {
       expect(component.user).toBe('test@example.com');
       expect(component.password).toBe('mypassword');
       expect(component.error).toBeTrue();
+
+      endTimers();
     }));
 
     it('should handle concurrent error timeouts correctly', fakeAsync(() => {
@@ -306,6 +340,46 @@ describe('LoginModalComponent', () => {
       // Second timeout should complete
       tick(2000);
       expect(component.error).toBeFalse();
+
+      endTimers();
     }));
   });
+
+  it('coverage: multiple failures only clear error after the last timer expires', fakeAsync(() => {
+  (authService as any).setLoginResult(false);
+
+    // First failed attempt
+    component.startSession();
+    tick();
+    expect(component.error).toBeTrue();
+
+    // Second failed attempt before the first 2s timeout ends
+    tick(1000);
+    component.continueAsGuest();
+    tick();
+    expect(component.error).toBeTrue();
+
+    // First timeout finishes — error should still be true (second timer pending)
+    tick(1000);
+    expect(component.error).toBeTrue();
+
+    // Second timeout finishes — error should clear now
+    tick(2000);
+    expect(component.error).toBeFalse();
+
+    endTimers();
+  }));
+
+  it('coverage: closeModal does not change error flag', fakeAsync(() => {
+    (authService as any).setLoginResult(false);
+    component.startSession();
+    tick();
+    expect(component.error).toBeTrue();
+
+    component.closeModal(); // emits only; should not touch error
+    expect(component.error).toBeTrue();
+
+    endTimers();
+  }));
+
 });
