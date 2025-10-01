@@ -270,8 +270,8 @@
 .options-grid {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
-  gap: 0.6rem;
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  gap: 0.5rem;
   margin-bottom: 1.5rem;
   position: relative;
   z-index: 2;
@@ -292,7 +292,7 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   text-overflow: ellipsis;
   overflow: hidden;
-  white-space: nowrap;
+  white-space: normal;
   backdrop-filter: blur(10px);
   font-size: 0.95rem;
 }
@@ -380,6 +380,8 @@
   position: relative;
   z-index: 2;
   min-width: 180px;
+  display: block;
+  margin: 0 auto;
 }
 
 .wizard-btn:hover:not(:disabled) {
@@ -394,6 +396,7 @@
   transform: none;
   box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
 }
+
 
 .saving-msg {
   margin-top: 1.5rem;
@@ -433,28 +436,6 @@
   background: rgba(255, 255, 255, 0.5);
 }
 
-/* Loading spinner */
-.loading-content {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.spinner {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top: 2px solid white;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
 
 /* Responsive */
 @media (max-width: 640px) {
