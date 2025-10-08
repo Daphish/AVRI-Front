@@ -124,7 +124,7 @@ Currently, there are some tests in development that mainly cover (but are not li
 If you want to verify the tests, you should use the following command in the project's root directory:
 
 ```bash
-npx ng test --watch=false --browser=ChromeHeadless --code-coverage
+npx ng test --watch=false --browsers=ChromeHeadless --code-coverage
 ```
 
 ---
