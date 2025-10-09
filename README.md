@@ -8,6 +8,22 @@
   </a>
 </div>
 
+<p align="center">
+  <!-- GitHub Actions: CI -->
+  <a href="https://github.com/Daphish/AVRI-Front/actions/workflows/ci.yml">
+    <img alt="CI" src="https://github.com/Daphish/AVRI-Front/actions/workflows/ci.yml/badge.svg?branch=main">
+  </a>
+
+  <!-- Angular & Node (static badges) -->
+  <img alt="Angular" src="https://img.shields.io/badge/Angular-18%2B-dd0031?logo=angular&logoColor=white">
+  <img alt="Node" src="https://img.shields.io/badge/Node-18%2B-339933?logo=node.js&logoColor=white">
+
+  <!-- License & Last commit -->
+  <img alt="License" src="https://img.shields.io/github/license/Daphish/AVRI-Front">
+  <img alt="Last commit" src="https://img.shields.io/github/last-commit/Daphish/AVRI-Front">
+</p>
+
+
 # AVRI-Front 
 
 Interfaces for the **Virtual Assistant of the Institutional Repository**
@@ -59,7 +75,7 @@ cd AVRI-Front
 
 ---
 
-## ⚙️ Project Setup
+## Project Setup
 
 ### Install dependencies
 
@@ -69,11 +85,11 @@ As this is an Angular project, it's necessary to install all dependencies:
 npm install
 ```
 
-> **📝 Note**: This process may take a few minutes depending on your internet connection.
+> ** Note**: This process may take a few minutes depending on your internet connection.
 
 ---
 
-## 🏃‍♂️ Running the Application
+## Running the Application
 
 ### Start the development server
 
@@ -156,6 +172,9 @@ This project is built with:
 
 ### Dependency Versions
 ```json
+- Node: 22.13.0 
+- npm: 11.0.0 
+- pnpm: 10.12.1 
 ├── @angular-devkit/build-angular@18.2.14
 ├── @angular/animations@18.2.13
 ├── @angular/cli@18.2.14
@@ -187,6 +206,7 @@ This project is built with:
 ├── tslib@2.8.1
 ├── typescript@5.5.4
 └── zone.js@0.14.10
+
 ```
 
 ---
