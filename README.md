@@ -9,11 +9,7 @@
 </div>
 
 <p align="center">
-  <!-- GitHub Actions: CI -->
-  <a href="https://github.com/Daphish/AVRI-Front/actions/workflows/ci.yml">
-    <img alt="CI" src="https://github.com/Daphish/AVRI-Front/actions/workflows/ci.yml/badge.svg?branch=main">
-  </a>
-
+ 
   <!-- Angular & Node (static badges) -->
   <img alt="Angular" src="https://img.shields.io/badge/Angular-18%2B-dd0031?logo=angular&logoColor=white">
   <img alt="Node" src="https://img.shields.io/badge/Node-18%2B-339933?logo=node.js&logoColor=white">
