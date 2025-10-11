@@ -13,20 +13,24 @@
   overflow-y: auto;
   flex-direction: column;
   display: flex;
-  justify-content: space-between;
   padding: 1rem 0.5rem;
+  padding-bottom: 80px;
 }
+
 .messages::-webkit-scrollbar {
   width: 8px;
 }
+
 .messages::-webkit-scrollbar-track {
   background: #e4e8ed;
   border-radius: 4px;
 }
+
 .messages::-webkit-scrollbar-thumb {
   background: #7789a0;
   border-radius: 4px;
 }
+
 .messages::-webkit-scrollbar-thumb:hover {
   background: #5a6d84;
 }
@@ -37,29 +41,32 @@
   align-items: flex-start;
 }
 
-/* welcome ---------------------------------------------------- */
+/* Welcome screen */
 .welcome-block {
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
+
 .welcome-title {
   font-size: 2rem;
   font-weight: 700;
   color: #21405f;
   margin-top: 1.2rem;
 }
+
 .welcome-img {
   width: 8rem;
   margin: 1rem 0;
 }
+
 .welcome-body {
   font-size: 1.25rem;
   color: #21405f;
 }
 
-/* ----- bubbles ------------------------------------------------ */
+/* Message bubbles */
 .message-bubble {
   display: flex;
   align-items: flex-start;
@@ -70,11 +77,13 @@
   border-radius: 10px;
   word-break: break-word;
 }
+
 .message-user {
   align-self: flex-end;
   background: #b6c8d9;
   color: #002850;
 }
+
 .message-system {
   align-self: flex-start;
   background: #ededed;
@@ -85,15 +94,17 @@
   width: 1.6rem;
   margin-right: 8px;
 }
+
 .system-avatar {
   width: 1.6rem;
   height: auto;
 }
+
 .message-text {
   white-space: pre-line;
 }
 
-/* Loading dots animation */
+/* Loading dots */
 .dot {
   animation: blink 1.4s infinite;
   font-size: 1.5rem;
@@ -113,7 +124,7 @@
   }
 }
 
-/* references ---------------------------------------------- */
+/* Message references */
 .message-references {
   display: flex;
   flex-wrap: wrap;
@@ -121,6 +132,7 @@
   margin: 2px 0 4px 0;
   width: 100%;
 }
+
 .ref-badge {
   background: #f0f0f0;
   color: #555;
@@ -130,13 +142,17 @@
   cursor: pointer;
   transition: background 0.2s;
 }
+
 .ref-badge:hover {
   background: #e0e0e0;
 }
 
-/* ---------- input area ----------------------- */
+/* Chat input */
 .chat-input {
-  margin: 10px 16px 20px;
+  position: absolute;
+  bottom: 10px;
+  left: 16px;
+  right: 16px;
   background: #d9d9d9;
   border: 1px solid #0056a3;
   border-radius: 20px;
@@ -144,7 +160,9 @@
   align-items: center;
   gap: 10px;
   padding: 6px 10px;
+  z-index: 10;
 }
+
 .chat-input-box {
   flex: 1;
   border: none;
@@ -152,9 +170,11 @@
   font-size: 1rem;
   padding: 0 1rem;
 }
+
 .chat-input-box:focus {
   outline: none;
 }
+
 .chat-send-button {
   width: 38px;
   height: 38px;
@@ -166,15 +186,17 @@
   cursor: pointer;
   transition: background 0.25s;
 }
+
 .chat-send-button:hover {
   background: #21405f;
 }
+
 .chat-send-button i {
   color: #fff;
   font-size: 1.2rem;
 }
 
-/* ====================== WIZARD OVERLAY ========================= */
+/* ========== WIZARD OVERLAY ========== */
 .wizard-overlay {
   position: fixed;
   top: 0;
@@ -207,7 +229,6 @@
   animation: fadeInScale 0.3s ease-out;
 }
 
-/* Bright line at top */
 .wizard-card::before {
   content: '';
   position: absolute;
@@ -219,7 +240,6 @@
   opacity: 0.8;
 }
 
-/* Background effect */
 .wizard-card::after {
   content: '';
   position: absolute;
@@ -231,7 +251,6 @@
   pointer-events: none;
 }
 
-/* Header */
 .wizard-header {
   align-self: stretch;
   display: flex;
@@ -259,7 +278,6 @@
   transform: scale(1.1);
 }
 
-/* Titles */
 .wizard-title {
   font-size: 1.8rem;
   font-weight: 700;
@@ -286,7 +304,6 @@
   z-index: 2;
 }
 
-/* Options grid */
 .options-grid {
   width: 100%;
   display: grid;
@@ -338,7 +355,6 @@
   transform: none;
 }
 
-/* Navigation */
 .wizard-nav {
   display: flex;
   align-items: center;
@@ -385,7 +401,6 @@
   text-align: center;
 }
 
-/* Primary button */
 .wizard-btn {
   background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
   color: #2d3748;
@@ -417,7 +432,6 @@
   box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
 }
 
-
 .saving-msg {
   margin-top: 1.5rem;
   text-align: center;
@@ -425,7 +439,6 @@
   z-index: 2;
 }
 
-/* Animations */
 @keyframes fadeInScale {
   from {
     opacity: 0;
@@ -437,7 +450,6 @@
   }
 }
 
-/* Custom scrollbar */
 .wizard-card::-webkit-scrollbar {
   width: 8px;
 }
@@ -456,8 +468,6 @@
   background: rgba(255, 255, 255, 0.5);
 }
 
-
-/* Responsive */
 @media (max-width: 640px) {
   .wizard-card {
     width: 98%;
@@ -497,7 +507,7 @@
   }
 }
 
-/* ====================== TOAST NOTIFICATIONS ========================= */
+/* ========== TOAST NOTIFICATIONS ========== */
 .toast {
   position: fixed;
   top: 20px;
@@ -539,7 +549,6 @@
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* toast types */
 .toast-error {
   background: #d9b6b7;
   color: #871414;
@@ -558,7 +567,6 @@
   border-left-color: #b8860b;
 }
 
-/* Animations */
 @keyframes slideInRight {
   from {
     transform: translateX(100%);
@@ -570,7 +578,6 @@
   }
 }
 
-/* Responsive */
 @media (max-width: 640px) {
   .toast {
     left: 16px;
@@ -581,8 +588,7 @@
   }
 }
 
-/* ====================== LOADING SPINNER ========================= */
-
+/* ========== LOADING SPINNER ========== */
 .loading-content {
   display: flex;
   align-items: center;
@@ -625,7 +631,7 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* ====================== REFERENCE CARDS ========================= */
+/* ========== REFERENCE CARDS ========== */
 .recommendation-card {
   padding: 1rem;
   border-radius: 8px;
@@ -671,7 +677,7 @@ button:disabled {
   transform: scale(1.15);
 }
 
-/* Status color backgrounds */
+/* Document status colors */
 .blue {
   background-color: #cce5ff;
   color: #003366;
@@ -687,7 +693,6 @@ button:disabled {
   color: #705700;
 }
 
-/* Icon colors within colored cards */
 .blue .doc-icons i {
   color: #0056a3;
 }

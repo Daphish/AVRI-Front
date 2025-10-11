@@ -138,26 +138,26 @@
         </div>
       </div>
     </ng-container>
+  </div>
 
-    <!-- ======================== input ============================== -->
-    <div class="chat-input" *ngIf="!showWizard">
-      <input
-        class="chat-input-box"
-        placeholder="Escribe algo al AVRI"
-        [(ngModel)]="newText"
-        (keyup.enter)="send()"
-        [disabled]="isSending"
-      />
-      <div class="chat-send-button" (click)="send()" [class.sending]="isSending">
-        <i *ngIf="!isSending" class="bi bi-arrow-up"></i>
-        <span *ngIf="isSending" class="spinner-small"></span>
-      </div>
+  <!-- ======================== input ============================== -->
+  <div class="chat-input" *ngIf="!showWizard">
+    <input
+      class="chat-input-box"
+      placeholder="Escribe algo al AVRI"
+      [(ngModel)]="newText"
+      (keyup.enter)="send()"
+      [disabled]="isSending"
+    />
+    <div class="chat-send-button" (click)="send()" [class.sending]="isSending">
+      <i *ngIf="!isSending" class="bi bi-arrow-up"></i>
+      <span *ngIf="isSending" class="spinner-small"></span>
     </div>
+  </div>
 
-    <!-- Toast notification -->
-    <div *ngIf="showToast" class="toast toast-{{ toastType }}">
-      <span>{{ toastMessage }}</span>
-      <i class="bi bi-x" (click)="showToast = false"></i>
-    </div>
+  <!-- Toast notification -->
+  <div *ngIf="showToast" class="toast toast-{{ toastType }}">
+    <span>{{ toastMessage }}</span>
+    <i class="bi bi-x" (click)="showToast = false"></i>
   </div>
 </div>
