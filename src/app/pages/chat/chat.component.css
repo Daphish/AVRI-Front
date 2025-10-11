@@ -604,3 +604,78 @@ button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* ====================== REFERENCE CARDS ========================= */
+.recommendation-card {
+  padding: 1rem;
+  border-radius: 8px;
+  position: relative;
+  margin-top: 8px;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease;
+}
+
+.recommendation-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.doc-title {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  line-height: 1.3;
+}
+
+.doc-author {
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+  opacity: 0.9;
+}
+
+.doc-icons {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  font-size: 1.2rem;
+  margin-top: 0.5rem;
+}
+
+.doc-icons i {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.doc-icons i:hover {
+  transform: scale(1.15);
+}
+
+/* Status color backgrounds */
+.blue {
+  background-color: #cce5ff;
+  color: #003366;
+}
+
+.red {
+  background-color: #d9b6b7;
+  color: #871414;
+}
+
+.yellow {
+  background-color: #fae9b5;
+  color: #705700;
+}
+
+/* Icon colors within colored cards */
+.blue .doc-icons i {
+  color: #0056a3;
+}
+
+.red .doc-icons i {
+  color: #871414;
+}
+
+.yellow .doc-icons i {
+  color: #705700;
+}
