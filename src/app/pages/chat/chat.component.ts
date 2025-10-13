@@ -97,7 +97,7 @@ export class ChatComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     // 1) Show wizard to anonymous users or users with an incomplete profile
     this.auth.profileSetupComplete$.subscribe((isComplete) => {
-      this.showWizard = !isComplete;
+      this.showWizard = isComplete === false;
       if (!isComplete) this.step = 0;
     });
 
@@ -212,10 +212,11 @@ export class ChatComponent implements OnInit {
 
       this.newText = '';
       this.showWizard = false;
-
     } catch (error) {
       console.error('Error enviando mensaje:', error);
-      this.showToastMessage('Hubo un error al enviar el mensaje. Inténtalo de nuevo.');
+      this.showToastMessage(
+        'Hubo un error al enviar el mensaje. Inténtalo de nuevo.'
+      );
     } finally {
       this.isSending = false;
     }
@@ -227,7 +228,9 @@ export class ChatComponent implements OnInit {
       this.router.navigate(['/document']);
     } catch (error) {
       console.error('Error abriendo documento:', error);
-      this.showToastMessage('No se pudo abrir el documento. Inténtalo de nuevo.');
+      this.showToastMessage(
+        'No se pudo abrir el documento. Inténtalo de nuevo.'
+      );
     }
   }
 

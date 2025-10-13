@@ -26,8 +26,10 @@ export class AuthService {
   readonly isLoggedIn$: Observable<boolean> =
     this.loggedInSource.asObservable();
 
-  private profileSetupCompleteSource = new BehaviorSubject<boolean>(false);
-  readonly profileSetupComplete$: Observable<boolean> =
+  private profileSetupCompleteSource = new BehaviorSubject<boolean | null>(
+    null
+  );
+  readonly profileSetupComplete$: Observable<boolean | null> =
     this.profileSetupCompleteSource.asObservable();
 
   constructor() {
@@ -124,7 +126,7 @@ export class AuthService {
     localStorage.removeItem('authToken');
     this.currentUserSource.next(null);
     this.loggedInSource.next(false);
-    this.profileSetupCompleteSource.next(false);
+    this.profileSetupCompleteSource.next(null);
   }
 
   getToken(): string | null {
