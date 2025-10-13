@@ -3,15 +3,63 @@
     <div class="avatar-circle">
       <i class="bi bi-person-fill" style="color: white; font-size: 6rem"></i>
     </div>
-    <h2>Iniciar Sesión</h2>
+    <h2>{{ register ? "Registro" : "Iniciar Sesión" }}</h2>
 
+    <!-- Register fields -->
+    <ng-container *ngIf="register">
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="name">Nombre</label>
+          <input
+            type="text"
+            id="name"
+            [(ngModel)]="name"
+            (keyup.enter)="registerUser()"
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="firstName">Apellido paterno</label>
+          <input
+            type="text"
+            id="firstName"
+            [(ngModel)]="firstName"
+            (keyup.enter)="registerUser()"
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="lastName">Apellido materno</label>
+          <input
+            type="text"
+            id="lastName"
+            [(ngModel)]="lastName"
+            (keyup.enter)="registerUser()"
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="userType">Tipo de usuario</label>
+          <select
+            id="userType"
+            [(ngModel)]="is_author"
+            class="user-type-select"
+          >
+            <option [ngValue]="false">Lector</option>
+            <option [ngValue]="true">Autor</option>
+          </select>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- For both login and register -->
     <label for="email" style="width: 100%">Correo Electrónico</label>
     <input
       type="email"
       id="email"
       placeholder="Ejemplo: usuario@email.com"
       [(ngModel)]="user"
-      (keyup.enter)="startSession()"
+      (keyup.enter)="register ? registerUser() : startSession()"
     />
 
     <label for="password" style="width: 100%">Contraseña</label>
@@ -20,19 +68,54 @@
       id="password"
       placeholder="********"
       [(ngModel)]="password"
-      (keyup.enter)="startSession()"
+      (keyup.enter)="register ? registerUser() : startSession()"
     />
 
-    <div class="modal-actions">
-      <button class="btn login" (click)="startSession()" [disabled]="loggingIn">
+    <span *ngIf="!register"
+      >¿No tienes cuenta?
+      <a class="link" (click)="toggleRegisterModal()">Regístrate</a></span
+    >
+    <span *ngIf="register"
+      >¿Ya tienes una cuenta?
+      <a class="link" (click)="toggleRegisterModal()">Inicia sesión</a></span
+    >
+
+    <div
+      class="modal-actions"
+      [ngStyle]="{ 'justify-content': register ? 'center' : 'space-between' }"
+    >
+      <button
+        *ngIf="!register"
+        class="btn login"
+        (click)="startSession()"
+        [disabled]="loggingIn"
+      >
         <span *ngIf="!loggingIn">Iniciar Sesión</span>
         <span *ngIf="loggingIn" class="loading-content">
           <span class="spinner"></span>
           Iniciando...
         </span>
       </button>
-      
-      <button class="btn guest" (click)="continueAsGuest()" [disabled]="loggingIn">
+
+      <button
+        *ngIf="register"
+        class="btn login"
+        (click)="registerUser()"
+        [disabled]="registering"
+      >
+        <span *ngIf="!registering">Registrarse</span>
+        <span *ngIf="registering" class="loading-content">
+          <span class="spinner"></span>
+          Registrando...
+        </span>
+      </button>
+
+      <button
+        *ngIf="!register"
+        class="btn guest"
+        (click)="continueAsGuest()"
+        [disabled]="loggingIn"
+      >
         <span *ngIf="!loggingIn">Continuar como invitado</span>
         <span *ngIf="loggingIn" class="loading-content">
           <span class="spinner"></span>
@@ -43,10 +126,8 @@
   </div>
 
   <!-- Toast notification -->
-  <div *ngIf="showToast" class="toast toast-{{toastType}}">
+  <div *ngIf="showToast" class="toast toast-{{ toastType }}">
     <span>{{ toastMessage }}</span>
     <i class="bi bi-x" (click)="showToast = false"></i>
   </div>
-
 </div>
-

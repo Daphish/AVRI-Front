@@ -7,6 +7,18 @@ import { isPlatformBrowser } from '@angular/common';
 interface TokenResponse {
   token: string;
 }
+
+interface UserResponse {
+  email: string;
+  name: string;
+  first_name: string;
+  last_name: string;
+  education_level: string;
+  field_of_study: any | null;
+  is_staff: boolean;
+  is_author: boolean;
+}
+
 interface AnonymousResponse {
   anonymous_id: string;
 }
@@ -64,6 +76,33 @@ export class AuthService {
     } catch (error) {
       console.error('Error en login:', error);
       this.logout();
+      return false;
+    }
+  }
+
+  async registerUser(
+    name: string,
+    first_name: string,
+    last_name: string,
+    is_author: boolean,
+    email: string,
+    password: string
+  ): Promise<boolean> {
+    try {
+      const resp = await firstValueFrom(
+        this.http.post<UserResponse>('/api/user/create/', {
+          email,
+          password,
+          name,
+          first_name,
+          last_name,
+          education_level: 'N',
+          is_author,
+        })
+      );
+      return true;
+    } catch (error) {
+      console.error('Error al registrar:', error);
       return false;
     }
   }
