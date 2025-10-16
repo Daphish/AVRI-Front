@@ -154,11 +154,11 @@ describe('UserService', () => {
         expect(users).toEqual(mockUsers2);
       });
 
-      const req1 = httpMock.expectOne('/api/user/list');
-      const req2 = httpMock.expectOne('/api/user/list');
+      const requests = httpMock.match('/api/user/list');
+      expect(requests.length).toBe(2);
 
-      req1.flush(mockUsers1);
-      req2.flush(mockUsers2);
+      requests[0].flush(mockUsers1);
+      requests[1].flush(mockUsers2);
     });
 
     it('should handle users with different education levels', () => {
@@ -358,8 +358,8 @@ describe('UserService', () => {
       observable.subscribe(users => results.push(users));
 
       // Should create separate requests for each subscription
-      const req1 = httpMock.expectOne('/api/user/list');
-      const req2 = httpMock.expectOne('/api/user/list');
+      const requests = httpMock.match('/api/user/list');
+      expect(requests.length).toBe(2);
 
       const mockUsers: User[] = [{
         id: 1,
@@ -371,8 +371,8 @@ describe('UserService', () => {
         field_of_study: 'Computer Science'
       }];
 
-      req1.flush(mockUsers);
-      req2.flush(mockUsers);
+      requests[0].flush(mockUsers);
+      requests[1].flush(mockUsers);
 
       expect(results.length).toBe(2);
       expect(results[0]).toEqual(mockUsers);

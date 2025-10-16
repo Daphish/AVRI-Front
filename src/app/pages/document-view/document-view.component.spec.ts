@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick, flush } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { DocumentViewComponent } from './document-view.component';
 import { provideHttpClient, withFetch } from '@angular/common/http';
@@ -506,7 +506,7 @@ describe('DocumentViewComponent', () => {
       expect(window.open).toHaveBeenCalledWith('https://workflow.test', '_blank');
     });
 
-    it('should handle error recovery scenarios', () => {
+    it('should handle error recovery scenarios', fakeAsync(() => {
       const mockDocument: DocumentDetail = {
         id: 'error-doc',
         title: 'Error Document',
@@ -539,7 +539,10 @@ describe('DocumentViewComponent', () => {
       
       expect(component.saved).toBeTrue();
       expect(component.toastType).toBe('success');
-    });
+      
+      // Flush remaining timers
+      flush();
+    }));
 
     it('should handle rapid successive operations', fakeAsync(() => {
       const mockDocument: DocumentDetail = {
@@ -669,6 +672,9 @@ describe('DocumentViewComponent', () => {
       // Operation should still complete without errors
       tick();
       expect(component.saved).toBeTrue();
+      
+      // Flush remaining timers
+      flush();
     }));
   });
 });

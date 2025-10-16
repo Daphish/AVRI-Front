@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick, flush } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { ChatComponent } from './chat.component';
 import { provideHttpClient, withFetch } from '@angular/common/http';
@@ -112,9 +112,9 @@ describe('ChatComponent', () => {
     });
 
     it('should navigate to next step when canContinue is true', () => {
-      // Select 5 temas (minimum required)
+      // Select 5 topics (minimum required)
       for (let i = 0; i < 5; i++) {
-        component.temas[i].selected = true;
+        component.topics[i].selected = true;
       }
       
       component.next();
@@ -122,9 +122,9 @@ describe('ChatComponent', () => {
     });
 
     it('should not navigate to next step when canContinue is false', () => {
-      // Select only 2 temas (less than minimum)
-      component.temas[0].selected = true;
-      component.temas[1].selected = true;
+      // Select only 2 topics (less than minimum)
+      component.topics[0].selected = true;
+      component.topics[1].selected = true;
       
       component.next();
       expect(component.step).toBe(1); // Should stay on step 1
@@ -144,19 +144,19 @@ describe('ChatComponent', () => {
 
     it('should return correct currentList based on step', () => {
       component.step = 1;
-      expect(component.currentList()).toBe(component.temas);
+      expect(component.currentList()).toBe(component.topics);
       
       component.step = 2;
       expect(component.currentList()).toBe(component.keywords);
       
       component.step = 3;
-      expect(component.currentList()).toBe(component.documentos);
+      expect(component.currentList()).toBe(component.documents);
     });
   });
 
   describe('Preference Selection', () => {
     it('should toggle selection state', () => {
-      const item = component.temas[0];
+      const item = component.topics[0];
       const initialState = item.selected;
       
       component.toggle(item);
@@ -170,12 +170,12 @@ describe('ChatComponent', () => {
       component.step = 1;
       // Select 4 items (less than minimum of 5)
       for (let i = 0; i < 4; i++) {
-        component.temas[i].selected = true;
+        component.topics[i].selected = true;
       }
       expect(component.canContinue()).toBeFalse();
       
       // Select 5th item
-      component.temas[4].selected = true;
+      component.topics[4].selected = true;
       expect(component.canContinue()).toBeTrue();
     });
 
@@ -185,7 +185,7 @@ describe('ChatComponent', () => {
       expect(component.canContinue()).toBeFalse();
       
       // Select 1 document type (minimum for step 3)
-      component.documentos[0].selected = true;
+      component.documents[0].selected = true;
       expect(component.canContinue()).toBeTrue();
     });
   });
@@ -196,67 +196,80 @@ describe('ChatComponent', () => {
       component.step = 3;
       // Set up valid selections
       for (let i = 0; i < 5; i++) {
-        component.temas[i].selected = true;
+        component.topics[i].selected = true;
         component.keywords[i].selected = true;
       }
-      component.documentos[0].selected = true;
+      component.documents[0].selected = true;
     });
 
     it('should save preferences successfully', fakeAsync(() => {
       spyOn(authService, 'markProfileAsCompleted');
       
       component.savePreferences();
+      tick(); // Wait for async to start
       
       // First try PUT request
       const putReq = httpMock.expectOne('/api/recommender/profile/me/');
       expect(putReq.request.method).toBe('PUT');
       putReq.flush({}); // Success response
       
-      tick();
+      tick(); // Wait for promise resolution
       
       expect(authService.markProfileAsCompleted).toHaveBeenCalledWith(true);
       expect(component.showWizard).toBeFalse();
       expect(component.savingPrefs).toBeFalse();
       expect(component.showToast).toBeTrue();
       expect(component.toastType).toBe('success');
+      
+      flush(); // Clear any remaining timers
     }));
 
     it('should fallback to POST when PUT fails', fakeAsync(() => {
       spyOn(authService, 'markProfileAsCompleted');
       
       component.savePreferences();
+      tick(); // Wait for async to start
       
       // First try PUT request (fails)
       const putReq = httpMock.expectOne('/api/recommender/profile/me/');
       putReq.flush({}, { status: 404, statusText: 'Not Found' });
+      
+      tick(); // Wait for error handler to trigger POST
       
       // Then try POST request (succeeds)
       const postReq = httpMock.expectOne('/api/recommender/profile/create/');
       expect(postReq.request.method).toBe('POST');
       postReq.flush({});
       
-      tick();
+      tick(); // Wait for promise resolution
       
       expect(authService.markProfileAsCompleted).toHaveBeenCalledWith(false);
       expect(component.showWizard).toBeFalse();
+      
+      flush(); // Clear any remaining timers
     }));
 
     it('should handle save preferences error', fakeAsync(() => {
       component.savePreferences();
+      tick(); // Wait for async to start
       
       // PUT fails
       const putReq = httpMock.expectOne('/api/recommender/profile/me/');
       putReq.flush({}, { status: 500, statusText: 'Server Error' });
       
+      tick(); // Wait for error handler to trigger POST
+      
       // POST also fails
       const postReq = httpMock.expectOne('/api/recommender/profile/create/');
       postReq.flush({}, { status: 500, statusText: 'Server Error' });
       
-      tick();
+      tick(); // Wait for error handling
       
       expect(component.showToast).toBeTrue();
       expect(component.toastType).toBe('error');
       expect(component.savingPrefs).toBeFalse();
+      
+      flush(); // Clear any remaining timers
     }));
   });
 
@@ -308,6 +321,9 @@ describe('ChatComponent', () => {
       expect(component.showToast).toBeTrue();
       expect(component.toastType).toBe('error');
       expect(component.isSending).toBeFalse();
+      
+      // Flush toast auto-hide timer
+      flush();
     }));
 
     it('should set loading state during send', () => {

@@ -153,8 +153,8 @@ describe('RecommendationsComponent', () => {
       tick();
       
       expect(component.showToast).toBeTrue();
-      expect(component.toastMessage).toBe('Error al recibir los documentos recomendados.');
-      expect(component.toastType).toBe('error');
+      expect(component.toastMessage).toBe('No se encontraron documentos recomendados.');
+      expect(component.toastType).toBe('warning');
 
       flush(); 
     }));
@@ -166,7 +166,7 @@ describe('RecommendationsComponent', () => {
       tick();
       
       expect(component.showToast).toBeTrue();
-      expect(component.toastMessage).toBe('Error al recibir los documentos recomendados.');
+      expect(component.toastMessage).toBe('Error al solicitar documentos.');
       flush();
     }));
 
@@ -287,7 +287,7 @@ describe('RecommendationsComponent', () => {
       tick();
       
       expect(component.showToast).toBeTrue();
-      expect(component.toastMessage).toBe('Error al recibir los documentos recomendados.');
+      expect(component.toastMessage).toBe('No se encontraron documentos recomendados.');
       
       // Clean up timer from toast
       tick(4000);

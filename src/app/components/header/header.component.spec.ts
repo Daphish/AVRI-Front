@@ -4,7 +4,7 @@ import { provideHttpClient, withFetch } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { EventoEncuestaService } from '../../services/evento-encuesta.service';
+import { SurveyEventService } from '../../services/evento-encuesta.service';
 import { BehaviorSubject } from 'rxjs';
 
 // Enhanced service stubs for behavior testing
@@ -25,15 +25,15 @@ class EnhancedAuthServiceStub {
   }
 }
 
-class EnhancedEventoEncuestaServiceStub {
-  lanzarEncuesta() {}
+class EnhancedSurveyEventServiceStub {
+  launchSurvey() {}
 }
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent;
   let fixture: ComponentFixture<HeaderComponent>;
   let authService: EnhancedAuthServiceStub;
-  let encuestaService: EnhancedEventoEncuestaServiceStub;
+  let surveyService: EnhancedSurveyEventServiceStub;
   let router: Router;
 
   beforeEach(async () => {
@@ -41,7 +41,7 @@ describe('HeaderComponent', () => {
       imports: [HeaderComponent],
       providers: [
         { provide: AuthService, useClass: EnhancedAuthServiceStub },
-        { provide: EventoEncuestaService, useClass: EnhancedEventoEncuestaServiceStub },
+        { provide: SurveyEventService, useClass: EnhancedSurveyEventServiceStub },
         provideRouter([
           { path: 'fyp', component: HeaderComponent }
         ]),
@@ -53,7 +53,7 @@ describe('HeaderComponent', () => {
     fixture = TestBed.createComponent(HeaderComponent);
     component = fixture.componentInstance;
     authService = TestBed.inject(AuthService) as any;
-    encuestaService = TestBed.inject(EventoEncuestaService) as any;
+    surveyService = TestBed.inject(SurveyEventService) as any;
     router = TestBed.inject(Router);
     
     fixture.detectChanges();
@@ -147,20 +147,23 @@ describe('HeaderComponent', () => {
       // Start with regular user
       const regularUser = { id: 1, email: 'user@test.com' };
       authService.setCurrentUser(regularUser);
+      fixture.detectChanges();
       
       expect(component.is_author).toBeFalse();
       expect(component.is_staff).toBeFalse();
       
       // Change to author user
-      const authorUser = { id: 1, email: 'user@test.com', is_author: true };
+      const authorUser = { id: 1, email: 'user@test.com', is_author: true, is_staff: false };
       authService.setCurrentUser(authorUser);
+      fixture.detectChanges();
       
       expect(component.is_author).toBeTrue();
       expect(component.is_staff).toBeFalse();
       
       // Change to staff user
-      const staffUser = { id: 1, email: 'user@test.com', is_staff: true };
+      const staffUser = { id: 1, email: 'user@test.com', is_author: false, is_staff: true };
       authService.setCurrentUser(staffUser);
+      fixture.detectChanges();
       
       expect(component.is_author).toBeFalse();
       expect(component.is_staff).toBeTrue();
@@ -193,12 +196,12 @@ describe('HeaderComponent', () => {
   });
 
   describe('Survey Functions', () => {
-    it('should trigger survey when abrirEncuesta is called', () => {
-      spyOn(encuestaService, 'lanzarEncuesta');
+    it('should trigger survey when openSurvey is called', () => {
+      spyOn(surveyService, 'launchSurvey');
       
-      component.abrirEncuesta();
+      component.openSurvey();
       
-      expect(encuestaService.lanzarEncuesta).toHaveBeenCalled();
+      expect(surveyService.launchSurvey).toHaveBeenCalled();
     });
   });
 
@@ -267,14 +270,18 @@ describe('HeaderComponent', () => {
 
     it('should handle rapid user changes', () => {
       // Simulate rapid user switching
-      authService.setCurrentUser({ id: 1, is_author: true });
+      authService.setCurrentUser({ id: 1, is_author: true, is_staff: false });
+      fixture.detectChanges();
       expect(component.is_author).toBeTrue();
+      expect(component.is_staff).toBeFalse();
       
-      authService.setCurrentUser({ id: 2, is_staff: true });
+      authService.setCurrentUser({ id: 2, is_author: false, is_staff: true });
+      fixture.detectChanges();
       expect(component.is_author).toBeFalse();
       expect(component.is_staff).toBeTrue();
       
       authService.setCurrentUser(null);
+      fixture.detectChanges();
       expect(component.is_author).toBeFalse();
       expect(component.is_staff).toBeFalse();
     });

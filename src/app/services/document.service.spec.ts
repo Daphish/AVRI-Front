@@ -158,7 +158,7 @@ describe('DocumentService', () => {
       const docId = 'doc-789';
 
       service.removeSaved(docId).subscribe(response => {
-        expect(response).toBeUndefined();
+        expect(response).toBeNull(); // HTTP DELETE returns null, not undefined
       });
 
       const req = http.expectOne('/api/documents/saved/delete/doc-789/');
@@ -259,7 +259,7 @@ describe('DocumentService', () => {
       const docId = 'doc-unclaim';
 
       service.unclaimDocument(docId).subscribe(response => {
-        expect(response).toBeUndefined();
+        expect(response).toBeNull(); // HTTP DELETE returns null, not undefined
       });
 
       const req = http.expectOne('/api/documents/authored/delete/doc-unclaim/');

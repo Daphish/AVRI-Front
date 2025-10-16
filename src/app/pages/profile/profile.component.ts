@@ -6,6 +6,7 @@ import {
   inject,
   DestroyRef,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { NgFor, NgIf } from '@angular/common';
 import { Observable, Subscription, map, take } from 'rxjs';
@@ -79,7 +80,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.authService.currentUser$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((currentUser) => {
-        if (currentUser && !('anonymous_id' in currentUser)) {
+        if (currentUser && typeof currentUser === 'object' && !('anonymous_id' in currentUser)) {
           this.isActuallyAnonymous = false;
           this.userDisplay = currentUser as User;
           this.loadProfileData();

@@ -101,7 +101,8 @@ describe('SidebarComponent', () => {
   describe('Component Initialization', () => {
     it('should initialize with default values', () => {
       expect(component.activeSessionId).toBeNull();
-      expect(component.isModalOpen).toBeFalse();
+      // isModalOpen is true initially when not logged in (authService.isLoggedIn$ starts as false)
+      expect(component.isModalOpen).toBeTrue();
     });
 
     it('should call autoLogin on initialization', () => {
@@ -207,11 +208,11 @@ describe('SidebarComponent', () => {
       });
     });
 
-    it('should display "?" initial when no name', (done) => {
+    it('should display "I" initial when no name (Invitado)', (done) => {
       authService.setCurrentUser(null);
       
       component.currentUserInitial$.subscribe(initial => {
-        expect(initial).toBe('?');
+        expect(initial).toBe('I'); // 'I' from 'Invitado'
         done();
       });
     });
@@ -250,32 +251,37 @@ describe('SidebarComponent', () => {
     });
 
     it('should delete session when confirmation is accepted', () => {
-      window.confirm = jasmine.createSpy().and.returnValue(true);
       spyOn(chatService, 'deleteSession');
       
+      // First call sets up pending delete and shows toast
       component.deleteChat('session-456');
+      expect(component.pendingDeleteId).toBe('session-456');
+      expect(component.showToast).toBeTrue();
       
-      expect(window.confirm).toHaveBeenCalledWith('¿Eliminar esta conversación?');
+      // Second call confirms and actually deletes
+      component.confirmDelete();
       expect(chatService.deleteSession).toHaveBeenCalledWith('session-456');
     });
 
     it('should not delete session when confirmation is rejected', () => {
-      window.confirm = jasmine.createSpy().and.returnValue(false);
       spyOn(chatService, 'deleteSession');
       
+      // Call deleteChat but don't call confirmDelete
       component.deleteChat('session-456');
+      expect(component.pendingDeleteId).toBe('session-456');
       
-      expect(window.confirm).toHaveBeenCalledWith('¿Eliminar esta conversación?');
+      // Close toast without confirming (component sets showToast = false)
+      component.showToast = false;
       expect(chatService.deleteSession).not.toHaveBeenCalled();
     });
 
     it('should prevent event propagation when deleting chat', () => {
-      window.confirm = jasmine.createSpy().and.returnValue(true);
       const mockEvent = { stopPropagation: jasmine.createSpy() };
       
       component.deleteChat('session-789', mockEvent as any);
       
       expect(mockEvent.stopPropagation).toHaveBeenCalled();
+      expect(component.pendingDeleteId).toBe('session-789');
     });
   });
 
@@ -339,11 +345,10 @@ describe('SidebarComponent', () => {
       component.loadMessages('session-1');
       expect(component.activeSessionId).toBe('session-1');
       
-      // Delete a session with confirmation
-      window.confirm = jasmine.createSpy().and.returnValue(true);
+      // Delete a session with toast-based confirmation
       component.deleteChat('session-2');
-      
-      expect(window.confirm).toHaveBeenCalled();
+      expect(component.pendingDeleteId).toBe('session-2');
+      expect(component.showToast).toBeTrue();
     });
 
     it('should handle user type changes correctly', (done) => {
@@ -352,8 +357,9 @@ describe('SidebarComponent', () => {
       component.currentUserName$.subscribe(name => {
         nameEmissions.push(name);
         
-        if (nameEmissions.length === 4) {
-          expect(nameEmissions).toEqual(['Invitado', 'Invitado', 'John Doe', 'Invitado']);
+        if (nameEmissions.length === 5) {
+          // Initial + 4 changes: null → null → anonymous → regular → null
+          expect(nameEmissions).toEqual(['Invitado', 'Invitado', 'Invitado', 'John Doe', 'Invitado']);
           done();
         }
       });
@@ -374,11 +380,14 @@ describe('SidebarComponent', () => {
 
   describe('Edge Cases', () => {
     it('should handle deleteChat without event parameter', () => {
-      window.confirm = jasmine.createSpy().and.returnValue(true);
       spyOn(chatService, 'deleteSession');
       
       // Should not throw error when event is undefined
       expect(() => component.deleteChat('session-test')).not.toThrow();
+      expect(component.pendingDeleteId).toBe('session-test');
+      
+      // Confirm to actually delete
+      component.confirmDelete();
       expect(chatService.deleteSession).toHaveBeenCalledWith('session-test');
     });
 

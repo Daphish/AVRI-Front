@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { of } from 'rxjs';
@@ -31,13 +31,11 @@ describe('RecommendationService', () => {
     http = TestBed.inject(HttpTestingController);
   });
 
-  it('getDetailedDocuments(): waits for final list (length===3) before asserting', (done) => {
-    const sub = service.documents$.subscribe((docs) => {
-      if (docs.length === 3) {
-        expect(docs.map(d => d.id)).toEqual(['a', 'b', 'c']);
-        sub.unsubscribe();
-        done();
-      }
+  it('getDetailedDocuments(): waits for final list (length===3) before asserting', fakeAsync(() => {
+    let finalDocs: any[] = [];
+    
+    service.documents$.subscribe((docs) => {
+      finalDocs = docs;
     });
 
     service.getDetailedDocuments();
@@ -45,9 +43,25 @@ describe('RecommendationService', () => {
     const idsReq = http.expectOne(req => /\/api\/recommender\/serve\/?$/.test(req.url));
     expect(idsReq.request.method).toBe('GET');
     idsReq.flush(['a', 'b', 'c']);
+    
+    tick(); // Allow observables to process the IDs
+    
+    // Handle detail requests for each document
+    const detailReqs = http.match(req => /\/api\/recommender\/documents\/detail\//.test(req.url));
+    expect(detailReqs.length).toBe(3); // Ensure all 3 detail requests were made
+    
+    detailReqs.forEach((req, index) => {
+      const id = ['a', 'b', 'c'][index];
+      req.flush({ id, title: `Document ${id}`, details: 'Some details' });
+    });
+    
+    tick(); // Allow observables to complete
 
+    expect(finalDocs.length).toBe(3);
+    expect(finalDocs.map(d => d.id)).toEqual(['a', 'b', 'c']);
+    
     http.verify();
-  });
+  }));
 
   it('getDocuments() returns [] on server error (smoke)', (done) => {
     service.getDocuments().subscribe((raw: any[]) => {

@@ -1,22 +1,22 @@
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom, take } from 'rxjs';
-import { EventoEncuestaService } from './evento-encuesta.service';
+import { SurveyEventService } from './evento-encuesta.service';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
-describe('EventoEncuestaService (trigger only)', () => {
-  let service: EventoEncuestaService;
+describe('SurveyEventService (trigger only)', () => {
+  let service: SurveyEventService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [EventoEncuestaService, provideHttpClient(withFetch()), provideHttpClientTesting()],
+      providers: [SurveyEventService, provideHttpClient(withFetch()), provideHttpClientTesting()],
     });
-    service = TestBed.inject(EventoEncuestaService);
+    service = TestBed.inject(SurveyEventService);
   });
 
-  it('lanzarEncuesta() emits on encuestaActivada$', async () => {
-    const next = firstValueFrom(service.encuestaActivada$.pipe(take(1)));
-    service.lanzarEncuesta();
+  it('launchSurvey() emits on surveyOn$', async () => {
+    const next = firstValueFrom(service.surveyOn$.pipe(take(1)));
+    service.launchSurvey();
     await next;
     expect(true).toBeTrue();
   });

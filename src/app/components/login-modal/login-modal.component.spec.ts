@@ -8,12 +8,13 @@ import { ChatService } from '../../services/chat.service';
 // Enhanced service stubs for behavior testing
 class EnhancedAuthServiceStub {
   private shouldSucceed = true;
+  private anonymousResult = true;
   
   login(email: string, password: string) { 
     return Promise.resolve(this.shouldSucceed);
   }
   createAnonymous() { 
-    return Promise.resolve(this.shouldSucceed);
+    return Promise.resolve(this.anonymousResult);
   }
   logout() {}
   getToken() { return 'mock-token'; }
@@ -21,6 +22,10 @@ class EnhancedAuthServiceStub {
   // Test helper methods
   setLoginResult(success: boolean) {
     this.shouldSucceed = success;
+  }
+  
+  setAnonymousResult(success: boolean) {
+    this.anonymousResult = success;
   }
 }
 
@@ -70,7 +75,7 @@ describe('LoginModalComponent', () => {
     it('should initialize with default values', () => {
       expect(component.user).toBe('');
       expect(component.password).toBe('');
-      expect(component.error).toBeFalse();
+      expect(component.showToast).toBeFalse();
     });
   });
 
@@ -112,7 +117,8 @@ describe('LoginModalComponent', () => {
       
       expect(chatService.loadSessions).toHaveBeenCalled();
       expect(component.closeModal).toHaveBeenCalled();
-      expect(component.error).toBeFalse();
+      expect(component.showToast).toBeTrue();
+      expect(component.toastType).toBe('success');
 
       endTimers();
     }));
@@ -127,22 +133,23 @@ describe('LoginModalComponent', () => {
       
       expect(chatService.loadSessions).not.toHaveBeenCalled();
       expect(component.closeModal).not.toHaveBeenCalled();
-      expect(component.error).toBeTrue();
+      expect(component.showToast).toBeTrue();
+      expect(component.toastType).toBe('error');
 
       endTimers();
     }));
 
-    it('should auto-hide error after 2 seconds on login failure', fakeAsync(() => {
+    it('should auto-hide toast after 4 seconds on login failure', fakeAsync(() => {
       authService.setLoginResult(false);
       
       component.startSession();
       tick(); // Wait for login promise to resolve
       
-      expect(component.error).toBeTrue();
+      expect(component.showToast).toBeTrue();
       
-      tick(2000); // Wait for error auto-hide timeout
+      tick(4000); // Wait for toast auto-hide timeout
       
-      expect(component.error).toBeFalse();
+      expect(component.showToast).toBeFalse();
 
       endTimers();
     }));
@@ -169,35 +176,37 @@ describe('LoginModalComponent', () => {
       tick();
       
       expect(component.closeModal).toHaveBeenCalled();
-      expect(component.error).toBeFalse();
+      expect(component.showToast).toBeTrue();
+      expect(component.toastType).toBe('success');
 
       endTimers();
     }));
 
     it('should handle anonymous creation failure', fakeAsync(() => {
-      authService.setLoginResult(false);
+      authService.setAnonymousResult(false); // Use setAnonymousResult, not setLoginResult
       spyOn(component, 'closeModal');
       
       component.continueAsGuest();
       tick();
       
       expect(component.closeModal).not.toHaveBeenCalled();
-      expect(component.error).toBeTrue();
+      expect(component.showToast).toBeTrue();
+      expect(component.toastType).toBe('error');
 
       endTimers();
     }));
 
-    it('should auto-hide error after 2 seconds on anonymous creation failure', fakeAsync(() => {
-      authService.setLoginResult(false);
+    it('should auto-hide toast after 4 seconds on anonymous creation failure', fakeAsync(() => {
+      authService.setAnonymousResult(false); // Use setAnonymousResult, not setLoginResult
       
       component.continueAsGuest();
       tick(); // Wait for createAnonymous promise to resolve
       
-      expect(component.error).toBeTrue();
+      expect(component.showToast).toBeTrue();
       
-      tick(2000); // Wait for error auto-hide timeout
+      tick(4000); // Wait for toast auto-hide timeout
       
-      expect(component.error).toBeFalse();
+      expect(component.showToast).toBeFalse();
 
       endTimers();
     }));
@@ -229,32 +238,31 @@ describe('LoginModalComponent', () => {
       tick();
       
       expect(authService.login).toHaveBeenCalledWith('', '');
-      expect(component.error).toBeTrue();
+      expect(component.showToast).toBeTrue();
+      expect(component.toastType).toBe('error');
 
       endTimers();
     }));
   });
 
-  describe('Error Display', () => {
-    it('should show error state correctly', () => {
-      component.error = true;
-      expect(component.error).toBeTrue();
+  describe('Toast Display', () => {
+    it('should show toast state correctly', () => {
+      component.showToast = true;
+      expect(component.showToast).toBeTrue();
       
-      component.error = false;
-      expect(component.error).toBeFalse();
+      component.showToast = false;
+      expect(component.showToast).toBeFalse();
     });
 
-    it('should reset error state before new login attempt', fakeAsync(() => {
-      // Set initial error state
-      component.error = true;
-      
+    it('should show toast after login attempt', fakeAsync(() => {
       // Attempt new login
       authService.setLoginResult(true);
       component.startSession();
       tick();
       
-      // Error should be cleared on successful login
-      expect(component.error).toBeFalse();
+      // Toast should be shown on successful login
+      expect(component.showToast).toBeTrue();
+      expect(component.toastType).toBe('success');
 
       endTimers();
     }));
@@ -269,7 +277,8 @@ describe('LoginModalComponent', () => {
       authService.setLoginResult(false);
       component.startSession();
       tick();
-      expect(component.error).toBeTrue();
+      expect(component.showToast).toBeTrue();
+      expect(component.toastType).toBe('error');
       
       // Second attempt succeeds immediately
       authService.setLoginResult(true);
@@ -289,7 +298,8 @@ describe('LoginModalComponent', () => {
       authService.setLoginResult(false);
       component.startSession();
       tick();
-      expect(component.error).toBeTrue();
+      expect(component.showToast).toBeTrue();
+      expect(component.toastType).toBe('error');
       
       // Then try guest mode (succeeds)
       authService.setLoginResult(true);
@@ -315,69 +325,71 @@ describe('LoginModalComponent', () => {
       // Form values should be preserved even after error
       expect(component.user).toBe('test@example.com');
       expect(component.password).toBe('mypassword');
-      expect(component.error).toBeTrue();
+      expect(component.showToast).toBeTrue();
+      expect(component.toastType).toBe('error');
 
       endTimers();
     }));
 
-    it('should handle concurrent error timeouts correctly', fakeAsync(() => {
+    it('should handle concurrent toast timeouts correctly', fakeAsync(() => {
       // Trigger first error
       authService.setLoginResult(false);
       component.startSession();
       tick();
-      expect(component.error).toBeTrue();
+      expect(component.showToast).toBeTrue();
       
-      // Trigger second error before first timeout
-      tick(1000);
+      // Wait for toast to auto-hide
+      tick(4000);
+      expect(component.showToast).toBeFalse();
+      
+      // Trigger second error
+      authService.setAnonymousResult(false);
       component.continueAsGuest();
       tick();
-      expect(component.error).toBeTrue();
+      expect(component.showToast).toBeTrue();
       
-      // First timeout should complete
-      tick(1000);
-      expect(component.error).toBeTrue();
-      
-      // Second timeout should complete
-      tick(2000);
-      expect(component.error).toBeFalse();
+      // Wait for second toast to auto-hide
+      tick(4000);
+      expect(component.showToast).toBeFalse();
 
       endTimers();
     }));
   });
 
-  it('coverage: multiple failures only clear error after the last timer expires', fakeAsync(() => {
-  (authService as any).setLoginResult(false);
+  it('coverage: multiple failures show toast with correct timing', fakeAsync(() => {
+    (authService as any).setLoginResult(false);
 
     // First failed attempt
     component.startSession();
     tick();
-    expect(component.error).toBeTrue();
+    expect(component.showToast).toBeTrue();
+    expect(component.toastType).toBe('error');
 
-    // Second failed attempt before the first 2s timeout ends
-    tick(1000);
+    // Wait for first toast to hide
+    tick(4000);
+    expect(component.showToast).toBeFalse();
+    
+    // Second failed attempt
+    (authService as any).setAnonymousResult(false);
     component.continueAsGuest();
     tick();
-    expect(component.error).toBeTrue();
+    expect(component.showToast).toBeTrue();
 
-    // First timeout finishes — error should still be true (second timer pending)
-    tick(1000);
-    expect(component.error).toBeTrue();
-
-    // Second timeout finishes — error should clear now
-    tick(2000);
-    expect(component.error).toBeFalse();
+    // Wait for second toast to hide
+    tick(4000);
+    expect(component.showToast).toBeFalse();
 
     endTimers();
   }));
 
-  it('coverage: closeModal does not change error flag', fakeAsync(() => {
+  it('coverage: closeModal does not change toast flag', fakeAsync(() => {
     (authService as any).setLoginResult(false);
     component.startSession();
     tick();
-    expect(component.error).toBeTrue();
+    expect(component.showToast).toBeTrue();
 
-    component.closeModal(); // emits only; should not touch error
-    expect(component.error).toBeTrue();
+    component.closeModal(); // emits only; should not touch toast
+    expect(component.showToast).toBeTrue();
 
     endTimers();
   }));

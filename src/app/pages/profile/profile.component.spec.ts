@@ -311,12 +311,12 @@ describe('ProfileComponent', () => {
   });
 
   describe('Logout Functionality', () => {
-    it('should logout successfully', () => {
+    it('should logout successfully', async () => {
       spyOn(chatService, 'clearSessions');
       spyOn(authService, 'logout');
-      spyOn(router, 'navigate');
+      spyOn(router, 'navigate').and.returnValue(Promise.resolve(true));
       
-      component.logout();
+      await component.logout();
       
       expect(chatService.clearSessions).toHaveBeenCalled();
       expect(authService.logout).toHaveBeenCalled();
