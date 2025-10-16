@@ -6,6 +6,7 @@ import {
   inject,
   DestroyRef,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { NgFor, NgIf } from '@angular/common';
 import { Observable, Subscription, map, take } from 'rxjs';
