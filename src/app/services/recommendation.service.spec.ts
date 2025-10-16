@@ -34,33 +34,36 @@ describe('RecommendationService', () => {
   it('getDetailedDocuments(): waits for final list (length===3) before asserting', fakeAsync(() => {
     let finalDocs: any[] = [];
     
-    service.documents$.subscribe((docs) => {
+    // Subscribe before calling the method
+    const sub = service.documents$.subscribe((docs) => {
       finalDocs = docs;
     });
 
     service.getDetailedDocuments();
+    tick(); // Let the method start
 
-    // First request: get document IDs
-    const idsReq = http.expectOne(req => /\/api\/recommender\/serve\/?$/.test(req.url));
+    // First request: get document IDs from recommender
+    const idsReq = http.expectOne('/api/recommender/serve/');
     expect(idsReq.request.method).toBe('GET');
     idsReq.flush([{ id: 'a' }, { id: 'b' }, { id: 'c' }]); // Returns Document objects with IDs
     
-    tick(); // Allow observables to process the IDs
+    tick(); // Process the response and trigger getDocumentsByIds
     
-    // Second: DocumentService.getDocumentsByIds makes requests to /api/documents/{id}/repository
-    const detailReqs = http.match(req => /\/api\/documents\/(a|b|c)\/repository/.test(req.url));
-    expect(detailReqs.length).toBe(3); // Ensure all 3 detail requests were made
+    // Second: DocumentService.getDocumentsByIds makes forkJoin of requests
+    const reqA = http.expectOne('/api/documents/a/repository');
+    const reqB = http.expectOne('/api/documents/b/repository');
+    const reqC = http.expectOne('/api/documents/c/repository');
     
-    detailReqs.forEach((req) => {
-      const id = req.request.url.match(/\/api\/documents\/(\w+)\/repository/)?.[1];
-      req.flush({ id, title: `Document ${id}`, details: 'Some details' });
-    });
+    reqA.flush({ id: 'a', title: 'Document a', author: 'Author A' });
+    reqB.flush({ id: 'b', title: 'Document b', author: 'Author B' });
+    reqC.flush({ id: 'c', title: 'Document c', author: 'Author C' });
     
-    tick(); // Allow observables to complete
+    tick(); // Process all responses and update documents$$
 
     expect(finalDocs.length).toBe(3);
     expect(finalDocs.map(d => d.id)).toEqual(['a', 'b', 'c']);
     
+    sub.unsubscribe();
     http.verify();
   }));
 
