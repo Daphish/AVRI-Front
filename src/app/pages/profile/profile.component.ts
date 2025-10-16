@@ -14,7 +14,6 @@ import { AuthService } from '../../services/auth.service';
 import { ChatService } from '../../services/chat.service';
 import { RecommendationService } from '../../services/recommendation.service';
 import { User } from '../../interfaces/user.interface';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   DocumentService,
   SavedDocument,
@@ -93,13 +92,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
         }
       });
 
-    this.authService.profileSetupComplete$
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((isComplete) => {
-        if (!this.isActuallyAnonymous) {
-          this.profileNeedsSetup = !isComplete;
-        }
-      });
+    this.subscriptions.add(
+      this.authService.profileSetupComplete$
+        .subscribe((isComplete) => {
+          if (!this.isActuallyAnonymous) {
+            this.profileNeedsSetup = !isComplete;
+          }
+        })
+    );
   }
 
   private getDefaultDocumentsPlaceholder(): SavedDocument[] {
