@@ -40,18 +40,19 @@ describe('RecommendationService', () => {
 
     service.getDetailedDocuments();
 
+    // First request: get document IDs
     const idsReq = http.expectOne(req => /\/api\/recommender\/serve\/?$/.test(req.url));
     expect(idsReq.request.method).toBe('GET');
-    idsReq.flush(['a', 'b', 'c']);
+    idsReq.flush([{ id: 'a' }, { id: 'b' }, { id: 'c' }]); // Returns Document objects with IDs
     
     tick(); // Allow observables to process the IDs
     
-    // Handle detail requests for each document
-    const detailReqs = http.match(req => /\/api\/recommender\/documents\/detail\//.test(req.url));
+    // Second: DocumentService.getDocumentsByIds makes requests to /api/documents/{id}/repository
+    const detailReqs = http.match(req => /\/api\/documents\/(a|b|c)\/repository/.test(req.url));
     expect(detailReqs.length).toBe(3); // Ensure all 3 detail requests were made
     
-    detailReqs.forEach((req, index) => {
-      const id = ['a', 'b', 'c'][index];
+    detailReqs.forEach((req) => {
+      const id = req.request.url.match(/\/api\/documents\/(\w+)\/repository/)?.[1];
       req.flush({ id, title: `Document ${id}`, details: 'Some details' });
     });
     

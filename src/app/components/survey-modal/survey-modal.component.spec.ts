@@ -28,15 +28,12 @@ describe('SurveyModalComponent (coverage)', () => {
   let alertSpy: jasmine.Spy<(msg?: any) => void>;
 
   beforeEach(async () => {
-    // Polyfill crypto.randomUUID for test environment
-    if (typeof crypto === 'undefined' || !crypto.randomUUID) {
-      Object.defineProperty(globalThis, 'crypto', {
-        value: {
-          randomUUID: () => '00000000-0000-0000-0000-000000000000'
-        },
-        writable: true,
-        configurable: true
-      });
+    // Mock crypto.randomUUID for test environment
+    if (!globalThis.crypto) {
+      (globalThis as any).crypto = {};
+    }
+    if (!globalThis.crypto.randomUUID) {
+      globalThis.crypto.randomUUID = () => '00000000-0000-0000-0000-000000000000';
     }
     
     await TestBed.configureTestingModule({

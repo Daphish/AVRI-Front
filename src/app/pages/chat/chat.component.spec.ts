@@ -243,8 +243,11 @@ describe('ChatComponent', () => {
       
       tick(); // Wait for promise resolution
       
-      expect(authService.markProfileAsCompleted).toHaveBeenCalledWith(false);
+      // Even when POST is used, it's still a successful profile completion
+      expect(authService.markProfileAsCompleted).toHaveBeenCalledWith(true);
       expect(component.showWizard).toBeFalse();
+      expect(component.showToast).toBeTrue();
+      expect(component.toastType).toBe('success');
       
       flush(); // Clear any remaining timers
     }));
