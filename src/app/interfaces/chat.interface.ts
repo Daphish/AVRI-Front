@@ -1,4 +1,3 @@
-// Añadimos el tipo para cada chunk de referencia
 export interface ReferenceChunk {
   content: string;
   dataset_id: string;
@@ -27,11 +26,7 @@ export interface Documents {
 export interface Message {
   fromUser: boolean;
   text: string;
-
-  /** Referencias únicas extraídas de `reference.chunks` */
   references?: Documents[];
-
-  /** Burbuja en modo “escribiendo…” */
   isLoading?: boolean;
 }
 
@@ -41,7 +36,6 @@ export interface Chat {
   user: number;
 }
 
-/* RawMessage viene tal cual del backend /ask/ */
 export interface RawMessage {
   answer?: string;
   content?: string;

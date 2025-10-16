@@ -11,7 +11,7 @@ import { Documents, Message } from '../../interfaces/chat.interface';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
 
-/** Único tipo para las listas del wizard */
+/** Only type por wizard lists */
 interface SelectItem {
   label: string;
   selected: boolean;
@@ -32,7 +32,7 @@ export class ChatComponent implements OnInit {
   toastMessage = '';
   toastType: 'success' | 'error' | 'warning' = 'error';
 
-  /* ---------- estado chat ---------- */
+  /* ---------- chat state ---------- */
   sessionId = '';
   messages: Message[] = [];
   newText = '';
@@ -43,7 +43,7 @@ export class ChatComponent implements OnInit {
   step = 0;
   savingPrefs = false;
 
-  temas: SelectItem[] = [
+  topics: SelectItem[] = [
     'Ingeniería',
     'Ciencias Sociales',
     'Ciencias Naturales',
@@ -78,7 +78,7 @@ export class ChatComponent implements OnInit {
     'Ciberseguridad',
   ].map((label) => ({ label, selected: false }));
 
-  documentos: SelectItem[] = [
+  documents: SelectItem[] = [
     'Manual de laboratorio',
     'Tesis Doctoral',
     'Artículo de revista',
@@ -95,13 +95,13 @@ export class ChatComponent implements OnInit {
   ) {}
 
   async ngOnInit(): Promise<void> {
-    // 1) Mostrar el wizard primero para usuarios anónimos o sin perfil completo
+    // 1) Show wizard to anonymous users or users with an incomplete profile
     this.auth.profileSetupComplete$.subscribe((isComplete) => {
       this.showWizard = !isComplete;
       if (!isComplete) this.step = 0;
     });
 
-    // 2) Gestión de sesión y wizard pendiente (flujo existente)
+    // 2) Pending wizard on session
     this.chatService.idChat$.subscribe((id) => {
       this.sessionId = id;
       this.messages = [];
@@ -112,7 +112,7 @@ export class ChatComponent implements OnInit {
       }
     });
 
-    // 3) Flujo de mensajes
+    // 3) Message flow
     this.chatService.messages$.subscribe((msgs) => {
       this.messages = msgs;
       setTimeout(() => this.scrollBottom(), 0);
@@ -122,10 +122,10 @@ export class ChatComponent implements OnInit {
   /* ---------------- Wizard ---------------- */
   currentList(): SelectItem[] {
     return this.step === 1
-      ? this.temas
+      ? this.topics
       : this.step === 2
       ? this.keywords
-      : this.documentos;
+      : this.documents;
   }
 
   toggle(opt: SelectItem) {
@@ -134,7 +134,7 @@ export class ChatComponent implements OnInit {
 
   canContinue(): boolean {
     const list = this.currentList();
-    const min = this.step === 3 ? 1 : 5; // 5 en pasos 1 y 2; 1 en paso 3
+    const min = this.step === 3 ? 1 : 5;
     return list.filter((x) => x.selected).length >= min;
   }
 
@@ -146,7 +146,7 @@ export class ChatComponent implements OnInit {
     if (this.step > 1) this.step--;
   }
 
-  /* ---------- método para mostrar toast ---------- */
+  /* ---------- method for showing toast ---------- */
   private showToastMessage(
     message: string,
     type: 'success' | 'error' | 'warning' = 'error'
@@ -166,10 +166,10 @@ export class ChatComponent implements OnInit {
       const payload = {
         profile: {
           interests: [
-            ...this.temas.filter((t) => t.selected).map((t) => t.label),
+            ...this.topics.filter((t) => t.selected).map((t) => t.label),
             ...this.keywords.filter((k) => k.selected).map((k) => k.label),
           ],
-          document_titles: this.documentos
+          document_titles: this.documents
             .filter((d) => d.selected)
             .map((d) => d.label),
         },
@@ -202,22 +202,20 @@ export class ChatComponent implements OnInit {
     if (!text) return;
 
     this.isSending = true;
-    this.showWizard = false;
 
     try {
-      // ← AGREGAR TRY-CATCH
       if (!this.sessionId) {
         await firstValueFrom(this.chatService.createSession(text));
       }
-      this.chatService.sendMessage(this.sessionId, text);
+
+      await this.chatService.sendMessage(this.sessionId, text);
 
       this.newText = '';
+      this.showWizard = false;
+
     } catch (error) {
       console.error('Error enviando mensaje:', error);
-      // manejo de errores
-      this.showToastMessage(
-        'Hubo un error al enviar el mensaje. Inténtalo de nuevo.'
-      );
+      this.showToastMessage('Hubo un error al enviar el mensaje. Inténtalo de nuevo.');
     } finally {
       this.isSending = false;
     }
@@ -229,16 +227,12 @@ export class ChatComponent implements OnInit {
       this.router.navigate(['/document']);
     } catch (error) {
       console.error('Error abriendo documento:', error);
-      // manejo de errores
-      this.showToastMessage(
-        'No se pudo abrir el documento. Inténtalo de nuevo.'
-      );
+      this.showToastMessage('No se pudo abrir el documento. Inténtalo de nuevo.');
     }
   }
 
-  /* ---------------- utilidades ---------------- */
+  /* ---------------- utilities ---------------- */
   get isTyping(): boolean {
-    // si tu interfaz Message no trae isLoading, este getter no se usa en la plantilla
     return this.messages.some((m: any) => m?.isLoading);
   }
 

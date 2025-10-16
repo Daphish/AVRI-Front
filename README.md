@@ -8,50 +8,62 @@
   </a>
 </div>
 
-# AVRI-Front 🖥️
+<p align="center">
+ 
+  <!-- Angular & Node (static badges) -->
+  <img alt="Angular" src="https://img.shields.io/badge/Angular-18%2B-dd0031?logo=angular&logoColor=white">
+  <img alt="Node" src="https://img.shields.io/badge/Node-18%2B-339933?logo=node.js&logoColor=white">
 
-Interfaces para el **Asistente Virtual del Repositorio Institucional**
+  <!-- License & Last commit -->
+  <img alt="License" src="https://img.shields.io/github/license/Daphish/AVRI-Front">
+  <img alt="Last commit" src="https://img.shields.io/github/last-commit/Daphish/AVRI-Front">
+</p>
+
+
+# AVRI-Front 
+
+Interfaces for the **Virtual Assistant of the Institutional Repository**
 
 ---
 
-## 📋 Tabla de Contenidos
+## Table of Contents
 
-- [Pre-requisitos](#pre-requisitos)
-- [Instalación](#instalación)
-- [Configuración del Proyecto](#configuración-del-proyecto)
-- [Ejecución](#ejecución)
-- [Verificación](#verificación)
-- [Detener el Servidor](#detener-el-servidor)
-- [Tecnologías](#tecnologías)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Project Setup](#project-setup)
+- [Running the Application](#running-the-application)
+- [Verification](#verification)
+- [Stop the Server](#stop-the-server)
+- [Technologies](#technologies)
 
 ---
 
-## 🔧 Pre-requisitos
+## Prerequisites
 
-Antes de comenzar, asegúrate de tener instalado:
+Before starting, make sure you have installed:
 
 - [Git](https://git-scm.com/)
-- [Node.js](https://nodejs.org/) (versión 16 o superior)
-- [npm](https://www.npmjs.com/) (incluido con Node.js)
-- [Angular CLI](https://angular.io/cli) (opcional, pero recomendado)
+- [Node.js](https://nodejs.org/) (version 16 or higher)
+- [npm](https://www.npmjs.com/) (included with Node.js)
+- [Angular CLI](https://angular.io/cli) (optional, but recommended)
 
 ```bash
-# Verificar versiones instaladas
+# Check installed versions
 node --version
 npm --version
 ```
 
 ---
 
-## 🚀 Instalación
+## Installation
 
-### 1. Clonar el repositorio
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/Daphish/AVRI-Front.git
 ```
 
-### 2. Navegar al directorio del proyecto
+### 2. Navigate to the project directory
 
 ```bash
 cd AVRI-Front
@@ -59,153 +71,208 @@ cd AVRI-Front
 
 ---
 
-## ⚙️ Configuración del Proyecto
+## Project Setup
 
-### Instalar dependencias
+### Install dependencies
 
-Como este es un proyecto Angular, es necesario instalar todas las dependencias:
+As this is an Angular project, it's necessary to install all dependencies:
 
 ```bash
 npm install
 ```
 
-> **📝 Nota**: Este proceso puede tomar algunos minutos dependiendo de tu conexión a internet.
+> ** Note**: This process may take a few minutes depending on your internet connection.
 
 ---
 
-## 🏃‍♂️ Ejecución
+## Running the Application
 
-### Iniciar el servidor de desarrollo
+### Start the development server
 
 ```bash
 npm start
 ```
 
-El servidor se iniciará automáticamente en el puerto `4200`.
+The server will automatically start on port `4200`.
 
 ---
 
-## ✅ Verificación
+## Verification
 
-### 1. Verificación en terminal
+### 1. Terminal verification
 
-Si todo se ejecutó correctamente, deberías ver una salida similar a esta en tu terminal:
+If everything runs correctly, you should see output similar to this in your terminal:
 
 ![Terminal Success](https://github.com/user-attachments/assets/beed2f05-ab65-42a2-a993-467e5d062bdf)
 
-### 2. Verificación en el navegador
+### 2. Browser verification
 
-Abre tu navegador web y navega a:
+Open your web browser and navigate to:
 
 ```
 http://localhost:4200/home
 ```
 
-Deberías ver la pantalla de inicio de sesión:
+You should see the login screen:
 
 ![Login Screen](https://github.com/user-attachments/assets/7d100cb6-98f0-4aab-8e16-f700321774f1)
 
-### 3. Rutas disponibles
+### 3. Available routes
 
 - **Home**: `http://localhost:4200/home`
-- **Principal**: `http://localhost:4200/`
+- **Main**: `http://localhost:4200/`
 
 ---
 
-## 🛑 Detener el Servidor
+### Testing
 
-Para detener el servidor de desarrollo:
+Currently, there are some tests in development that mainly cover (but are not limited to):
 
-1. Ve a la terminal donde está ejecutándose el servidor
-2. Presiona `Ctrl + C`
-3. Confirma la acción si se te solicita
+- Authentication Services
+- Chat Services
+- Document Services
+- Basic creation tests (Various components)
+
+If you want to verify the tests, you should use the following command in the project's root directory:
 
 ```bash
-# El servidor se detendrá y verás algo similar a:
+npx ng test --watch=false --browsers=ChromeHeadless --code-coverage
+```
+
+---
+
+## Stop the Server
+
+To stop the development server:
+
+1. Go to the terminal where the server is running
+2. Press `Ctrl + C`
+3. Confirm the action if prompted
+
+```bash
+# The server will stop and you'll see something similar to:
 ^C
 Terminated
 ```
 
 ---
 
-## 🛠️ Tecnologías
+## Technologies
 
-Este proyecto está construido con:
+This project is built with:
 
-- **[Angular](https://angular.io/)** - Framework principal
-- **[TypeScript](https://www.typescriptlang.org/)** - Lenguaje de programación
-- **[Node.js](https://nodejs.org/)** - Entorno de ejecución
-- **[npm](https://www.npmjs.com/)** - Gestor de paquetes
+- **[Angular](https://angular.io/)** - Main framework
+- **[TypeScript](https://www.typescriptlang.org/)** - Programming language
+- **[Node.js](https://nodejs.org/)** - Runtime environment
+- **[npm](https://www.npmjs.com/)** - Package manager
+
+### Dependency Versions
+```json
+- Node: 22.13.0 
+- npm: 11.0.0 
+- pnpm: 10.12.1 
+├── @angular-devkit/build-angular@18.2.14
+├── @angular/animations@18.2.13
+├── @angular/cli@18.2.14
+├── @angular/common@18.2.13
+├── @angular/compiler-cli@18.2.13
+├── @angular/compiler@18.2.13
+├── @angular/core@18.2.13
+├── @angular/forms@18.2.13
+├── @angular/platform-browser-dynamic@18.2.13
+├── @angular/platform-browser@18.2.13
+├── @angular/platform-server@18.2.13
+├── @angular/router@18.2.13
+├── @angular/ssr@18.2.14
+├── @types/express@4.17.21
+├── @types/jasmine@5.1.5
+├── @types/node@18.19.74
+├── body-parser@1.20.3
+├── bootstrap-icons@1.11.3
+├── cors@2.8.5
+├── express@4.21.2
+├── jasmine-core@5.2.0
+├── karma-chrome-launcher@3.2.0
+├── karma-coverage@2.2.1
+├── karma-jasmine-html-reporter@2.1.0
+├── karma-jasmine@5.1.0
+├── karma@6.4.4
+├── router@2.2.0
+├── rxjs@7.8.1
+├── tslib@2.8.1
+├── typescript@5.5.4
+└── zone.js@0.14.10
+
+```
 
 ---
 
-## 📝 Comandos Útiles
+## Useful Commands
 
 ```bash
-# Instalar dependencias
+# Install dependencies
 npm install
 
-# Iniciar servidor de desarrollo
+# Start development server
 npm start
 
-# Construir para producción
+# Build for production
 npm run build
 
-# Ejecutar tests
+# Run tests
 npm test
 
-# Linting del código
+# Code linting
 npm run lint
 ```
 
 ---
 
-## 🔧 Solución de Problemas
+## Troubleshooting
 
-### Error: "ng no es reconocido como comando"
+### Error: "ng is not recognized as a command"
 
-Si encuentras este error, instala Angular CLI globalmente:
+If you encounter this error, install Angular CLI globally:
 
 ```bash
 npm install -g @angular/cli
 ```
 
-### Error: "Puerto 4200 ya está en uso"
+### Error: "Port 4200 is already in use"
 
-Si el puerto está ocupado, puedes usar un puerto diferente:
+If the port is occupied, you can use a different port:
 
 ```bash
 ng serve --port 4201
 ```
 
-### Problemas con dependencias
+### Dependencies issues
 
-Si tienes problemas con las dependencias, intenta:
+If you have problems with dependencies, try:
 
 ```bash
-# Limpiar caché de npm
+# Clear npm cache
 npm cache clean --force
 
-# Eliminar node_modules y reinstalar
+# Remove node_modules and reinstall
 rm -rf node_modules
 npm install
 ```
 
 ---
 
-## 🤝 Contribución
+## Contributing
 
-Si encuentras algún problema o tienes sugerencias de mejora:
+If you find any issues or have improvement suggestions:
 
-1. Abre un [issue](https://github.com/Daphish/AVRI-Front/issues)
-2. Crea un pull request con tus cambios
-3. Sigue las convenciones de código del proyecto
+1. Open an [issue](https://github.com/Daphish/AVRI-Front/issues)
+2. Create a pull request with your changes
+3. Follow the project's code conventions
 
 ---
 
+## Related Links
 
-## 🔗 Enlaces Relacionados
-
-- [AVRI-Back](https://github.com/MikelBarajas38/AVRI-Back) - API del proyecto
+- [AVRI-Back](https://github.com/MikelBarajas38/AVRI-Back) - Project API
 - [Angular Documentation](https://angular.io/docs)
 - [Node.js Documentation](https://nodejs.org/docs/)

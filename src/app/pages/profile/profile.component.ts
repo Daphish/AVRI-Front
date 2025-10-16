@@ -1,5 +1,11 @@
 // src/app/pages/profile/profile.component.ts
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  inject,
+  DestroyRef,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { NgFor, NgIf } from '@angular/common';
 import { Observable, Subscription, map, take } from 'rxjs';
@@ -28,26 +34,32 @@ export class ProfileComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private subscriptions = new Subscription();
 
+  isLoadingProfile = false;
+  isLoadingPreferences = false;
+  isLoadingDocuments = false;
+  isLoggingOut = false;
+  isNavigating = false;
+
   /* ---------- toast notifications ---------- */
   showToast = false;
   toastMessage = '';
   toastType: 'success' | 'error' | 'warning' = 'error';
 
   userDisplay: User | null = null;
-  isActuallyAnonymous: boolean = true; // Usado para controlar la vista
+  isActuallyAnonymous: boolean = true; // For controlling the display
   preferences: String[] = [];
   documents: SavedDocument[] = [];
-  profileNeedsSetup: boolean = false; // Se actualizará en base a profileSetupComplete$
+  profileNeedsSetup: boolean = false;
 
-  // Para el botón de cerrar sesión y otras lógicas de plantilla
+  // For closing session
   isUserLoggedInAndNotAnonymous$: Observable<boolean> =
     this.authService.currentUser$.pipe(
       map((user) => !!user && !('anonymous_id' in user))
     );
 
-  constructor() {}
+  constructor(private destroyRef: DestroyRef) {}
 
-  /* ---------- método para mostrar toast ---------- */
+  /* ---------- Method for showing toast ---------- */
   private showToastMessage(
     message: string,
     type: 'success' | 'error' | 'warning' = 'error'
@@ -62,8 +74,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.subscriptions.add(
-      this.authService.currentUser$.pipe(take(1)).subscribe((currentUser) => {
+    this.isLoadingProfile = true;
+
+    this.authService.currentUser$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((currentUser) => {
         if (currentUser && !('anonymous_id' in currentUser)) {
           this.isActuallyAnonymous = false;
           this.userDisplay = currentUser as User;
@@ -73,9 +88,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
           this.userDisplay = null;
           this.preferences = ['Inicia sesión para ver y configurar tu perfil.'];
           this.documents = this.getDefaultDocumentsPlaceholder();
+          this.isLoadingProfile = false;
         }
-      })
-    );
+      });
 
     this.subscriptions.add(
       this.authService.profileSetupComplete$
@@ -111,9 +126,15 @@ export class ProfileComponent implements OnInit, OnDestroy {
   loadProfileData(): void {
     if (this.isActuallyAnonymous || !this.userDisplay) return;
 
+    this.isLoadingPreferences = true;
+    this.isLoadingDocuments = true;
+
     this.subscriptions.add(
       this.recommendationService.get().subscribe({
         next: (data) => {
+          this.isLoadingPreferences = false;
+          this.isLoadingProfile = false;
+
           if (
             data?.profile?.interests &&
             Array.isArray(data.profile.interests)
@@ -129,6 +150,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
           }
         },
         error: () => {
+          this.isLoadingPreferences = false;
+          this.isLoadingProfile = false;
+
           this.preferences = [
             'Error al cargar preferencias. Intenta configurar tu perfil.',
           ];
@@ -140,41 +164,60 @@ export class ProfileComponent implements OnInit, OnDestroy {
       })
     );
 
-    // Este getDocuments es del RecommendationService, asumo que es para historial o similares.
     this.subscriptions.add(
-      this.documentService.getSavedDocuments().subscribe((docs) => {
-        if (docs && docs.length > 0) {
-          this.documents = docs;
-        } else {
+      this.documentService.getSavedDocuments().subscribe({
+        next: (docs) => {
+          if (docs && docs.length > 0) {
+            this.documents = docs;
+          } else {
+            this.documents = this.getDefaultDocumentsPlaceholder();
+          }
+          this.isLoadingDocuments = false;
+        },
+        error: () => {
           this.documents = this.getDefaultDocumentsPlaceholder();
-        }
+          this.isLoadingDocuments = false;
+          this.showToastMessage('Error al cargar documentos guardados.');
+        },
       })
     );
   }
 
   async goBack(): Promise<void> {
-    /* Siempre queremos volver a mostrar el wizard */
-    this.authService.profileSetupComplete$.subscribe((isComplete) => {
-      if (!isComplete) {
-        this.chatService.pendingWizard = true;
-      }
-    });
-    await this.router.navigate(['/home']);
+    this.isNavigating = true;
+    try {
+      this.authService.profileSetupComplete$.subscribe((isComplete) => {
+        if (!isComplete) {
+          this.chatService.pendingWizard = true;
+        }
+      });
+      await this.router.navigate(['/home']);
+    } finally {
+      this.isNavigating = false;
+    }
   }
 
   async showWizard(): Promise<void> {
-    this.chatService.pendingWizard = true;
-    await this.router.navigate(['/home']);
+    this.isNavigating = true;
+    try {
+      this.chatService.pendingWizard = true;
+      await this.router.navigate(['/home']);
+    } finally {
+      this.isNavigating = false;
+    }
   }
 
-  logout(): void {
+  async logout(): Promise<void> {
+    this.isLoggingOut = true;
     try {
       this.chatService.clearSessions();
       this.authService.logout();
-      this.router.navigate(['/home']);
+      await this.router.navigate(['/home']);
       this.showToastMessage('Sesión cerrada correctamente.', 'success');
     } catch (error) {
       this.showToastMessage('Error al cerrar sesión.');
+    } finally {
+      this.isLoggingOut = false;
     }
   }
 

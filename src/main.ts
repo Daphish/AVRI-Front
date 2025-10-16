@@ -1,5 +1,3 @@
-// src/main.ts
-
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideHttpClient, withInterceptors, withFetch } from '@angular/common/http';
 import { provideRouter } from '@angular/router';

@@ -1,9 +1,6 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
-import { Component, OnInit } from '@angular/core'; // Agregado OnInit
-import {
-  Document,
-  RepositoryDocument,
-} from '../../interfaces/document.interface';
+import { Component, OnInit } from '@angular/core';
+import { RepositoryDocument } from '../../interfaces/document.interface';
 import { RecommendationService } from '../../services/recommendation.service';
 import { DocumentDetail } from '../../services/document.service';
 
@@ -20,25 +17,27 @@ export class RecommendationsComponent implements OnInit {
   toastMessage = '';
   toastType: 'success' | 'error' | 'warning' = 'error';
 
-  /* ---------- método para mostrar toast ---------- */
-  private showToastMessage(message: string, type: 'success' | 'error' | 'warning' = 'error') {
+  /* ---------- method for showing toast ---------- */
+  private showToastMessage(
+    message: string,
+    type: 'success' | 'error' | 'warning' = 'error'
+  ) {
     this.toastMessage = message;
     this.toastType = type;
     this.showToast = true;
-    
+
     setTimeout(() => {
       this.showToast = false;
     }, 4000);
   }
 
-  // Implementado OnInit
   recommendedDocs: RepositoryDocument[] = [
     {
-      id: 'rec-doc-0', // CORREGIDO: id como string
+      id: 'rec-doc-0',
       title:
         'Efectos de la quema de la caña de azúcar en las propiedades del suelo en Tancanhuitz San Luis Potosí',
       repository_uri: 'uri/doc0',
-      repository_id: 'repo-id-0', // AÑADIDO: repository_id
+      repository_id: 'repo-id-0',
       status: 'L',
       author: 'Rojas Velázquez, Montserrath',
       type: 'Tesis',
@@ -47,11 +46,11 @@ export class RecommendationsComponent implements OnInit {
       license: 'CC BY-NC-SA 4.0',
     },
     {
-      id: 'rec-doc-1', // CORREGIDO: id como string
+      id: 'rec-doc-1',
       title:
         'Manual de enfermería para el manejo del equipo laparoscópico de cirugía general en la Central de Esterilización y Equipos',
       repository_uri: 'uri/doc1',
-      repository_id: 'repo-id-1', // AÑADIDO: repository_id
+      repository_id: 'repo-id-1',
       status: 'L',
       author: 'Almazán Segovia, Iliana Guadalupe',
       type: 'Tesis',
@@ -60,11 +59,11 @@ export class RecommendationsComponent implements OnInit {
       license: 'CC BY-NC-SA 4.0',
     },
     {
-      id: 'rec-doc-2', // CORREGIDO: id como string (ID único)
+      id: 'rec-doc-2',
       title:
-        'Identificación de patrones metabolómicos en orina en pacientes con cáncer de mama posterior al tratamiento', // Título único
+        'Identificación de patrones metabolómicos en orina en pacientes con cáncer de mama posterior al tratamiento',
       repository_uri: 'uri/doc2',
-      repository_id: 'repo-id-2', // AÑADIDO: repository_id
+      repository_id: 'repo-id-2',
       status: 'L',
       author: 'Rodríguez Govea, Edson Artemio',
       type: 'Tesis',
@@ -73,11 +72,11 @@ export class RecommendationsComponent implements OnInit {
       license: 'CC BY-NC-SA 4.0',
     },
     {
-      id: 'rec-doc-3', // CORREGIDO: id como string (ID único)
+      id: 'rec-doc-3',
       title:
-        'Diagnóstico y recomendaciones para la conservación de la colección de carteles y fotomontajes de la cineteca alameda del estado de San Luis Potosí', // Título único
+        'Diagnóstico y recomendaciones para la conservación de la colección de carteles y fotomontajes de la cineteca alameda del estado de San Luis Potosí',
       repository_uri: 'uri/doc3',
-      repository_id: 'repo-id-3', // AÑADIDO: repository_id
+      repository_id: 'repo-id-3',
       status: 'L',
       author: 'Rodríguez Contreras, Daniela',
       type: 'Tesis',
@@ -91,33 +90,60 @@ export class RecommendationsComponent implements OnInit {
 
   constructor(private recommendationService: RecommendationService) {}
 
-  // ngOninit -> debe ser ngOnInit (camelCase)
+  isLoadingRecommendations = false;
+  hasError = false;
+  errorMessage = '';
+
   ngOnInit(): void {
+    this.loadRecommendations();
+  }
+
+  private loadRecommendations(): void {
+    this.isLoadingRecommendations = true;
+    this.hasError = false;
+    this.errorMessage = '';
+
     try {
       this.recommendationService.getDetailedDocuments();
     } catch (error) {
       console.error('Error al solicitar documentos:', error);
+      this.hasError = true;
+      this.errorMessage = 'Error al solicitar documentos.';
       this.showToastMessage('Error al solicitar documentos.');
+      this.isLoadingRecommendations = false;
+      return;
     }
-  
+
     this.recommendationService.documents$.subscribe({
       next: (documents) => {
+        this.isLoadingRecommendations = false;
         if (documents && documents.length > 0) {
           this.recommendedDocsBack = documents;
+          this.hasError = false;
         } else {
           console.log('No se recibieron documentos recomendados.');
-          this.showToastMessage('Error al recibir los documentos recomendados.');
+          this.hasError = true;
+          this.errorMessage = 'No hay documentos recomendados disponibles.';
+          this.showToastMessage(
+            'No se encontraron documentos recomendados.',
+            'warning'
+          );
         }
       },
       error: (error) => {
         console.error('Error al obtener documentos:', error);
+        this.isLoadingRecommendations = false;
+        this.hasError = true;
+        this.errorMessage = 'Error al cargar documentos recomendados.';
         this.showToastMessage('Error al cargar documentos recomendados.');
-      }
+      },
     });
-    
-    // CORREGIDO: nombre del método y tipo de retorno
-    // Descomenta y ajusta esto si es necesario
-    /*
+  }
+
+  retryLoadRecommendations(): void {
+    this.loadRecommendations();
+  }
+  /*
     this.recommendationService.getDocuments().subscribe(documents => {
       if (documents && documents.length > 0) {
         this.recommendedDocs = documents;
@@ -127,5 +153,4 @@ export class RecommendationsComponent implements OnInit {
       }
     });
     */
-  }
 }

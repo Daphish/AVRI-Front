@@ -20,10 +20,10 @@ export class ChatService {
   private documentService = inject(DocumentService);
   private readonly BASE_URL = '/api/chat';
 
-  /* Flag para volver a mostrar el wizard después de perfil */
+  /* Showing wizard after profile */
   public pendingWizard = false;
 
-  /* --------------- estado reactivo --------------- */
+  /* --------------- reactive state --------------- */
   private sessions$$ = new BehaviorSubject<Chat[]>([]);
   readonly sessions$ = this.sessions$$.asObservable();
 
@@ -33,10 +33,25 @@ export class ChatService {
   private idChat$$ = new BehaviorSubject<string>('');
   readonly idChat$ = this.idChat$$.asObservable();
 
-  /* --------------- sesiones ---------------------- */
+  /* --------------- sessions ---------------------- */
+  cleanText(text: string): string {
+    return text
+      .replace(/<think>.*?<\/think>/gs, '') // remove thinking
+      .replace(/##\d+\$\$/g, '') // remove cite
+      .trim();
+  }
+
   loadSessions(): void {
     this.http
       .get<Chat[]>(`${this.BASE_URL}/`)
+      .pipe(
+        map((list) =>
+          list.map((s) => ({
+            ...s,
+            session_name: this.cleanText(s.session_name),
+          })),
+        ),
+      )
       .subscribe((list) => this.sessions$$.next(list));
   }
 
@@ -50,10 +65,11 @@ export class ChatService {
       .post<Chat>(`${this.BASE_URL}/`, { session_name: name })
       .pipe(
         tap((s) => {
+          s.session_name = this.cleanText(s.session_name); // remove thinking pattern
           this.sessions$$.next([s, ...this.sessions$$.value]);
           this.idChat$$.next(s.session_id);
-          this.messages$$.next([]); // sin mensaje automático
-        })
+          this.messages$$.next([]);
+        }),
       );
   }
 
@@ -61,7 +77,7 @@ export class ChatService {
     this.http.delete(`${this.BASE_URL}/${id}/`).subscribe({
       next: () => {
         this.sessions$$.next(
-          this.sessions$$.value.filter((c) => c.session_id !== id)
+          this.sessions$$.value.filter((c) => c.session_id !== id),
         );
         if (this.idChat$$.value === id) {
           this.idChat$$.next('');
@@ -72,16 +88,14 @@ export class ChatService {
     });
   }
 
-  /** Utilizado al cerrar sesión / modo invitado: borra todo lo local */
   clearSessions(): void {
     this.sessions$$.next([]);
     this.idChat$$.next('');
     this.messages$$.next([]);
   }
 
-  /* --------------- mensajes ---------------------- */
+  /* --------------- messages ---------------------- */
   loadMessages(id: string): void {
-    // Reordenar: seleccionado al principio
     const arr = this.sessions$$.value;
     const idx = arr.findIndex((s) => s.session_id === id);
     if (idx !== -1) {
@@ -98,7 +112,7 @@ export class ChatService {
         map((res) =>
           Array.isArray(res?.data) && res.data[0]?.messages
             ? res.data[0].messages
-            : res.messages ?? []
+            : (res.messages ?? []),
         ),
         map((list: any[]) =>
           list.map((m) => {
@@ -106,7 +120,7 @@ export class ChatService {
               m.reference?.chunks ?? m.reference ?? [];
             const uniqueRefs = chunks.filter(
               (c, i, a) =>
-                a.findIndex((x) => x.document_id === c.document_id) === i
+                a.findIndex((x) => x.document_id === c.document_id) === i,
             );
             const documentIds = uniqueRefs.map((r) => r.document_id);
             const detailedDocs: DocumentDetail[] = [];
@@ -117,18 +131,16 @@ export class ChatService {
               });
             return {
               fromUser: m.role === 'user',
-              text: (m.content ?? m.answer ?? '')
-                .replace(/##\d+\$\$/g, '')
-                .trim(),
+              text: this.cleanText(m.content ?? m.answer ?? ''),
               references: detailedDocs,
             } as Message;
-          })
-        )
+          }),
+        ),
       )
       .subscribe((msgs) => this.messages$$.next(msgs));
   }
 
-  /** Envía texto y agrega burbuja “escribiendo…” */
+  /** Sends text and adds “writing…” */
   sendMessage(sessionId: string, text: string): void {
     const userMsg: Message = { fromUser: true, text };
     const typingMsg: Message = { fromUser: false, text: '', isLoading: true };
@@ -142,13 +154,11 @@ export class ChatService {
       .pipe(
         map((r) => r.data),
         map((raw) => {
-          const answer = (raw.answer ?? raw.content ?? '')
-            .replace(/##\d+\$\$/g, '')
-            .trim();
+          const answer = this.cleanText(raw.answer ?? raw.content ?? '');
           const chunks: ReferenceChunk[] = raw.reference?.chunks ?? [];
           const uniqueRefs = chunks.filter(
             (c, i, a) =>
-              a.findIndex((x) => x.document_id === c.document_id) === i
+              a.findIndex((x) => x.document_id === c.document_id) === i,
           );
           const documentIds = uniqueRefs.map((r) => r.document_id);
           const detailedDocs: DocumentDetail[] = [];
@@ -162,7 +172,7 @@ export class ChatService {
             text: answer,
             references: detailedDocs,
           } as Message;
-        })
+        }),
       )
       .subscribe({
         next: (reply) => {
@@ -175,19 +185,19 @@ export class ChatService {
         error: (err) => {
           console.error(err);
           this.messages$$.next(
-            this.messages$$.value.filter((m) => !m.isLoading)
+            this.messages$$.value.filter((m) => !m.isLoading),
           );
         },
       });
   }
 
-  /* --------------- preferencias perfil --------------- */
+  /* --------------- preferences profile --------------- */
   getProfile(): Observable<any> {
     return this.http.get('/api/recommender/profile/me/');
   }
   submitProfile(
     interests: string[],
-    documentTitles: string[]
+    documentTitles: string[],
   ): Observable<any> {
     const payload = {
       profile: {
@@ -203,14 +213,14 @@ export class ChatService {
       switchMap(() =>
         this.http
           .patch(urlUpdate, payload)
-          .pipe(tap(() => this.authService.markProfileAsCompleted(true)))
+          .pipe(tap(() => this.authService.markProfileAsCompleted(true))),
       ),
       catchError((err) => {
         return this.http.post(urlCreate, payload).pipe(
           tap(() => this.authService.markProfileAsCompleted(false)),
-          catchError((error) => throwError(() => error))
+          catchError((error) => throwError(() => error)),
         );
-      })
+      }),
     );
   }
 }

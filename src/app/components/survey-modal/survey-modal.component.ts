@@ -4,7 +4,7 @@ import { NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
-import { EventoEncuestaService } from '../../services/evento-encuesta.service';
+import { SurveyEventService } from '../../services/evento-encuesta.service';
 import { ChatService } from '../../services/chat.service';
 
 @Component({
@@ -15,73 +15,103 @@ import { ChatService } from '../../services/chat.service';
   styleUrl: './survey-modal.component.css',
 })
 export class SurveyModalComponent implements OnInit {
-  mostrarEncuesta = false;
-  mostrarFormulario = false;
+  /* ---------- toast notifications ---------- */
+  showToast = false;
+  toastMessage = '';
+  toastType: 'success' | 'error' | 'warning' = 'error';
+
+  /* ---------- method for showing toast ---------- */
+  private showToastMessage(message: string, type: 'success' | 'error' | 'warning' = 'error') {
+    this.toastMessage = message;
+    this.toastType = type;
+    this.showToast = true;
+    
+    setTimeout(() => {
+      this.showToast = false;
+    }, 4000);
+  }
+
+  showSurvey = false;
+  showForm = false;
   isSubmittingSurvey = false;
   currentSessionId = '';
 
-  preguntas = [
-    { id: 'q1',  texto: 'Encontré que el sistema es fácil de usar.' },
-    { id: 'q2',  texto: 'Me gustaría usar el sistema con frecuencia.' },
-    { id: 'q3',  texto: 'Las funciones del sistema están bien integradas.' },
-    { id: 'q4',  texto: 'El sistema es innecesariamente complejo.' },
-    { id: 'q5',  texto: 'Considero que el sistema es consistente.' },
-    { id: 'q6',  texto: 'Creo que la mayoría de la gente aprendería a usarlo rápidamente.' },
-    { id: 'q7',  texto: 'El sistema es muy difícil de usar.' },
-    { id: 'q8',  texto: 'Me sentí muy confiado usando el sistema.' },
-    { id: 'q9',  texto: 'Necesité aprender muchas cosas antes de comenzar.' },
-    { id: 'q10', texto: 'En general estoy satisfecho con el sistema.' },
+  questions = [
+    { id: 'q1',  text: 'Encontré que el sistema es fácil de usar.' },
+    { id: 'q2',  text: 'Me gustaría usar el sistema con frecuencia.' },
+    { id: 'q3',  text: 'Las funciones del sistema están bien integradas.' },
+    { id: 'q4',  text: 'El sistema es innecesariamente complejo.' },
+    { id: 'q5',  text: 'Considero que el sistema es consistente.' },
+    { id: 'q6',  text: 'Creo que la mayoría de la gente aprendería a usarlo rápidamente.' },
+    { id: 'q7',  text: 'El sistema es muy difícil de usar.' },
+    { id: 'q8',  text: 'Me sentí muy confiado usando el sistema.' },
+    { id: 'q9',  text: 'Necesité aprender muchas cosas antes de comenzar.' },
+    { id: 'q10', text: 'En general estoy satisfecho con el sistema.' },
   ];
 
-  opciones = [1,2,3,4,5].map(v => ({ valor: v, texto: String(v) }));
+  options = [1,2,3,4,5].map(v => ({ value: v, text: String(v) }));
 
-  respuestas: any = {
+  answers: any = {
     q1: 0, q2: 0, q3: 0, q4: 0, q5: 0,
     q6: 0, q7: 0, q8: 0, q9: 0, q10: 0,
     comments: ''
   };
 
   constructor(
-    private eventoEncuesta: EventoEncuestaService,
+    private surveyEvent: SurveyEventService,
     private chatService: ChatService,
     private http: HttpClient
   ) {}
 
   ngOnInit(): void {
-    this.eventoEncuesta.encuestaActivada$.subscribe(() => {
-      this.mostrarEncuesta = true;
-      this.mostrarFormulario = false;
-    });
+    try {
+      this.surveyEvent.surveyOn$.subscribe({
+        next: () => {
+          this.showSurvey = true;
+          this.showForm = false;
+        },
+        error: (error) => {
+          console.error('Error en evento encuesta:', error);
+          this.showToastMessage('Error al activar la encuesta.');
+        }
+      });
 
-    // Mantener el session ID actualizado
-    this.chatService.idChat$.subscribe(id => {
-      this.currentSessionId = id;
-    });
+      this.chatService.idChat$.subscribe({
+        next: (id) => {
+          this.currentSessionId = id;
+        },
+        error: (error) => {
+          console.error('Error al obtener session ID:', error);
+        }
+      });
+    } catch (error) {
+      console.error('Error al inicializar encuesta:', error);
+      this.showToastMessage('Error al inicializar la encuesta.');
+    }
   }
 
-  iniciarEncuesta(): void {
-    this.mostrarFormulario = true;
+  startSurvey(): void {
+    this.showForm = true;
   }
 
-  cancelarEncuesta(): void {
-    this.cerrarEncuesta();
+  cancelSurvey(): void {
+    this.closeSurvey();
   }
 
-  volverAtras(): void {
-    this.mostrarFormulario = false;
+  getBack(): void {
+    this.showForm = false;
   }
 
-  cerrarEncuesta(): void {
-    this.mostrarEncuesta = false;
-    this.mostrarFormulario = false;
-    this.resetearRespuestas();
+  closeSurvey(): void {
+    this.showSurvey = false;
+    this.showForm = false;
+    this.resetAnswers();
   }
 
-  enviarEncuesta(): void {
-    // Validar que todas las preguntas estén respondidas
+  sendSurvey(): void {
     for (let i = 1; i <= 10; i++) {
-      if (!this.respuestas['q' + i]) {
-        alert('Por favor responde todas las preguntas');
+      if (!this.answers['q' + i]) {
+        this.showToastMessage('Por favor responde todas las preguntas.', 'warning');
         return;
       }
     }
@@ -90,12 +120,12 @@ export class SurveyModalComponent implements OnInit {
       version: 'sus-1.0',
       survey: {
         rating_items: {
-          q1: this.respuestas.q1, q2: this.respuestas.q2, q3: this.respuestas.q3, 
-          q4: this.respuestas.q4, q5: this.respuestas.q5, q6: this.respuestas.q6, 
-          q7: this.respuestas.q7, q8: this.respuestas.q8, q9: this.respuestas.q9, 
-          q10: this.respuestas.q10,
+          q1: this.answers.q1, q2: this.answers.q2, q3: this.answers.q3, 
+          q4: this.answers.q4, q5: this.answers.q5, q6: this.answers.q6, 
+          q7: this.answers.q7, q8: this.answers.q8, q9: this.answers.q9, 
+          q10: this.answers.q10,
         },
-        comments: this.respuestas.comments || '',
+        comments: this.answers.comments || '',
         meta: {
           session_id: this.currentSessionId || null,
           feature: 'general',
@@ -110,19 +140,20 @@ export class SurveyModalComponent implements OnInit {
 
     this.http.post('/api/feedback/', payload, { headers }).subscribe({
       next: () => {
-        alert('¡Gracias! Tu encuesta ha sido enviada exitosamente.');
-        this.cerrarEncuesta();
+        this.showToastMessage('¡Gracias! Tu encuesta ha sido enviada exitosamente.', 'success');
+        this.isSubmittingSurvey = false;
+        this.closeSurvey();
       },
       error: (error) => {
         console.error('Error al enviar la encuesta:', error);
-        alert('Hubo un error al enviar la encuesta. Inténtalo de nuevo.');
+        this.showToastMessage('Hubo un error al enviar la encuesta. Inténtalo de nuevo.');
         this.isSubmittingSurvey = false;
       }
     });
   }
 
-  private resetearRespuestas(): void {
-    this.respuestas = {
+  private resetAnswers(): void {
+    this.answers = {
       q1: 0, q2: 0, q3: 0, q4: 0, q5: 0,
       q6: 0, q7: 0, q8: 0, q9: 0, q10: 0,
       comments: ''
@@ -130,11 +161,16 @@ export class SurveyModalComponent implements OnInit {
   }
 
   private generateUUID(): string {
-    if ('randomUUID' in crypto) return (crypto as any).randomUUID();
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-      const r = (Math.random() * 16) | 0;
-      const v = c === 'x' ? r : (r & 0x3) | 0x8;
-      return v.toString(16);
-    });
+    try {
+      if ('randomUUID' in crypto) return (crypto as any).randomUUID();
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        const r = (Math.random() * 16) | 0;
+        const v = c === 'x' ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      });
+    } catch (error) {
+      console.error('Error al generar UUID:', error);
+      return Date.now().toString() + Math.random().toString();
+    }
   }
 }

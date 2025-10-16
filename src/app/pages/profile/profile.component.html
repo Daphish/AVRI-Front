@@ -1,7 +1,13 @@
 <div class="profile-container">
   <div class="column-left">
-    <button class="back-button" aria-label="Volver al chat" (click)="goBack()">
-      <i class="bi bi-arrow-left"></i>
+    <button
+      class="back-button"
+      aria-label="Get back to chat"
+      (click)="goBack()"
+      [disabled]="isNavigating"
+    >
+      <i *ngIf="!isNavigating" class="bi bi-arrow-left"></i>
+      <i *ngIf="isNavigating" class="bi bi-arrow-clockwise spinner"></i>
     </button>
     <div class="avatar-circle">
       <i
@@ -20,14 +26,37 @@
       *ngIf="isActuallyAnonymous; else logoutButton"
       class="logout-button"
       (click)="logout()"
+      [disabled]="isLoggingOut"
     >
-      <i class="bi bi-box-arrow-in-right" style="margin-right: 5px"></i>
-      Iniciar sesión
+      <i
+        *ngIf="!isLoggingOut"
+        class="bi bi-box-arrow-in-right"
+        style="margin-right: 5px"
+      ></i>
+      <i
+        *ngIf="isLoggingOut"
+        class="bi bi-arrow-clockwise spinner"
+        style="margin-right: 5px"
+      ></i>
+      {{ isLoggingOut ? "Iniciando sesión..." : "Iniciar sesión" }}
     </button>
     <ng-template #logoutButton>
-      <button class="logout-button" (click)="logout()">
-        <i class="bi bi-box-arrow-right" style="margin-right: 5px"></i>
-        Cerrar sesión
+      <button
+        class="logout-button"
+        (click)="logout()"
+        [disabled]="isLoggingOut"
+      >
+        <i
+          *ngIf="!isLoggingOut"
+          class="bi bi-box-arrow-right"
+          style="margin-right: 5px"
+        ></i>
+        <i
+          *ngIf="isLoggingOut"
+          class="bi bi-arrow-clockwise spinner"
+          style="margin-right: 5px"
+        ></i>
+        {{ isLoggingOut ? "Cerrando sesión..." : "Cerrar sesión" }}
       </button>
     </ng-template>
   </div>
@@ -37,32 +66,41 @@
       {{ userDisplay.name }} {{ userDisplay.first_name }}
       {{ userDisplay.last_name }}
     </h1>
-    <div class="row-container">
-      <div class="row-child">
-        <div class="title-tag">
-          <i
-            class="bi bi-person"
-            style="color: black; font-size: 1.2rem; margin-right: 5px"
-          ></i>
-          Datos de identificación
-        </div>
-        <p>{{ userDisplay.field_of_study || "No especificado" }}</p>
-        <p>{{ userDisplay.education_level || "No especificado" }}</p>
-        <div>
-          <i
-            class="bi bi-envelope"
-            style="color: black; font-size: 1rem; margin-right: 5px"
-          ></i>
-          {{ userDisplay.email }}
-        </div>
+    <div class="row-child">
+      <div class="title-tag">
+        <i
+          class="bi bi-person"
+          style="color: black; font-size: 1.2rem; margin-right: 5px"
+        ></i>
+        Datos de identificación
+      </div>
+      <p>{{ userDisplay.field_of_study || "No especificado" }}</p>
+      <p>{{ userDisplay.education_level || "No especificado" }}</p>
+      <div>
+        <i
+          class="bi bi-envelope"
+          style="color: black; font-size: 1rem; margin-right: 5px"
+        ></i>
+        {{ userDisplay.email }}
+      </div>
+    </div>
+    <div class="row-child">
+      <div class="title-tag">
+        <i
+          class="bi bi-heart"
+          style="color: black; font-size: 1rem; margin-right: 5px"
+        ></i>
+        Preferencias
+      </div>
 
-        <div class="title-tag">
-          <i
-            class="bi bi-heart"
-            style="color: black; font-size: 1rem; margin-right: 5px"
-          ></i>
-          Preferencias
-        </div>
+      <!-- Loading spinner -->
+      <div *ngIf="isLoadingPreferences" class="loading-section">
+        <i class="bi bi-arrow-clockwise spinner"></i>
+        <span>Cargando preferencias...</span>
+      </div>
+
+      <!-- Preferences if not loading -->
+      <div *ngIf="!isLoadingPreferences">
         <p
           *ngIf="
             preferences.length === 0 ||
@@ -85,31 +123,53 @@
             {{ preference }}
           </p>
         </ng-container>
-
-        <button
-          class="see-more-button"
-          *ngIf="profileNeedsSetup && !isActuallyAnonymous"
-          (click)="showWizard()"
-        >
-          Configurar Preferencias
-        </button>
-        <button
-          class="see-more-button"
-          *ngIf="!profileNeedsSetup && !isActuallyAnonymous"
-          (click)="showWizard()"
-        >
-          Reconfigurar Preferencias
-        </button>
       </div>
 
-      <div class="row-child">
-        <div class="title-tag">
-          <i
-            class="bi bi-bookmarks"
-            style="color: black; font-size: 1.2rem; margin-right: 5px"
-          ></i>
-          Historial / Elementos guardados
-        </div>
+      <button
+        class="see-more-button"
+        *ngIf="profileNeedsSetup && !isActuallyAnonymous"
+        (click)="showWizard()"
+        [disabled]="isNavigating"
+      >
+        <i
+          *ngIf="isNavigating"
+          class="bi bi-arrow-clockwise spinner"
+          style="margin-right: 5px"
+        ></i>
+        Configurar Preferencias
+      </button>
+      <button
+        class="see-more-button"
+        *ngIf="!profileNeedsSetup && !isActuallyAnonymous"
+        (click)="showWizard()"
+        [disabled]="isNavigating"
+      >
+        <i
+          *ngIf="isNavigating"
+          class="bi bi-arrow-clockwise spinner"
+          style="margin-right: 5px"
+        ></i>
+        Reconfigurar Preferencias
+      </button>
+    </div>
+
+    <div class="row-child">
+      <div class="title-tag">
+        <i
+          class="bi bi-bookmarks"
+          style="color: black; font-size: 1.2rem; margin-right: 5px"
+        ></i>
+        Historial / Elementos guardados
+      </div>
+
+      <!-- Document loading spinner -->
+      <div *ngIf="isLoadingDocuments" class="loading-section">
+        <i class="bi bi-arrow-clockwise spinner"></i>
+        <span>Cargando documentos...</span>
+      </div>
+
+      <!-- Loading docs if not loading -->
+      <div *ngIf="!isLoadingDocuments">
         <ng-container
           *ngIf="
             documents.length > 0 &&
@@ -136,7 +196,7 @@
     </div>
   </div>
 
-  <div *ngIf="isActuallyAnonymous" class="column">
+  <div *ngIf="isActuallyAnonymous" class="column-anonymous">
     <h1>Usuario Invitado</h1>
     <p>
       Inicia sesión para acceder a tu perfil completo y guardar tus
