@@ -33,8 +33,9 @@ export class RecommendationService {
     );
   }
   getDetailedDocuments(): void {
-    this.http.get<Document[]>(`${this.BASE}/serve/`).subscribe((documents) => {
-      const documentIds = documents.map((doc) => doc.id);
+    this.http.get<{ documents: Document[] }>(`${this.BASE}/serve/`).subscribe((response) => {
+      console.log('documents', response.documents);
+      const documentIds = response.documents.map((doc) => doc.id);
       this.documentService.getDocumentsByIds(documentIds).subscribe((docs) => {
         this.documents$$.next(docs);
       });
