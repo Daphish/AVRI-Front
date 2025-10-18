@@ -27,6 +27,12 @@ export class LoginModalComponent {
   register: boolean = false;
   registering: boolean = false;
 
+  /* ---------- email validation ---------- */
+  emailTouched: boolean = false;
+  
+  // Email validation regex
+  private readonly EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
   /* ---------- toast notifications ---------- */
   showToast = false;
   toastMessage = '';
@@ -50,6 +56,40 @@ export class LoginModalComponent {
 
   closeModal() {
     this.closeModalEvent.emit();
+  }
+
+  /* ---------- email validation methods ---------- */
+  isEmailValid(): boolean {
+    return this.EMAIL_REGEX.test(this.user.trim());
+  }
+
+  showEmailError(): boolean {
+    return this.emailTouched && this.user.length > 0 && !this.isEmailValid();
+  }
+
+  onEmailBlur(): void {
+    this.emailTouched = true;
+  }
+
+  onEmailInput(): void {
+    if (!this.emailTouched && this.user.length > 0) {
+      this.emailTouched = true;
+    }
+  }
+
+  canSubmitLogin(): boolean {
+    return this.user.trim() !== '' && 
+           this.password.trim() !== '' && 
+           this.isEmailValid();
+  }
+
+  canSubmitRegister(): boolean {
+    return this.name.trim() !== '' &&
+           this.firstName.trim() !== '' &&
+           this.lastName.trim() !== '' &&
+           this.user.trim() !== '' && 
+           this.password.trim() !== '' && 
+           this.isEmailValid();
   }
 
   startSession() {
@@ -102,6 +142,7 @@ export class LoginModalComponent {
     this.lastName = '';
     this.is_author = false;
     this.password = '';
+    this.emailTouched = false; // Reset email validation state
   }
 
   registerUser() {
