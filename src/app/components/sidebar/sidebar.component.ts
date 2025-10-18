@@ -13,6 +13,7 @@ import { Observable, Subscription, map } from 'rxjs';
 import { LoginModalComponent } from '../login-modal/login-modal.component';
 import { AuthService } from '../../services/auth.service';
 import { ChatService } from '../../services/chat.service';
+import { ModalService } from '../../services/modal.service';
 import { Chat } from '../../interfaces/chat.interface';
 import { User } from '../../interfaces/user.interface';
 
@@ -33,6 +34,7 @@ import { User } from '../../interfaces/user.interface';
 export class SidebarComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private chatService = inject(ChatService);
+  private modalService = inject(ModalService);
   private router = inject(Router);
   private subs = new Subscription();
   activeSessionId: string | null = null;
@@ -100,6 +102,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
             this.chatService.loadSessions();
             this.loadingSessions = false; 
             this.isModalOpen = false;
+            this.modalService.closeModal();
           } catch (error) {
             this.loadingSessions = false; 
             console.error('Error al cargar sesiones:', error);
@@ -109,6 +112,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
         if (!loggedIn) {
           this.chatService.clearSessions();
           this.isModalOpen = true;
+          this.modalService.openModal();
         }
       })
     );
@@ -165,10 +169,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   openModal() {
     this.isModalOpen = true;
+    this.modalService.openModal();
   }
 
   closeModal() {
     this.isModalOpen = false;
+    this.modalService.closeModal();
   }
 
   viewProfile() {
