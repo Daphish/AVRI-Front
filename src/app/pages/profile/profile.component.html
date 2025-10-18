@@ -23,7 +23,7 @@
       </span>
     </div>
     <button
-      *ngIf="isActuallyAnonymous; else logoutButton"
+      *ngIf="isActuallyAnonymous"
       class="logout-button"
       (click)="logout()"
       [disabled]="isLoggingOut"
@@ -40,25 +40,6 @@
       ></i>
       {{ isLoggingOut ? "Iniciando sesión..." : "Iniciar sesión" }}
     </button>
-    <ng-template #logoutButton>
-      <button
-        class="logout-button"
-        (click)="logout()"
-        [disabled]="isLoggingOut"
-      >
-        <i
-          *ngIf="!isLoggingOut"
-          class="bi bi-box-arrow-right"
-          style="margin-right: 5px"
-        ></i>
-        <i
-          *ngIf="isLoggingOut"
-          class="bi bi-arrow-clockwise spinner"
-          style="margin-right: 5px"
-        ></i>
-        {{ isLoggingOut ? "Cerrando sesión..." : "Cerrar sesión" }}
-      </button>
-    </ng-template>
   </div>
 
   <div *ngIf="!isActuallyAnonymous && userDisplay" class="column">
