@@ -483,4 +483,167 @@ describe('LoginModalComponent', () => {
     endTimers();
   }));
 
+  describe('CAPTCHA Functionality', () => {
+    beforeEach(() => {
+      component.register = true;
+      component.generateMathQuestion();
+    });
+
+    it('should generate math questions with numbers 1-10', () => {
+      // Test multiple generations to ensure randomness
+      const questions = [];
+      for (let i = 0; i < 10; i++) {
+        component.generateMathQuestion();
+        questions.push(component.mathQuestion);
+      }
+      
+      // All questions should follow the pattern "X + Y = ?"
+      questions.forEach(question => {
+        expect(question).toMatch(/^\d+ \+ \d+ = \?$/);
+        const numbers = question.match(/\d+/g);
+        expect(numbers).toHaveSize(2);
+        if (numbers) {
+          expect(parseInt(numbers[0])).toBeGreaterThanOrEqual(1);
+          expect(parseInt(numbers[0])).toBeLessThanOrEqual(10);
+          expect(parseInt(numbers[1])).toBeGreaterThanOrEqual(1);
+          expect(parseInt(numbers[1])).toBeLessThanOrEqual(10);
+        }
+      });
+    });
+
+    it('should calculate correct answer for math question', () => {
+      component.generateMathQuestion();
+      const question = component.mathQuestion;
+      const numbers = question.match(/\d+/g);
+      if (numbers && numbers.length >= 2) {
+        const expectedAnswer = parseInt(numbers[0]) + parseInt(numbers[1]);
+        expect(component.mathAnswer).toBe(expectedAnswer);
+      }
+    });
+
+    it('should validate correct answers', () => {
+      component.userAnswer = component.mathAnswer;
+      component.validateCaptcha();
+      
+      expect(component.captchaSolved).toBeTrue();
+    });
+
+    it('should reject incorrect answers', () => {
+      component.userAnswer = component.mathAnswer + 1; // Wrong answer
+      component.validateCaptcha();
+      
+      expect(component.captchaSolved).toBeFalse();
+    });
+
+    it('should show error message for incorrect answers', () => {
+      spyOn(component as any, 'showToastMessage');
+      component.userAnswer = component.mathAnswer + 1;
+      component.validateCaptcha();
+      
+      expect((component as any).showToastMessage).toHaveBeenCalledWith(
+        'Respuesta incorrecta. Inténtalo de nuevo.',
+        'error'
+      );
+    });
+
+    it('should not show error for correct answers', () => {
+      spyOn(component as any, 'showToastMessage');
+      component.userAnswer = component.mathAnswer;
+      component.validateCaptcha();
+      
+      expect((component as any).showToastMessage).not.toHaveBeenCalled();
+    });
+
+    it('should block registration until CAPTCHA is solved', () => {
+      component.name = 'John';
+      component.firstName = 'Doe';
+      component.lastName = 'Smith';
+      component.user = 'valid@email.com';
+      component.password = 'password123';
+      component.captchaSolved = false;
+      
+      expect(component.canSubmitRegister()).toBeFalse();
+      
+      component.captchaSolved = true;
+      expect(component.canSubmitRegister()).toBeTrue();
+    });
+
+    it('should generate new question on refresh', () => {
+      const originalQuestion = component.mathQuestion;
+      const originalAnswer = component.mathAnswer;
+      
+      component.refreshCaptcha();
+      
+      expect(component.mathQuestion).not.toBe(originalQuestion);
+      expect(component.mathAnswer).not.toBe(originalAnswer);
+      expect(component.userAnswer).toBe(0);
+      expect(component.captchaSolved).toBeFalse();
+    });
+
+    it('should reset CAPTCHA when switching to login mode', () => {
+      component.register = true;
+      component.generateMathQuestion();
+      component.captchaSolved = true;
+      
+      component.toggleRegisterModal(); // Switch to login
+      
+      expect(component.mathQuestion).toBe('');
+      expect(component.mathAnswer).toBe(0);
+      expect(component.userAnswer).toBe(0);
+      expect(component.captchaSolved).toBeFalse();
+    });
+
+    it('should generate CAPTCHA when switching to register mode', () => {
+      component.register = false;
+      component.resetCaptcha();
+      
+      component.toggleRegisterModal(); // Switch to register
+      
+      expect(component.mathQuestion).not.toBe('');
+      expect(component.mathAnswer).toBeGreaterThan(0);
+      expect(component.userAnswer).toBe(0);
+      expect(component.captchaSolved).toBeFalse();
+    });
+
+    it('should handle multiple CAPTCHA attempts', () => {
+      // First attempt - wrong answer
+      component.userAnswer = component.mathAnswer + 1;
+      component.validateCaptcha();
+      expect(component.captchaSolved).toBeFalse();
+      
+      // Second attempt - correct answer
+      component.userAnswer = component.mathAnswer;
+      component.validateCaptcha();
+      expect(component.captchaSolved).toBeTrue();
+    });
+
+    it('should maintain CAPTCHA state during form validation', () => {
+      component.name = 'John';
+      component.firstName = 'Doe';
+      component.lastName = 'Smith';
+      component.user = 'valid@email.com';
+      component.password = 'password123';
+      
+      // Form valid but CAPTCHA not solved
+      expect(component.canSubmitRegister()).toBeFalse();
+      
+      // Solve CAPTCHA
+      component.userAnswer = component.mathAnswer;
+      component.validateCaptcha();
+      expect(component.canSubmitRegister()).toBeTrue();
+    });
+
+    it('should handle CAPTCHA refresh after solving', () => {
+      // Solve CAPTCHA first
+      component.userAnswer = component.mathAnswer;
+      component.validateCaptcha();
+      expect(component.captchaSolved).toBeTrue();
+      
+      // Refresh should reset everything
+      component.refreshCaptcha();
+      expect(component.captchaSolved).toBeFalse();
+      expect(component.userAnswer).toBe(0);
+    });
+  });
+
 });

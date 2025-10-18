@@ -2,7 +2,9 @@ import { ComponentFixture, TestBed, fakeAsync, tick, flush} from '@angular/core/
 import { RecommendationsComponent } from './recommendations.component';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideRouter, Router } from '@angular/router';
 import { RecommendationService } from '../../services/recommendation.service';
+import { DocumentService } from '../../services/document.service';
 import { BehaviorSubject, throwError } from 'rxjs';
 import { DocumentDetail } from '../../services/document.service';
 
@@ -32,49 +34,28 @@ class EnhancedRecommendationServiceStub {
   emitError(error: string) {
     this.documentsSubject.error(new Error(error));
   }
-  
-  private getMockDocuments(): DocumentDetail[] {
-    return [
-      {
-        id: 'mock-1',
-        title: 'AI in Healthcare',
-        author: 'Dr. Smith',
-        publication_date: '2023-01-01',
-        knowledge_area: 'Computer Science',
-        license: 'MIT',
-        repository_uri: 'https://mock.com/1',
-        repository_id: 'repo-1',
-        status: 'L',
-        created_at: '2023-01-01',
-        updated_at: '2023-01-01'
-      },
-      {
-        id: 'mock-2',
-        title: 'Machine Learning Applications',
-        author: 'Dr. Johnson',
-        publication_date: '2023-01-02',
-        knowledge_area: 'Computer Science',
-        license: 'CC BY',
-        repository_uri: 'https://mock.com/2',
-        repository_id: 'repo-2',
-        status: 'L',
-        created_at: '2023-01-02',
-        updated_at: '2023-01-02'
-      }
-    ];
-  }
+}
+
+class EnhancedDocumentServiceStub {
+  setCurrentDocument(document: DocumentDetail) {}
 }
 
 describe('RecommendationsComponent', () => {
   let component: RecommendationsComponent;
   let fixture: ComponentFixture<RecommendationsComponent>;
   let recommendationService: EnhancedRecommendationServiceStub;
+  let documentService: EnhancedDocumentServiceStub;
+  let router: Router;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RecommendationsComponent],
       providers: [
         { provide: RecommendationService, useClass: EnhancedRecommendationServiceStub},
+        { provide: DocumentService, useClass: EnhancedDocumentServiceStub },
+        provideRouter([
+          { path: 'document', component: RecommendationsComponent }
+        ]),
         provideHttpClient(withFetch()), 
         provideHttpClientTesting()
       ],
@@ -83,6 +64,8 @@ describe('RecommendationsComponent', () => {
     fixture = TestBed.createComponent(RecommendationsComponent);
     component = fixture.componentInstance;
     recommendationService = TestBed.inject(RecommendationService) as any;
+    documentService = TestBed.inject(DocumentService) as any;
+    router = TestBed.inject(Router);
     
     // DON'T call detectChanges here - let each test control initialization
   });
@@ -449,5 +432,84 @@ describe('RecommendationsComponent', () => {
       
       flush();
     }));
+  });
+
+  describe('Document Navigation', () => {
+    let mockDocument: DocumentDetail;
+
+    beforeEach(() => {
+      mockDocument = {
+        id: 'doc-123',
+        title: 'Test Document',
+        author: 'Test Author',
+        publication_date: '2023-01-01',
+        knowledge_area: 'Computer Science',
+        license: 'MIT',
+        repository_uri: 'https://test.com/doc',
+        repository_id: 'repo-123',
+        status: 'L',
+        created_at: '2023-01-01',
+        updated_at: '2023-01-01'
+      };
+    });
+
+    it('should navigate to document view', () => {
+      spyOn(documentService, 'setCurrentDocument');
+      spyOn(router, 'navigate');
+      
+      component.openDocument(mockDocument);
+      
+      expect(documentService.setCurrentDocument).toHaveBeenCalledWith(mockDocument);
+      expect(router.navigate).toHaveBeenCalledWith(['/document']);
+    });
+
+    it('should handle navigation errors gracefully', () => {
+      spyOn(documentService, 'setCurrentDocument').and.throwError('Navigation error');
+      spyOn(component as any, 'showToastMessage');
+      
+      component.openDocument(mockDocument);
+      
+      expect((component as any).showToastMessage).toHaveBeenCalledWith(
+        'No se pudo abrir el documento. Inténtalo de nuevo.'
+      );
+    });
+
+    it('should show toast message on navigation error', () => {
+      spyOn(documentService, 'setCurrentDocument').and.throwError('Test error');
+      spyOn(component as any, 'showToastMessage');
+      
+      component.openDocument(mockDocument);
+      
+      expect((component as any).showToastMessage).toHaveBeenCalledWith(
+        'No se pudo abrir el documento. Inténtalo de nuevo.'
+      );
+    });
+
+    it('should handle service errors gracefully', () => {
+      spyOn(documentService, 'setCurrentDocument').and.throwError('Service error');
+      spyOn(console, 'error');
+      
+      component.openDocument(mockDocument);
+      
+      expect(console.error).toHaveBeenCalledWith('Error abriendo documento:', jasmine.any(Error));
+    });
+
+    it('should work with different document types', () => {
+      const documents = [
+        { ...mockDocument, status: 'L' as const },
+        { ...mockDocument, status: 'R' as const },
+        { ...mockDocument, status: 'E' as const }
+      ];
+      
+      spyOn(documentService, 'setCurrentDocument');
+      spyOn(router, 'navigate');
+      
+      documents.forEach(doc => {
+        component.openDocument(doc);
+        expect(documentService.setCurrentDocument).toHaveBeenCalledWith(doc);
+      });
+      
+      expect(router.navigate).toHaveBeenCalledTimes(3);
+    });
   });
 });

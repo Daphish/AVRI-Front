@@ -4,7 +4,9 @@ import { provideHttpClient, withFetch } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { EventoEncuestaService } from '../../services/evento-encuesta.service';
+import { SurveyEventService } from '../../services/evento-encuesta.service';
+import { ChatService } from '../../services/chat.service';
+import { ModalService } from '../../services/modal.service';
 import { BehaviorSubject } from 'rxjs';
 
 // Enhanced service stubs for behavior testing
@@ -25,15 +27,43 @@ class EnhancedAuthServiceStub {
   }
 }
 
-class EnhancedEventoEncuestaServiceStub {
+class EnhancedSurveyEventServiceStub {
   lanzarEncuesta() {}
+}
+
+class EnhancedChatServiceStub {
+  clearSessions() {}
+}
+
+class EnhancedModalServiceStub {
+  private isModalOpenSubject = new BehaviorSubject<boolean>(false);
+  isModalOpen$ = this.isModalOpenSubject.asObservable();
+  
+  openModal() {
+    this.isModalOpenSubject.next(true);
+  }
+  
+  closeModal() {
+    this.isModalOpenSubject.next(false);
+  }
+  
+  getModalState() {
+    return this.isModalOpenSubject.value;
+  }
+  
+  // Test helper methods
+  setModalState(isOpen: boolean) {
+    this.isModalOpenSubject.next(isOpen);
+  }
 }
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent;
   let fixture: ComponentFixture<HeaderComponent>;
   let authService: EnhancedAuthServiceStub;
-  let encuestaService: EnhancedEventoEncuestaServiceStub;
+  let encuestaService: EnhancedSurveyEventServiceStub;
+  let chatService: EnhancedChatServiceStub;
+  let modalService: EnhancedModalServiceStub;
   let router: Router;
 
   beforeEach(async () => {
@@ -41,9 +71,12 @@ describe('HeaderComponent', () => {
       imports: [HeaderComponent],
       providers: [
         { provide: AuthService, useClass: EnhancedAuthServiceStub },
-        { provide: EventoEncuestaService, useClass: EnhancedEventoEncuestaServiceStub },
+        { provide: SurveyEventService, useClass: EnhancedSurveyEventServiceStub },
+        { provide: ChatService, useClass: EnhancedChatServiceStub },
+        { provide: ModalService, useClass: EnhancedModalServiceStub },
         provideRouter([
-          { path: 'fyp', component: HeaderComponent }
+          { path: 'fyp', component: HeaderComponent },
+          { path: 'home', component: HeaderComponent }
         ]),
         provideHttpClient(withFetch()), 
         provideHttpClientTesting()
@@ -53,7 +86,9 @@ describe('HeaderComponent', () => {
     fixture = TestBed.createComponent(HeaderComponent);
     component = fixture.componentInstance;
     authService = TestBed.inject(AuthService) as any;
-    encuestaService = TestBed.inject(EventoEncuestaService) as any;
+    encuestaService = TestBed.inject(SurveyEventService) as any;
+    chatService = TestBed.inject(ChatService) as any;
+    modalService = TestBed.inject(ModalService) as any;
     router = TestBed.inject(Router);
     
     fixture.detectChanges();
@@ -196,7 +231,7 @@ describe('HeaderComponent', () => {
     it('should trigger survey when abrirEncuesta is called', () => {
       spyOn(encuestaService, 'lanzarEncuesta');
       
-      component.abrirEncuesta();
+      component.openSurvey();
       
       expect(encuestaService.lanzarEncuesta).toHaveBeenCalled();
     });
@@ -301,6 +336,85 @@ describe('HeaderComponent', () => {
       authService.setCurrentUser({ anonymous_id: 'temp-user' });
       expect(component.is_author).toBeFalse();
       expect(component.is_staff).toBeFalse();
+    });
+  });
+
+  describe('Close Session Functionality', () => {
+    it('should clear sessions and logout user', async () => {
+      spyOn(chatService, 'clearSessions');
+      spyOn(authService, 'logout');
+      spyOn(router, 'navigate');
+      
+      await component.closeSession();
+      
+      expect(chatService.clearSessions).toHaveBeenCalled();
+      expect(authService.logout).toHaveBeenCalled();
+      expect(router.navigate).toHaveBeenCalledWith(['/home']);
+    });
+
+    it('should handle closeSession errors gracefully', async () => {
+      spyOn(chatService, 'clearSessions').and.throwError('Test error');
+      spyOn(console, 'error');
+      spyOn(router, 'navigate');
+      
+      await component.closeSession();
+      
+      expect(console.error).toHaveBeenCalledWith('Error closing session:', jasmine.any(Error));
+      expect(router.navigate).toHaveBeenCalledWith(['/home']);
+    });
+
+    it('should handle navigation errors gracefully', async () => {
+      spyOn(chatService, 'clearSessions');
+      spyOn(authService, 'logout');
+      spyOn(router, 'navigate').and.throwError('Navigation error');
+      spyOn(console, 'error');
+      
+      await component.closeSession();
+      
+      expect(chatService.clearSessions).toHaveBeenCalled();
+      expect(authService.logout).toHaveBeenCalled();
+      expect(console.error).toHaveBeenCalledWith('Error closing session:', jasmine.any(Error));
+    });
+  });
+
+  describe('Modal Integration', () => {
+    it('should initialize with modal state observable', () => {
+      expect(component.isModalOpen$).toBeDefined();
+    });
+
+    it('should reflect modal state changes', (done) => {
+      component.isModalOpen$.subscribe(isOpen => {
+        expect(isOpen).toBeFalse();
+        done();
+      });
+    });
+
+    it('should update when modal opens', (done) => {
+      let callCount = 0;
+      component.isModalOpen$.subscribe(isOpen => {
+        callCount++;
+        if (callCount === 2) { // Second emission (after modal opens)
+          expect(isOpen).toBeTrue();
+          done();
+        }
+      });
+      
+      modalService.openModal();
+    });
+
+    it('should update when modal closes', (done) => {
+      modalService.openModal(); // First open it
+      
+      let callCount = 0;
+      component.isModalOpen$.subscribe(isOpen => {
+        callCount++;
+        if (callCount === 2) { // Second emission (after modal closes)
+          expect(isOpen).toBeFalse();
+          done();
+        }
+      });
+      
+      modalService.closeModal();
     });
   });
 });
