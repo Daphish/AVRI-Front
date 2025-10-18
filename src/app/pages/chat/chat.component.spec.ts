@@ -112,9 +112,9 @@ describe('ChatComponent', () => {
     });
 
     it('should navigate to next step when canContinue is true', () => {
-      // Select 5 temas (minimum required)
+      // Select 5 topics (minimum required)
       for (let i = 0; i < 5; i++) {
-        component.temas[i].selected = true;
+        component.topics[i].selected = true;
       }
       
       component.next();
@@ -122,9 +122,9 @@ describe('ChatComponent', () => {
     });
 
     it('should not navigate to next step when canContinue is false', () => {
-      // Select only 2 temas (less than minimum)
-      component.temas[0].selected = true;
-      component.temas[1].selected = true;
+      // Select only 2 topics (less than minimum)
+      component.topics[0].selected = true;
+      component.topics[1].selected = true;
       
       component.next();
       expect(component.step).toBe(1); // Should stay on step 1
@@ -144,19 +144,19 @@ describe('ChatComponent', () => {
 
     it('should return correct currentList based on step', () => {
       component.step = 1;
-      expect(component.currentList()).toBe(component.temas);
+      expect(component.currentList()).toBe(component.topics);
       
       component.step = 2;
       expect(component.currentList()).toBe(component.keywords);
       
       component.step = 3;
-      expect(component.currentList()).toBe(component.documentos);
+      expect(component.currentList()).toBe(component.documents);
     });
   });
 
   describe('Preference Selection', () => {
     it('should toggle selection state', () => {
-      const item = component.temas[0];
+      const item = component.topics[0];
       const initialState = item.selected;
       
       component.toggle(item);
@@ -170,12 +170,12 @@ describe('ChatComponent', () => {
       component.step = 1;
       // Select 4 items (less than minimum of 5)
       for (let i = 0; i < 4; i++) {
-        component.temas[i].selected = true;
+        component.topics[i].selected = true;
       }
       expect(component.canContinue()).toBeFalse();
       
       // Select 5th item
-      component.temas[4].selected = true;
+      component.topics[4].selected = true;
       expect(component.canContinue()).toBeTrue();
     });
 
@@ -185,7 +185,7 @@ describe('ChatComponent', () => {
       expect(component.canContinue()).toBeFalse();
       
       // Select 1 document type (minimum for step 3)
-      component.documentos[0].selected = true;
+      component.documents[0].selected = true;
       expect(component.canContinue()).toBeTrue();
     });
   });
@@ -196,10 +196,10 @@ describe('ChatComponent', () => {
       component.step = 3;
       // Set up valid selections
       for (let i = 0; i < 5; i++) {
-        component.temas[i].selected = true;
+        component.topics[i].selected = true;
         component.keywords[i].selected = true;
       }
-      component.documentos[0].selected = true;
+      component.documents[0].selected = true;
     });
 
     it('should save preferences successfully', fakeAsync(() => {
@@ -402,6 +402,115 @@ describe('ChatComponent', () => {
 
     it('should track by index', () => {
       expect(component.trackByIndex(5)).toBe(5);
+    });
+  });
+
+  describe('Auto-Resize Functionality', () => {
+    it('should handle auto-resize method exists', () => {
+      expect(typeof component.autoResize).toBe('function');
+    });
+
+    it('should handle missing ViewChild elements gracefully', () => {
+      component.chatInput = undefined as any;
+      component.msgContainer = undefined as any;
+      
+      expect(() => component.autoResize()).not.toThrow();
+    });
+  });
+
+  describe('Enter Key Handling', () => {
+    it('should send message on Enter key (without Shift)', () => {
+      const mockEvent = {
+        key: 'Enter',
+        shiftKey: false,
+        preventDefault: jasmine.createSpy()
+      } as any;
+      
+      spyOn(component, 'send');
+      
+      component.onEnterKey(mockEvent);
+      
+      expect(mockEvent.preventDefault).toHaveBeenCalled();
+      expect(component.send).toHaveBeenCalled();
+    });
+
+    it('should not send message on Shift+Enter', () => {
+      const mockEvent = {
+        key: 'Enter',
+        shiftKey: true,
+        preventDefault: jasmine.createSpy()
+      } as any;
+      
+      spyOn(component, 'send');
+      
+      component.onEnterKey(mockEvent);
+      
+      expect(mockEvent.preventDefault).not.toHaveBeenCalled();
+      expect(component.send).not.toHaveBeenCalled();
+    });
+
+    it('should not send message on other keys', () => {
+      const mockEvent = {
+        key: 'a',
+        shiftKey: false,
+        preventDefault: jasmine.createSpy()
+      } as any;
+      
+      spyOn(component, 'send');
+      
+      component.onEnterKey(mockEvent);
+      
+      expect(mockEvent.preventDefault).not.toHaveBeenCalled();
+      expect(component.send).not.toHaveBeenCalled();
+    });
+
+    it('should handle missing event gracefully', () => {
+      expect(() => component.onEnterKey(undefined as any)).not.toThrow();
+    });
+  });
+
+  describe('Document Navigation', () => {
+    let mockDocument: Documents;
+
+    beforeEach(() => {
+      mockDocument = {
+        id: 'doc-123',
+        title: 'Test Document',
+        author: 'Test Author',
+        status: 'L'
+      } as Documents;
+    });
+
+    it('should navigate to document view', () => {
+      spyOn(documentService, 'setCurrentDocument');
+      spyOn(router, 'navigate');
+      
+      component.openDocument(mockDocument);
+      
+      expect(documentService.setCurrentDocument).toHaveBeenCalledWith(mockDocument);
+      expect(router.navigate).toHaveBeenCalledWith(['/document']);
+    });
+
+    it('should handle navigation errors gracefully', () => {
+      spyOn(documentService, 'setCurrentDocument').and.throwError('Navigation error');
+      spyOn(component as any, 'showToastMessage');
+      
+      component.openDocument(mockDocument);
+      
+      expect((component as any).showToastMessage).toHaveBeenCalledWith(
+        'No se pudo abrir el documento. Inténtalo de nuevo.'
+      );
+    });
+
+    it('should show toast message on navigation error', () => {
+      spyOn(documentService, 'setCurrentDocument').and.throwError('Test error');
+      spyOn(component as any, 'showToastMessage');
+      
+      component.openDocument(mockDocument);
+      
+      expect((component as any).showToastMessage).toHaveBeenCalledWith(
+        'No se pudo abrir el documento. Inténtalo de nuevo.'
+      );
     });
   });
 });
