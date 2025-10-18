@@ -1,25 +1,33 @@
 import { Component } from '@angular/core';
-import { NgIf } from '@angular/common';
+import { NgIf, AsyncPipe } from '@angular/common';
 import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { SurveyEventService } from '../../services/evento-encuesta.service';
+import { ChatService } from '../../services/chat.service';
+import { ModalService } from '../../services/modal.service';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [NgIf],
+  imports: [NgIf, AsyncPipe],
   templateUrl: './header.component.html',
   styleUrl: './header.component.css',
 })
 export class HeaderComponent {
   is_author = false;
   is_staff = false;
+  isModalOpen$: Observable<boolean>;
 
   constructor(
     private auth: AuthService,
     private router: Router,
-    private survey: SurveyEventService
-  ) {}
+    private survey: SurveyEventService,
+    private chatService: ChatService,
+    private modalService: ModalService
+  ) {
+    this.isModalOpen$ = this.modalService.isModalOpen$;
+  }
 
   ngOnInit() {
     this.auth.currentUser$.subscribe((user: any) => {
@@ -45,5 +53,15 @@ export class HeaderComponent {
 
   openSurvey() {
     this.survey.launchSurvey();
+  }
+
+  async closeSession(): Promise<void> {
+    try {
+      this.chatService.clearSessions();
+      this.auth.logout();
+      await this.router.navigate(['/home']);
+    } catch (error) {
+      console.error('Error closing session:', error);
+    }
   }
 }

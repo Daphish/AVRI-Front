@@ -67,3 +67,20 @@
 .navbar-items li a:active {
   background-color: rgb(54, 105, 156);
 }
+
+/* Close session button specific styles */
+.close-session-btn {
+  color: #dc3545 !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border-left: none !important;
+}
+
+.close-session-btn:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  color: white !important;
+  background-color: #dc3545 !important;
+}
+
+.close-session-btn:active {
+  background-color: #c82333 !important;
+}
