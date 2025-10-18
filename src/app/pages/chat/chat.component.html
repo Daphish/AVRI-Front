@@ -141,13 +141,16 @@
 
   <!-- ======================== input ============================== -->
   <div class="chat-input" *ngIf="!showWizard">
-    <input
+    <textarea
+      #chatInput
       class="chat-input-box"
       placeholder="Escribe algo al AVRI"
       [(ngModel)]="newText"
-      (keyup.enter)="send()"
+      (keydown)="onEnterKey($event)"
+      (input)="autoResize()"
       [disabled]="isSending"
-    />
+      rows="1"
+    ></textarea>
     <div class="chat-send-button" (click)="send()" [class.sending]="isSending">
       <i *ngIf="!isSending" class="bi bi-arrow-up"></i>
       <span *ngIf="isSending" class="spinner-small"></span>

@@ -157,10 +157,12 @@
   border: 1px solid #0056a3;
   border-radius: 20px;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 10px;
   padding: 6px 10px;
   z-index: 10;
+  min-height: 50px;
+  transition: min-height 0.2s ease;
 }
 
 .chat-input-box {
@@ -168,11 +170,23 @@
   border: none;
   background: transparent;
   font-size: 1rem;
-  padding: 0 1rem;
+  padding: 0.75rem 1rem;
+  resize: none;
+  min-height: 40px;
+  max-height: 50vh;
+  overflow-y: hidden;
+  font-family: inherit;
+  line-height: 1.4;
+  transition: height 0.2s ease;
 }
 
 .chat-input-box:focus {
   outline: none;
+}
+
+.chat-input-box::placeholder {
+  color: #666;
+  opacity: 1;
 }
 
 .chat-send-button {
@@ -185,6 +199,8 @@
   justify-content: center;
   cursor: pointer;
   transition: background 0.25s;
+  flex-shrink: 0;
+  margin-bottom: 6px;
 }
 
 .chat-send-button:hover {

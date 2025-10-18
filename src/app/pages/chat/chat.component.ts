@@ -26,6 +26,7 @@ interface SelectItem {
 })
 export class ChatComponent implements OnInit {
   @ViewChild('msgContainer') msgContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild('chatInput') chatInput!: ElementRef<HTMLTextAreaElement>;
 
   /* ---------- toast notifications ---------- */
   showToast = false;
@@ -248,5 +249,42 @@ export class ChatComponent implements OnInit {
       const el = this.msgContainer.nativeElement;
       el.scrollTop = el.scrollHeight;
     } catch {}
+  }
+
+  /* ---------------- auto-resize textarea ---------------- */
+  autoResize(): void {
+    if (!this.chatInput) return;
+    
+    const textarea = this.chatInput.nativeElement;
+    const messagesContainer = this.msgContainer.nativeElement;
+    
+    // Reset height to auto to get the correct scrollHeight
+    textarea.style.height = 'auto';
+    
+    // Calculate the maximum height (half of messages container)
+    const maxHeight = messagesContainer.clientHeight * 0.5;
+    const minHeight = 40; // Minimum height for the textarea
+    const scrollHeight = textarea.scrollHeight;
+    
+    // Set the height based on content, but respect max and min constraints
+    const newHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
+    
+    textarea.style.height = `${newHeight}px`;
+    
+    // If content exceeds max height, enable scroll
+    if (scrollHeight > maxHeight) {
+      textarea.style.overflowY = 'auto';
+    } else {
+      textarea.style.overflowY = 'hidden';
+    }
+  }
+
+  onEnterKey(event: Event): void {
+    const keyboardEvent = event as KeyboardEvent;
+    if (keyboardEvent.key === 'Enter' && !keyboardEvent.shiftKey) {
+      event.preventDefault();
+      this.send();
+    }
+    // If Shift+Enter, allow new line (default behavior)
   }
 }
