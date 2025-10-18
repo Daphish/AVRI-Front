@@ -63,12 +63,27 @@
       Iniciar sesión
     </button>
 
-    <button *ngIf="logged" class="account-button" (click)="viewProfile()">
-      <div class="account-circle">
-        {{ currentUserInitial$ | async | uppercase }}
+    <div *ngIf="logged" class="account-dropdown-container">
+      <button class="account-button" (click)="toggleDropdown()">
+        <div class="account-circle">
+          {{ currentUserInitial$ | async | uppercase }}
+        </div>
+        {{ currentUserName$ | async }}
+        <i class="bi bi-chevron-down dropdown-arrow" [class.rotated]="isDropdownOpen"></i>
+      </button>
+      
+      <!-- Dropdown menu -->
+      <div class="dropdown-menu" *ngIf="isDropdownOpen">
+        <div class="dropdown-item" (click)="viewProfile()">
+          <i class="bi bi-person"></i>
+          <span>Perfil</span>
+        </div>
+        <div class="dropdown-item" (click)="closeSession()">
+          <i class="bi bi-box-arrow-right"></i>
+          <span>Cerrar sesión</span>
+        </div>
       </div>
-      {{ currentUserName$ | async }}
-    </button>
+    </div>
   </div>
 
   <div class="left-login" *ngIf="!(isLoggedIn$ | async)">

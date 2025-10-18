@@ -1,5 +1,5 @@
 // src/app/components/sidebar/sidebar.component.ts
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, HostListener } from '@angular/core';
 import {
   AsyncPipe,
   NgClass,
@@ -39,6 +39,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   private subs = new Subscription();
   activeSessionId: string | null = null;
   isModalOpen = false;
+  isDropdownOpen = false;
 
   /* ---------- loading states ---------- */
   deletingChatId: string | null = null; 
@@ -179,5 +180,36 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   viewProfile() {
     this.router.navigate(['/profile']);
+    this.closeDropdown();
+  }
+
+  /* ---------------- dropdown methods ---------------- */
+  toggleDropdown() {
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
+
+  closeDropdown() {
+    this.isDropdownOpen = false;
+  }
+
+  async closeSession(): Promise<void> {
+    try {
+      this.chatService.clearSessions();
+      this.authService.logout();
+      await this.router.navigate(['/home']);
+      this.closeDropdown();
+    } catch (error) {
+      console.error('Error closing session:', error);
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    const target = event.target as HTMLElement;
+    const dropdownContainer = target.closest('.account-dropdown-container');
+    
+    if (!dropdownContainer && this.isDropdownOpen) {
+      this.closeDropdown();
+    }
   }
 }
