@@ -122,14 +122,13 @@
                   red: ref.status === 'R',
                   yellow: ref.status === 'E'
                 }"
+                (click)="openDocument(ref)"
+                title="Click to view document details"
               >
                 <div class="doc-title">{{ ref.title }}</div>
                 <div class="doc-author">{{ ref.author }}</div>
                 <div class="doc-icons">
-                  <i
-                    class="bi bi-file-earmark-text"
-                    (click)="openDocument(ref)"
-                  ></i>
+                  <i class="bi bi-file-earmark-text"></i>
                   <i class="bi bi-quote"></i>
                 </div>
               </div>

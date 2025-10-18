@@ -38,6 +38,8 @@
           red: doc.status === 'R',
           yellow: doc.status === 'E'
         }"
+        (click)="openDocument(doc)"
+        title="Click to view document details"
       >
         <div class="doc-title">{{ doc.title }}</div>
         <div
