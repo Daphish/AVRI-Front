@@ -70,7 +70,8 @@ describe('LoginModalComponent', () => {
     it('should initialize with default values', () => {
       expect(component.user).toBe('');
       expect(component.password).toBe('');
-      expect(component.error).toBeFalse();
+      expect(component.showToast).toBeFalse();
+      expect(component.emailTouched).toBeFalse();
     });
   });
 
@@ -112,7 +113,7 @@ describe('LoginModalComponent', () => {
       
       expect(chatService.loadSessions).toHaveBeenCalled();
       expect(component.closeModal).toHaveBeenCalled();
-      expect(component.error).toBeFalse();
+      expect(component.toastType).toBe('success');
 
       endTimers();
     }));
@@ -127,22 +128,23 @@ describe('LoginModalComponent', () => {
       
       expect(chatService.loadSessions).not.toHaveBeenCalled();
       expect(component.closeModal).not.toHaveBeenCalled();
-      expect(component.error).toBeTrue();
+      expect(component.showToast).toBeTrue();
+      expect(component.toastType).toBe('error');
 
       endTimers();
     }));
 
-    it('should auto-hide error after 2 seconds on login failure', fakeAsync(() => {
+    it('should auto-hide toast after 4 seconds on login failure', fakeAsync(() => {
       authService.setLoginResult(false);
       
       component.startSession();
       tick(); // Wait for login promise to resolve
       
-      expect(component.error).toBeTrue();
+      expect(component.showToast).toBeTrue();
       
-      tick(2000); // Wait for error auto-hide timeout
+      tick(4000); // Wait for toast auto-hide timeout
       
-      expect(component.error).toBeFalse();
+      expect(component.showToast).toBeFalse();
 
       endTimers();
     }));
@@ -169,7 +171,7 @@ describe('LoginModalComponent', () => {
       tick();
       
       expect(component.closeModal).toHaveBeenCalled();
-      expect(component.error).toBeFalse();
+      expect(component.toastType).toBe('success');
 
       endTimers();
     }));
@@ -182,22 +184,23 @@ describe('LoginModalComponent', () => {
       tick();
       
       expect(component.closeModal).not.toHaveBeenCalled();
-      expect(component.error).toBeTrue();
+      expect(component.showToast).toBeTrue();
+      expect(component.toastType).toBe('error');
 
       endTimers();
     }));
 
-    it('should auto-hide error after 2 seconds on anonymous creation failure', fakeAsync(() => {
+    it('should auto-hide toast after 4 seconds on anonymous creation failure', fakeAsync(() => {
       authService.setLoginResult(false);
       
       component.continueAsGuest();
       tick(); // Wait for createAnonymous promise to resolve
       
-      expect(component.error).toBeTrue();
+      expect(component.showToast).toBeTrue();
       
-      tick(2000); // Wait for error auto-hide timeout
+      tick(4000); // Wait for toast auto-hide timeout
       
-      expect(component.error).toBeFalse();
+      expect(component.showToast).toBeFalse();
 
       endTimers();
     }));
@@ -214,47 +217,141 @@ describe('LoginModalComponent', () => {
       
       validEmails.forEach(email => {
         component.user = email;
-        // Component doesn't have built-in validation, but we test that it accepts the input
+        expect(component.isEmailValid()).toBeTrue();
         expect(component.user).toBe(email);
       });
+    });
+
+    it('should reject invalid email formats', () => {
+      const invalidEmails = [
+        'notanemail',
+        'missing@domain',
+        '@nodomain.com',
+        'no@domain',
+        'spaces in@email.com',
+        'double@@domain.com',
+        'nodomain@.com'
+      ];
+      
+      invalidEmails.forEach(email => {
+        component.user = email;
+        expect(component.isEmailValid()).toBeFalse();
+      });
+    });
+
+    it('should show email error when touched and invalid', () => {
+      component.user = 'invalidemail';
+      component.emailTouched = false;
+      expect(component.showEmailError()).toBeFalse();
+      
+      component.emailTouched = true;
+      expect(component.showEmailError()).toBeTrue();
+    });
+
+    it('should not show error for valid email', () => {
+      component.user = 'valid@email.com';
+      component.emailTouched = true;
+      expect(component.showEmailError()).toBeFalse();
+    });
+
+    it('should mark email as touched on blur', () => {
+      component.emailTouched = false;
+      component.onEmailBlur();
+      expect(component.emailTouched).toBeTrue();
+    });
+
+    it('should mark email as touched on input when user starts typing', () => {
+      component.emailTouched = false;
+      component.user = '';
+      component.onEmailInput();
+      expect(component.emailTouched).toBeFalse(); // Still false because no text
+      
+      component.user = 'a';
+      component.onEmailInput();
+      expect(component.emailTouched).toBeTrue(); // Now true because has text
+    });
+
+    it('should disable login button when email is invalid', () => {
+      component.user = 'invalid';
+      component.password = 'password123';
+      expect(component.canSubmitLogin()).toBeFalse();
+    });
+
+    it('should enable login button when all fields are valid', () => {
+      component.user = 'valid@email.com';
+      component.password = 'password123';
+      expect(component.canSubmitLogin()).toBeTrue();
+    });
+
+    it('should disable register button when email is invalid', () => {
+      component.name = 'John';
+      component.firstName = 'Doe';
+      component.lastName = 'Smith';
+      component.user = 'invalid';
+      component.password = 'password123';
+      expect(component.canSubmitRegister()).toBeFalse();
+    });
+
+    it('should disable register button when any required field is empty', () => {
+      component.name = '';
+      component.firstName = 'Doe';
+      component.lastName = 'Smith';
+      component.user = 'valid@email.com';
+      component.password = 'password123';
+      expect(component.canSubmitRegister()).toBeFalse();
+    });
+
+    it('should enable register button when all fields are valid', () => {
+      component.name = 'John';
+      component.firstName = 'Doe';
+      component.lastName = 'Smith';
+      component.user = 'valid@email.com';
+      component.password = 'password123';
+      expect(component.canSubmitRegister()).toBeTrue();
+    });
+
+    it('should reset email validation state when toggling register modal', () => {
+      component.emailTouched = true;
+      component.user = 'test@email.com';
+      component.toggleRegisterModal();
+      expect(component.emailTouched).toBeFalse();
+      expect(component.user).toBe('');
     });
 
     it('should handle empty credentials gracefully', fakeAsync(() => {
       component.user = '';
       component.password = '';
       
-      spyOn(authService, 'login').and.returnValue(Promise.resolve(false));
-      
-      component.startSession();
-      tick();
-      
-      expect(authService.login).toHaveBeenCalledWith('', '');
-      expect(component.error).toBeTrue();
+      // Should not be able to submit with empty credentials
+      expect(component.canSubmitLogin()).toBeFalse();
 
       endTimers();
     }));
+
+    it('should trim whitespace in email validation', () => {
+      component.user = '  valid@email.com  ';
+      expect(component.isEmailValid()).toBeTrue();
+    });
   });
 
-  describe('Error Display', () => {
-    it('should show error state correctly', () => {
-      component.error = true;
-      expect(component.error).toBeTrue();
+  describe('Toast Display', () => {
+    it('should show toast state correctly', () => {
+      component.showToast = true;
+      expect(component.showToast).toBeTrue();
       
-      component.error = false;
-      expect(component.error).toBeFalse();
+      component.showToast = false;
+      expect(component.showToast).toBeFalse();
     });
 
-    it('should reset error state before new login attempt', fakeAsync(() => {
-      // Set initial error state
-      component.error = true;
-      
-      // Attempt new login
+    it('should show success toast on successful login', fakeAsync(() => {
       authService.setLoginResult(true);
+      spyOn(component, 'closeModal');
+      
       component.startSession();
       tick();
       
-      // Error should be cleared on successful login
-      expect(component.error).toBeFalse();
+      expect(component.showToast).toBeTrue();
+      expect(component.toastType).toBe('success');
 
       endTimers();
     }));
@@ -269,7 +366,8 @@ describe('LoginModalComponent', () => {
       authService.setLoginResult(false);
       component.startSession();
       tick();
-      expect(component.error).toBeTrue();
+      expect(component.showToast).toBeTrue();
+      expect(component.toastType).toBe('error');
       
       // Second attempt succeeds immediately
       authService.setLoginResult(true);
@@ -278,6 +376,7 @@ describe('LoginModalComponent', () => {
       tick();
       
       expect(component.closeModal).toHaveBeenCalled();
+      expect(component.toastType).toBe('success');
 
       endTimers();
     }));
@@ -289,7 +388,8 @@ describe('LoginModalComponent', () => {
       authService.setLoginResult(false);
       component.startSession();
       tick();
-      expect(component.error).toBeTrue();
+      expect(component.showToast).toBeTrue();
+      expect(component.toastType).toBe('error');
       
       // Then try guest mode (succeeds)
       authService.setLoginResult(true);
@@ -315,69 +415,70 @@ describe('LoginModalComponent', () => {
       // Form values should be preserved even after error
       expect(component.user).toBe('test@example.com');
       expect(component.password).toBe('mypassword');
-      expect(component.error).toBeTrue();
+      expect(component.showToast).toBeTrue();
+      expect(component.toastType).toBe('error');
 
       endTimers();
     }));
 
-    it('should handle concurrent error timeouts correctly', fakeAsync(() => {
-      // Trigger first error
+    it('should handle concurrent toast timeouts correctly', fakeAsync(() => {
+      // Trigger first toast
       authService.setLoginResult(false);
       component.startSession();
       tick();
-      expect(component.error).toBeTrue();
+      expect(component.showToast).toBeTrue();
       
-      // Trigger second error before first timeout
-      tick(1000);
+      // Trigger second toast before first timeout
+      tick(2000);
       component.continueAsGuest();
       tick();
-      expect(component.error).toBeTrue();
+      expect(component.showToast).toBeTrue();
       
       // First timeout should complete
-      tick(1000);
-      expect(component.error).toBeTrue();
+      tick(2000);
+      expect(component.showToast).toBeTrue();
       
       // Second timeout should complete
-      tick(2000);
-      expect(component.error).toBeFalse();
+      tick(4000);
+      expect(component.showToast).toBeFalse();
 
       endTimers();
     }));
   });
 
-  it('coverage: multiple failures only clear error after the last timer expires', fakeAsync(() => {
+  it('coverage: multiple failures only clear toast after the last timer expires', fakeAsync(() => {
   (authService as any).setLoginResult(false);
 
     // First failed attempt
     component.startSession();
     tick();
-    expect(component.error).toBeTrue();
+    expect(component.showToast).toBeTrue();
 
-    // Second failed attempt before the first 2s timeout ends
-    tick(1000);
+    // Second failed attempt before the first 4s timeout ends
+    tick(2000);
     component.continueAsGuest();
     tick();
-    expect(component.error).toBeTrue();
+    expect(component.showToast).toBeTrue();
 
-    // First timeout finishes — error should still be true (second timer pending)
-    tick(1000);
-    expect(component.error).toBeTrue();
-
-    // Second timeout finishes — error should clear now
+    // First timeout finishes — toast should still be true (second timer pending)
     tick(2000);
-    expect(component.error).toBeFalse();
+    expect(component.showToast).toBeTrue();
+
+    // Second timeout finishes — toast should clear now
+    tick(4000);
+    expect(component.showToast).toBeFalse();
 
     endTimers();
   }));
 
-  it('coverage: closeModal does not change error flag', fakeAsync(() => {
+  it('coverage: closeModal does not change toast flag', fakeAsync(() => {
     (authService as any).setLoginResult(false);
     component.startSession();
     tick();
-    expect(component.error).toBeTrue();
+    expect(component.showToast).toBeTrue();
 
-    component.closeModal(); // emits only; should not touch error
-    expect(component.error).toBeTrue();
+    component.closeModal(); // emits only; should not touch toast
+    expect(component.showToast).toBeTrue();
 
     endTimers();
   }));

@@ -59,8 +59,15 @@
       id="email"
       placeholder="Ejemplo: usuario@email.com"
       [(ngModel)]="user"
+      (blur)="onEmailBlur()"
+      (input)="onEmailInput()"
       (keyup.enter)="register ? registerUser() : startSession()"
+      [class.input-error]="showEmailError()"
     />
+    <span *ngIf="showEmailError()" class="error-message">
+      <i class="bi bi-exclamation-circle"></i>
+      Por favor, ingresa un correo electrónico válido.
+    </span>
 
     <label for="password" style="width: 100%">Contraseña</label>
     <input
@@ -88,7 +95,7 @@
         *ngIf="!register"
         class="btn login"
         (click)="startSession()"
-        [disabled]="loggingIn"
+        [disabled]="loggingIn || !canSubmitLogin()"
       >
         <span *ngIf="!loggingIn">Iniciar Sesión</span>
         <span *ngIf="loggingIn" class="loading-content">
@@ -101,7 +108,7 @@
         *ngIf="register"
         class="btn login"
         (click)="registerUser()"
-        [disabled]="registering"
+        [disabled]="registering || !canSubmitRegister()"
       >
         <span *ngIf="!registering">Registrarse</span>
         <span *ngIf="registering" class="loading-content">
