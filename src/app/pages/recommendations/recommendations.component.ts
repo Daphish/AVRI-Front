@@ -1,8 +1,9 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { RepositoryDocument } from '../../interfaces/document.interface';
 import { RecommendationService } from '../../services/recommendation.service';
-import { DocumentDetail } from '../../services/document.service';
+import { DocumentService, DocumentDetail } from '../../services/document.service';
 
 @Component({
   selector: 'app-recommendations',
@@ -88,7 +89,11 @@ export class RecommendationsComponent implements OnInit {
 
   recommendedDocsBack: DocumentDetail[] = [];
 
-  constructor(private recommendationService: RecommendationService) {}
+  constructor(
+    private recommendationService: RecommendationService,
+    private documentService: DocumentService,
+    private router: Router
+  ) {}
 
   isLoadingRecommendations = false;
   hasError = false;
@@ -142,6 +147,18 @@ export class RecommendationsComponent implements OnInit {
 
   retryLoadRecommendations(): void {
     this.loadRecommendations();
+  }
+
+  openDocument(document: DocumentDetail): void {
+    try {
+      this.documentService.setCurrentDocument(document);
+      this.router.navigate(['/document']);
+    } catch (error) {
+      console.error('Error abriendo documento:', error);
+      this.showToastMessage(
+        'No se pudo abrir el documento. Inténtalo de nuevo.'
+      );
+    }
   }
   /*
     this.recommendationService.getDocuments().subscribe(documents => {

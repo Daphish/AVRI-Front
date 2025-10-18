@@ -638,11 +638,14 @@ button:disabled {
   position: relative;
   margin-top: 8px;
   cursor: pointer;
-  transition: box-shadow 0.2s ease;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
 }
 
 .recommendation-card:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+  border-color: rgba(0, 0, 0, 0.1);
 }
 
 .doc-title {
@@ -667,14 +670,15 @@ button:disabled {
 }
 
 .doc-icons i {
-  cursor: pointer;
   transition: transform 0.2s ease;
   padding: 4px;
   border-radius: 4px;
+  opacity: 0.8;
 }
 
-.doc-icons i:hover {
-  transform: scale(1.15);
+.recommendation-card:hover .doc-icons i {
+  transform: scale(1.1);
+  opacity: 1;
 }
 
 /* Document status colors */
