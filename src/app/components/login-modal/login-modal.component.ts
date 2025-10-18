@@ -27,6 +27,12 @@ export class LoginModalComponent {
   register: boolean = false;
   registering: boolean = false;
 
+  /* ---------- math captcha ---------- */
+  mathQuestion: string = '';
+  mathAnswer: number = 0;
+  userAnswer: number = 0;
+  captchaSolved: boolean = false;
+
   /* ---------- email validation ---------- */
   emailTouched: boolean = false;
   
@@ -89,7 +95,8 @@ export class LoginModalComponent {
            this.lastName.trim() !== '' &&
            this.user.trim() !== '' && 
            this.password.trim() !== '' && 
-           this.isEmailValid();
+           this.isEmailValid() &&
+           this.captchaSolved;
   }
 
   startSession() {
@@ -143,6 +150,13 @@ export class LoginModalComponent {
     this.is_author = false;
     this.password = '';
     this.emailTouched = false; // Reset email validation state
+    
+    // Generate new captcha when switching to register mode
+    if (this.register) {
+      this.generateMathQuestion();
+    } else {
+      this.resetCaptcha();
+    }
   }
 
   registerUser() {
@@ -173,5 +187,33 @@ export class LoginModalComponent {
         console.error('Error al registrar un nuevo usuario: ', error);
         this.showToastMessage('Error al conectar con el servidor.');
       });
+  }
+
+  /* ---------- math captcha methods ---------- */
+  generateMathQuestion(): void {
+    const a = Math.floor(Math.random() * 10) + 1;
+    const b = Math.floor(Math.random() * 10) + 1;
+    this.mathAnswer = a + b;
+    this.mathQuestion = `${a} + ${b} = ?`;
+    this.userAnswer = 0;
+    this.captchaSolved = false;
+  }
+
+  resetCaptcha(): void {
+    this.mathQuestion = '';
+    this.mathAnswer = 0;
+    this.userAnswer = 0;
+    this.captchaSolved = false;
+  }
+
+  validateCaptcha(): void {
+    this.captchaSolved = this.userAnswer === this.mathAnswer;
+    if (!this.captchaSolved && this.userAnswer !== 0) {
+      this.showToastMessage('Respuesta incorrecta. Inténtalo de nuevo.', 'error');
+    }
+  }
+
+  refreshCaptcha(): void {
+    this.generateMathQuestion();
   }
 }

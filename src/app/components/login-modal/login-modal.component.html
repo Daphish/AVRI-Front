@@ -78,6 +78,32 @@
       (keyup.enter)="register ? registerUser() : startSession()"
     />
 
+    <!-- Math CAPTCHA for registration -->
+    <div *ngIf="register" class="captcha-container">
+      <label for="captcha" style="width: 100%">Verificación de seguridad</label>
+      <div class="captcha-question">
+        <span class="math-question">{{ mathQuestion }}</span>
+        <button type="button" class="refresh-captcha" (click)="refreshCaptcha()" title="Generar nueva pregunta">
+          <i class="bi bi-arrow-clockwise"></i>
+        </button>
+      </div>
+      <input
+        type="number"
+        id="captcha"
+        placeholder="Tu respuesta"
+        [(ngModel)]="userAnswer"
+        (input)="validateCaptcha()"
+        (keyup.enter)="registerUser()"
+        class="captcha-input"
+        [class.captcha-correct]="captchaSolved"
+        [class.captcha-incorrect]="userAnswer !== 0 && !captchaSolved"
+      />
+      <div *ngIf="captchaSolved" class="captcha-success">
+        <i class="bi bi-check-circle"></i>
+        <span>¡Correcto!</span>
+      </div>
+    </div>
+
     <span *ngIf="!register"
       >¿No tienes cuenta?
       <a class="link" (click)="toggleRegisterModal()">Regístrate</a></span

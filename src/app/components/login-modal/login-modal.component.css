@@ -202,6 +202,115 @@ input.input-error:focus {
   background: rgba(255, 255, 255, 0.2);
 }
 
+/* ========== CAPTCHA STYLES ========== */
+.captcha-container {
+  width: 100%;
+  margin: 10px 0;
+  padding: 15px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.captcha-question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 10px 0;
+  padding: 10px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.math-question {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+  font-family: 'Courier New', monospace;
+}
+
+.refresh-captcha {
+  background: #0056a3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.refresh-captcha:hover {
+  background: #21405f;
+}
+
+.refresh-captcha i {
+  font-size: 0.9rem;
+}
+
+.captcha-input {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  margin-top: 8px;
+}
+
+.captcha-input:focus {
+  outline: none;
+  border-color: #0056a3;
+  box-shadow: 0 0 0 2px rgba(0, 86, 163, 0.2);
+}
+
+.captcha-input.captcha-correct {
+  border-color: #28a745;
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.captcha-input.captcha-incorrect {
+  border-color: #dc3545;
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.captcha-success {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px;
+  background: #d4edda;
+  color: #155724;
+  border-radius: 4px;
+  font-weight: 500;
+  animation: fadeIn 0.3s ease;
+}
+
+.captcha-success i {
+  color: #28a745;
+  font-size: 1.1rem;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Toast types */
 .toast-error {
   background: #d9b6b7;
