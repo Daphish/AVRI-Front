@@ -50,7 +50,7 @@
             *ngIf="deletingChatId !== chat.session_id"
             class="bi bi-trash delete-icon"
             title="Eliminar"
-            (click)="deleteChat(chat.session_id, $event)"
+            (click)="deleteChat(chat, $event)"
           ></i>
         </div>
       </div>
@@ -90,21 +90,36 @@
     <button class="login-button" (click)="openModal()">Iniciar sesión</button>
   </div>
 
-  <!-- Toast notification -->
-  <div
-    *ngIf="showToast"
-    class="toast toast-{{ toastType }}"
-    [class.clickable-warning]="toastType === 'warning' && pendingDeleteId"
-    (click)="
-      toastType === 'warning' && pendingDeleteId ? confirmDelete() : null
-    "
-  >
-    <span>{{ toastMessage }}</span>
+  <!-- Toast notification with confirmation buttons -->
+  <div *ngIf="showToast" class="toast toast-{{ toastType }}">
+    <div class="toast-content">
+      <i 
+        class="bi"
+        [ngClass]="{
+          'bi-exclamation-triangle-fill': toastType === 'warning',
+          'bi-check-circle-fill': toastType === 'success',
+          'bi-x-circle-fill': toastType === 'error'
+        }"
+      ></i>
+      <span>{{ toastMessage }}</span>
+    </div>
+    
+    <!-- Confirmation buttons for warning toast -->
+    <div *ngIf="toastType === 'warning' && pendingDeleteChat" class="toast-actions">
+      <button class="toast-btn toast-btn-cancel" (click)="cancelDelete()">
+        Cancelar
+      </button>
+      <button class="toast-btn toast-btn-confirm" (click)="confirmDelete()">
+        <i class="bi bi-trash"></i>
+        Eliminar
+      </button>
+    </div>
+    
+    <!-- Close button for other toast types -->
     <i
-      class="bi bi-x"
-      (click)="
-        showToast = false; pendingDeleteId = null; $event.stopPropagation()
-      "
+      *ngIf="toastType !== 'warning'"
+      class="bi bi-x toast-close"
+      (click)="showToast = false"
     ></i>
   </div>
 </div>
