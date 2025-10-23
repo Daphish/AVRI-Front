@@ -6,6 +6,7 @@ import {
   DocumentService,
   DocumentDetail,
 } from '../../services/document.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   standalone: true,
@@ -24,6 +25,8 @@ export class DocumentViewComponent implements OnInit, OnDestroy {
   loading = false;
   error: string | null = null;
 
+  is_author = false;
+
   saved = false;
   claimed = false;
 
@@ -32,7 +35,7 @@ export class DocumentViewComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  constructor(private docs: DocumentService) {}
+  constructor(private docs: DocumentService, private auth: AuthService) {}
 
   /* ---------- method for showing toast ---------- */
   private showToastMessage(
@@ -52,6 +55,19 @@ export class DocumentViewComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.document = this.docs.currentDocument;
     this.loading = false;
+
+    this.auth.currentUser$.subscribe((user: any) => {
+      if (!user) {
+        this.is_author = false;
+        return;
+      }
+      // Anonymous user
+      if ('anonymous_id' in user) {
+        this.is_author = false;
+      }
+      // Staff/autor flags if present
+      if ('is_author' in user) this.is_author = !!user.is_author;
+    });
 
     this.docs.document$.pipe(takeUntil(this.destroy$)).subscribe({
       next: (doc) => {
