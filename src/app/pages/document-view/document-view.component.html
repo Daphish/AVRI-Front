@@ -72,9 +72,10 @@
           [class.active]="claimed"
           (click)="toggleClaim()"
           [disabled]="claimingDocument"
+          *ngIf="is_author"
         >
           <span *ngIf="!claimingDocument">
-            {{ claimed ? "Ya eres el autor" : "Soy el autor" }}
+            {{ claimed ? "Retirar reclamo de autoría" : "Reclamar autoría" }}
           </span>
           <span *ngIf="claimingDocument" class="loading-content">
             <span class="spinner"></span>
@@ -84,8 +85,8 @@
       </div>
     </div>
   </div>
-   <!-- Toast notification -->
-  <div *ngIf="showToast" class="toast toast-{{toastType}}">
+  <!-- Toast notification -->
+  <div *ngIf="showToast" class="toast toast-{{ toastType }}">
     <span>{{ toastMessage }}</span>
     <i class="bi bi-x" (click)="showToast = false"></i>
   </div>
