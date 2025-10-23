@@ -124,6 +124,13 @@ h1 {
   background-color: #21405f;
 }
 
+.documentURI {
+  font-size: 0.85rem;
+  color: #555;
+  font-style: italic;
+  word-break: break-all;
+}
+
 /* ====================== TOAST NOTIFICATIONS ========================= */
 .toast {
   position: fixed;
