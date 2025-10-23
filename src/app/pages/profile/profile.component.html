@@ -140,7 +140,7 @@
           class="bi bi-bookmarks"
           style="color: black; font-size: 1.2rem; margin-right: 5px"
         ></i>
-        Historial / Elementos guardados
+        Elementos guardados
       </div>
 
       <!-- Document loading spinner -->
@@ -165,7 +165,7 @@
           >
             <strong>{{ item.document.title }}</strong>
             <br />
-            <small *ngIf="item.document.repository_uri">{{
+            <small class="documentURI" *ngIf="item.document.repository_uri">{{
               item.document.repository_uri
             }}</small>
           </div>
