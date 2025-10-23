@@ -6,106 +6,110 @@
     <h2>{{ register ? "Registro" : "Iniciar Sesión" }}</h2>
 
     <!-- Register fields -->
-    <ng-container *ngIf="register">
-      <div class="form-grid">
-        <div class="form-field">
-          <label for="name">Nombre</label>
-          <input
-            type="text"
-            id="name"
-            [(ngModel)]="name"
-            (keyup.enter)="registerUser()"
-          />
+    <div class="form-style">
+      <ng-container *ngIf="register">
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="name">Nombre</label>
+            <input
+              type="text"
+              id="name"
+              [(ngModel)]="name"
+              (keyup.enter)="registerUser()"
+            />
+          </div>
+
+          <div class="form-field">
+            <label for="firstName">Apellido paterno</label>
+            <input
+              type="text"
+              id="firstName"
+              [(ngModel)]="firstName"
+              (keyup.enter)="registerUser()"
+            />
+          </div>
+
+          <div class="form-field">
+            <label for="lastName">Apellido materno</label>
+            <input
+              type="text"
+              id="lastName"
+              [(ngModel)]="lastName"
+              (keyup.enter)="registerUser()"
+            />
+          </div>
+
+          <div class="form-field">
+            <label for="userType">Tipo de usuario</label>
+            <select
+              id="userType"
+              [(ngModel)]="is_author"
+              class="user-type-select"
+            >
+              <option [ngValue]="false">Lector</option>
+              <option [ngValue]="true">Autor</option>
+            </select>
+          </div>
         </div>
+      </ng-container>
 
-        <div class="form-field">
-          <label for="firstName">Apellido paterno</label>
-          <input
-            type="text"
-            id="firstName"
-            [(ngModel)]="firstName"
-            (keyup.enter)="registerUser()"
-          />
-        </div>
-
-        <div class="form-field">
-          <label for="lastName">Apellido materno</label>
-          <input
-            type="text"
-            id="lastName"
-            [(ngModel)]="lastName"
-            (keyup.enter)="registerUser()"
-          />
-        </div>
-
-        <div class="form-field">
-          <label for="userType">Tipo de usuario</label>
-          <select
-            id="userType"
-            [(ngModel)]="is_author"
-            class="user-type-select"
-          >
-            <option [ngValue]="false">Lector</option>
-            <option [ngValue]="true">Autor</option>
-          </select>
-        </div>
-      </div>
-    </ng-container>
-
-    <!-- For both login and register -->
-    <label for="email" style="width: 100%">Correo Electrónico</label>
-    <input
-      type="email"
-      id="email"
-      placeholder="Ejemplo: usuario@email.com"
-      [(ngModel)]="user"
-      (blur)="onEmailBlur()"
-      (input)="onEmailInput()"
-      (keyup.enter)="register ? registerUser() : startSession()"
-      [class.input-error]="showEmailError()"
-    />
-    <span *ngIf="showEmailError()" class="error-message">
-      <i class="bi bi-exclamation-circle"></i>
-      Por favor, ingresa un correo electrónico válido.
-    </span>
-
-    <label for="password" style="width: 100%">Contraseña</label>
-    <input
-      type="password"
-      id="password"
-      placeholder="********"
-      [(ngModel)]="password"
-      (keyup.enter)="register ? registerUser() : startSession()"
-    />
-
-    <!-- Math CAPTCHA for registration -->
-    <div *ngIf="register" class="captcha-container">
-      <label for="captcha" style="width: 100%">Verificación de seguridad</label>
-      <div class="captcha-question">
-        <span class="math-question">{{ mathQuestion }}</span>
-        <button
-          type="button"
-          class="refresh-captcha"
-          (click)="refreshCaptcha()"
-          title="Generar nueva pregunta"
-        >
-          <i class="bi bi-arrow-clockwise"></i>
-        </button>
-      </div>
+      <!-- For both login and register -->
+      <label for="email" style="width: 100%">Correo Electrónico</label>
       <input
-        type="number"
-        id="captcha"
-        placeholder="Tu respuesta"
-        [(ngModel)]="userAnswer"
-        (input)="validateCaptcha()"
-        (keyup.enter)="registerUser()"
-        class="captcha-input"
-        [class.captcha-correct]="captchaSolved"
-        [class.captcha-incorrect]="userAnswer !== 0 && !captchaSolved"
+        type="email"
+        id="email"
+        placeholder="Ejemplo: usuario@email.com"
+        [(ngModel)]="user"
+        (blur)="onEmailBlur()"
+        (input)="onEmailInput()"
+        (keyup.enter)="register ? registerUser() : startSession()"
+        [class.input-error]="showEmailError()"
       />
-      <div *ngIf="captchaSolved" class="captcha-success">
-        <i class="bi bi-check-circle"></i>
-        <span>¡Correcto!</span>
+      <span *ngIf="showEmailError()" class="error-message">
+        <i class="bi bi-exclamation-circle"></i>
+        Por favor, ingresa un correo electrónico válido.
+      </span>
+
+      <label for="password" style="width: 100%">Contraseña</label>
+      <input
+        type="password"
+        id="password"
+        placeholder="********"
+        [(ngModel)]="password"
+        (keyup.enter)="register ? registerUser() : startSession()"
+      />
+
+      <!-- Math CAPTCHA for registration -->
+      <div *ngIf="register" class="captcha-container">
+        <label for="captcha" style="width: 100%"
+          >Verificación de seguridad</label
+        >
+        <div class="captcha-question">
+          <span class="math-question">{{ mathQuestion }}</span>
+          <button
+            type="button"
+            class="refresh-captcha"
+            (click)="refreshCaptcha()"
+            title="Generar nueva pregunta"
+          >
+            <i class="bi bi-arrow-clockwise"></i>
+          </button>
+        </div>
+        <input
+          type="number"
+          id="captcha"
+          placeholder="Tu respuesta"
+          [(ngModel)]="userAnswer"
+          (input)="validateCaptcha()"
+          (keyup.enter)="registerUser()"
+          class="captcha-input"
+          [class.captcha-correct]="captchaSolved"
+          [class.captcha-incorrect]="userAnswer !== 0 && !captchaSolved"
+        />
+        <div *ngIf="captchaSolved" class="captcha-success">
+          <i class="bi bi-check-circle"></i>
+          <span>¡Correcto!</span>
+        </div>
       </div>
     </div>
 
