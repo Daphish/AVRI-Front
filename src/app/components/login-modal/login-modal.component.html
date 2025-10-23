@@ -83,7 +83,12 @@
       <label for="captcha" style="width: 100%">Verificación de seguridad</label>
       <div class="captcha-question">
         <span class="math-question">{{ mathQuestion }}</span>
-        <button type="button" class="refresh-captcha" (click)="refreshCaptcha()" title="Generar nueva pregunta">
+        <button
+          type="button"
+          class="refresh-captcha"
+          (click)="refreshCaptcha()"
+          title="Generar nueva pregunta"
+        >
           <i class="bi bi-arrow-clockwise"></i>
         </button>
       </div>
@@ -104,19 +109,16 @@
       </div>
     </div>
 
-    <span *ngIf="!register"
+    <span class="marginx" *ngIf="!register"
       >¿No tienes cuenta?
       <a class="link" (click)="toggleRegisterModal()">Regístrate</a></span
     >
-    <span *ngIf="register"
+    <span class="marginx" *ngIf="register"
       >¿Ya tienes una cuenta?
       <a class="link" (click)="toggleRegisterModal()">Inicia sesión</a></span
     >
 
-    <div
-      class="modal-actions"
-      [ngStyle]="{ 'justify-content': register ? 'center' : 'space-between' }"
-    >
+    <div class="modal-actions">
       <button
         *ngIf="!register"
         class="btn login"

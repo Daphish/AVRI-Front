@@ -106,6 +106,8 @@ input.input-error:focus {
 
 .modal-actions {
   display: flex;
+  flex-direction: column;
+  gap: 10px;
   width: 100%;
   margin-top: 10px;
 }
@@ -126,6 +128,11 @@ input.input-error:focus {
   cursor: pointer;
 }
 
+.marginx {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
 .btn.guest {
   color: black;
 }
@@ -139,9 +146,17 @@ input.input-error:focus {
   color: white;
 }
 
-.btn.login:hover {
+.btn.login:hover:not(:disabled) {
   background-color: #0056a3;
   color: white;
+}
+
+.btn.login:disabled {
+  background-color: #cccccc;
+  color: #666666;
+  border-color: #cccccc;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 #password {
@@ -228,7 +243,7 @@ input.input-error:focus {
   font-size: 1.2rem;
   font-weight: bold;
   color: #333;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .refresh-captcha {
