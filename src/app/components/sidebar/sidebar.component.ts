@@ -62,7 +62,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       if (this.showToast && this.toastType === type) {
         this.showToast = false;
         if (type === 'warning') {
-          this.pendingDeleteId = null;
+          this.pendingDeleteChat = null;
         }
       }
     }, timeout);
@@ -141,31 +141,37 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   /* ---------- deleting confirmation ---------- */
-  pendingDeleteId: string | null = null;
+  pendingDeleteChat: { id: string; name: string } | null = null;
 
-  deleteChat(id: string, ev?: Event) {
+  deleteChat(chat: Chat, ev?: Event) {
     ev?.stopPropagation();
-    this.pendingDeleteId = id;
-    this.showToastMessage('¿Eliminar esta conversación? Toca para confirmar.', 'warning');
+    this.pendingDeleteChat = {id: chat.session_id, name: chat.session_name};
+    this.showToastMessage('¿Eliminar esta conversación?', 'warning');
   }
 
   // Confirming deletion
   confirmDelete() {
-    if (this.pendingDeleteId) {
-      this.deletingChatId = this.pendingDeleteId;
+    if (this.pendingDeleteChat) {
+      this.deletingChatId = this.pendingDeleteChat.id;
       
       try {
-        this.chatService.deleteSession(this.pendingDeleteId);
+        this.chatService.deleteSession(this.pendingDeleteChat.id);
+        this.showToast = false;
         this.deletingChatId = null;
-        this.pendingDeleteId = null;
+        this.pendingDeleteChat = null;
         this.showToastMessage('Conversación eliminada.', 'success');
       } catch (error) {
         console.error('Error al eliminar chat:', error);
         this.showToastMessage('Error al eliminar la conversación.');
         this.deletingChatId = null;
+        this.pendingDeleteChat = null;
       }
     }
+  }
+
+  cancelDelete() {
     this.showToast = false;
+    this.pendingDeleteChat = null;
   }
 
   openModal() {
