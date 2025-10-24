@@ -47,7 +47,10 @@ export class ChatService {
 
   private markdownToSafeHtml(md: string): SafeHtml {
     const rawHtml = marked.parse(md || '') as unknown as string;
-    const clean = DOMPurify.sanitize(rawHtml);
+    const withoutP = rawHtml
+      .replace(/<p>/g, '')
+      .replace(/<\/p>/g, '<br>');
+    const clean = DOMPurify.sanitize(withoutP);
     return this.sanitizer.bypassSecurityTrustHtml(clean);
   }
 

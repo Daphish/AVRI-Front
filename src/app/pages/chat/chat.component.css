@@ -101,7 +101,57 @@
 }
 
 .message-text {
-  white-space: pre-line;
+  line-height: 1.5;
+}
+
+/* Markdown rendering styles */
+.message-text ul,
+.message-text ol {
+  margin: 0.3em 0;
+  padding-left: 1.5em;
+  list-style-position: outside;
+}
+
+.message-text ul {
+  list-style-type: disc;
+}
+
+.message-text ol {
+  list-style-type: decimal;
+}
+
+.message-text li {
+  display: list-item;
+}
+
+.message-text strong,
+.message-text b {
+  font-weight: bold;
+}
+
+.message-text em,
+.message-text i {
+  font-style: italic;
+}
+
+.message-text code {
+  background-color: rgba(0, 0, 0, 0.05);
+  /* padding: 0.2em 0.4em; */
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 0.9em;
+}
+
+.message-text pre {
+  background-color: rgba(0, 0, 0, 0.05);
+  /* padding: 0.5em; */
+  border-radius: 4px;
+  overflow-x: auto;
+}
+
+.message-text pre code {
+  background-color: transparent;
+  padding: 0;
 }
 
 /* Loading dots */

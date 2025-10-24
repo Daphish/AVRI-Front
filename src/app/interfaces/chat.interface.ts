@@ -26,6 +26,7 @@ export interface Documents {
 export interface Message {
   fromUser: boolean;
   text: string;
+  html?: any; // SafeHtml from DomSanitizer
   references?: Documents[];
   isLoading?: boolean;
 }

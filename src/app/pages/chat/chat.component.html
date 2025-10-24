@@ -95,7 +95,7 @@
             <div class="message-text">
               <!-- normal bubble -->
               <ng-container *ngIf="!m.isLoading; else typingDots">
-                {{ m.text }}
+                <div [innerHTML]="m.html || m.text"></div>
               </ng-container>
 
               <!-- "writing..." bubble -->
