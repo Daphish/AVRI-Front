@@ -45,27 +45,24 @@ export class SidebarComponent implements OnInit, OnDestroy {
   deletingChatId: string | null = null; 
   loadingSessions = false;
 
+  /* ---------- delete confirmation modal ---------- */
+  showDeleteModal = false;
+  chatToDelete: { id: string; name: string } | null = null;
+
   /* ---------- toast notifications ---------- */
   showToast = false;
   toastMessage = '';
-  toastType: 'success' | 'error' | 'warning' = 'error';
+  toastType: 'success' | 'error' = 'success';
 
   /* ---------- method for showing toast ---------- */
-  private showToastMessage(message: string, type: 'success' | 'error' | 'warning' = 'error') {
+  private showToastMessage(message: string, type: 'success' | 'error' = 'success') {
     this.toastMessage = message;
     this.toastType = type;
     this.showToast = true;
     
-    const timeout = type === 'warning' ? 8000 : 4000;
-    
     setTimeout(() => {
-      if (this.showToast && this.toastType === type) {
         this.showToast = false;
-        if (type === 'warning') {
-         this.pendingDeleteId = null;
-        }
-      }
-    }, timeout);
+    }, 4000);
   }
 
   /* ------------ template streams ------------ */
@@ -91,7 +88,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       this.authService.autoLogin();
     } catch (error) {
       console.error('Error en auto-login:', error);
-      this.showToastMessage('Error al verificar sesión.');
+      this.showToastMessage('Error al verificar sesión.', 'error');
     }
 
     this.subs.add(
@@ -107,7 +104,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
           } catch (error) {
             this.loadingSessions = false; 
             console.error('Error al cargar sesiones:', error);
-            this.showToastMessage('Error al cargar conversaciones.');
+            this.showToastMessage('Error al cargar conversaciones.', 'error');
           }
         }
         if (!loggedIn) {
@@ -136,36 +133,41 @@ export class SidebarComponent implements OnInit, OnDestroy {
       this.router.navigate(['/home']);
     } catch (error) {
       console.error('Error al cargar mensajes:', error);
-      this.showToastMessage('Error al cargar la conversación.');
+      this.showToastMessage('Error al cargar la conversación.', 'error');
     }
   }
 
-  /* ---------- deleting confirmation ---------- */
-  pendingDeleteId: string | null = null;
-
-  deleteChat(id: string, ev?: Event) {
+  /* ---------- delete confirmation modal ---------- */
+  openDeleteModal(chat: Chat, ev?: Event) {
     ev?.stopPropagation();
-    this.pendingDeleteId = id;
-    this.showToastMessage('¿Eliminar esta conversación? Toca para confirmar.', 'warning');
+    this.chatToDelete = {
+      id: chat.session_id,
+      name: chat.session_name
+    };
+    this.showDeleteModal = true;
   }
 
-  // Confirming deletion
+  closeDeleteModal() {
+    this.showDeleteModal = false;
+    this.chatToDelete = null;
+  }
+
   confirmDelete() {
-    if (this.pendingDeleteId) {
-      this.deletingChatId = this.pendingDeleteId;
+    if (this.chatToDelete) {
+      this.deletingChatId = this.chatToDelete.id;
       
       try {
-        this.chatService.deleteSession(this.pendingDeleteId);
+        this.chatService.deleteSession(this.chatToDelete.id);
+        this.showDeleteModal = false;
+        this.chatToDelete = null;
         this.deletingChatId = null;
-        this.pendingDeleteId = null;
-        this.showToastMessage('Conversación eliminada.', 'success');
+        this.showToastMessage('Conversación eliminada correctamente.', 'success');
       } catch (error) {
         console.error('Error al eliminar chat:', error);
-        this.showToastMessage('Error al eliminar la conversación.');
         this.deletingChatId = null;
+        this.showToastMessage('Error al eliminar la conversación.', 'error');
       }
     }
-    this.showToast = false;
   }
 
   openModal() {
