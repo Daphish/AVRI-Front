@@ -50,7 +50,7 @@
             *ngIf="deletingChatId !== chat.session_id"
             class="bi bi-trash delete-icon"
             title="Eliminar"
-            (click)="deleteChat(chat.session_id)"
+            (click)="openDeleteModal(chat, $event)"
           ></i>
         </div>
       </div>
@@ -89,35 +89,48 @@
   <div class="left-login" *ngIf="!(isLoggedIn$ | async)">
     <button class="login-button" (click)="openModal()">Iniciar sesión</button>
   </div>
-
-  <!-- Toast notification with confirmation buttons -->
+</div>
+ 
+    
+   <!-- Toast notification -->
   <div *ngIf="showToast" class="toast toast-{{ toastType }}">
-    <div class="toast-content">
-      <i 
-        class="bi"
-        [ngClass]="{
-          'bi-exclamation-triangle-fill': toastType === 'warning',
-          'bi-check-circle-fill': toastType === 'success',
-          'bi-x-circle-fill': toastType === 'error'
-        }"
-      ></i>
-      <span>{{ toastMessage }}</span>
+    <i 
+      class="bi"
+      [ngClass]="{
+        'bi-check-circle-fill': toastType === 'success',
+        'bi-x-circle-fill': toastType === 'error'
+      }"
+    ></i>
+    <span>{{ toastMessage }}</span>
+    <i class="bi bi-x toast-close" (click)="showToast = false"></i>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+<div *ngIf="showDeleteModal" class="modal-overlay" (click)="closeDeleteModal()">
+  <div class="confirm-modal" (click)="$event.stopPropagation()">
+    <div class="confirm-modal-header">
+      <i class="bi bi-exclamation-triangle-fill warning-icon"></i>
+      <h3>Eliminar conversación</h3>
     </div>
     
-    <!-- Toast notification -->
-  <div
-    *ngIf="showToast"
-    class="toast toast-{{ toastType }}"
-    [class.clickable-warning]="toastType === 'warning' && pendingDeleteId"
-    (click)="
-      toastType === 'warning' && pendingDeleteId ? confirmDelete() : null">
-    <span>{{ toastMessage }}</span>
-    <i
-      class="bi bi-x"
-      (click)="
-        showToast = false; pendingDeleteId = null; $event.stopPropagation()
-      "
-    ></i>
+    <div class="confirm-modal-body">
+      <p>¿Estás seguro de que deseas eliminar esta conversación?</p>
+      <div class="chat-name-highlight">
+        <i class="bi bi-chat-left"></i>
+        <strong>{{ chatToDelete?.name }}</strong>
+      </div>
+      <p class="warning-text">Esta acción no se puede deshacer.</p>
+    </div>
+    
+    <div class="confirm-modal-footer">
+      <button class="btn-cancel" (click)="closeDeleteModal()">
+        Cancelar
+      </button>
+      <button class="btn-delete" (click)="confirmDelete()">
+        <i class="bi bi-trash"></i>
+        Eliminar
+      </button>
+    </div>
   </div>
 </div>
 
