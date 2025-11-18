@@ -1,13 +1,13 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HeaderComponent } from './header.component';
-import { provideHttpClient, withFetch } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideRouter, Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
-import { SurveyEventService } from '../../services/evento-encuesta.service';
-import { ChatService } from '../../services/chat.service';
-import { ModalService } from '../../services/modal.service';
-import { BehaviorSubject } from 'rxjs';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { HeaderComponent } from "./header.component";
+import { provideHttpClient, withFetch } from "@angular/common/http";
+import { provideHttpClientTesting } from "@angular/common/http/testing";
+import { provideRouter, Router } from "@angular/router";
+import { AuthService } from "../../services/auth.service";
+import { SurveyEventService } from "../../services/evento-encuesta.service";
+import { ChatService } from "../../services/chat.service";
+import { ModalService } from "../../services/modal.service";
+import { BehaviorSubject } from "rxjs";
 
 // Enhanced service stubs for behavior testing
 class EnhancedAuthServiceStub {
@@ -15,12 +15,18 @@ class EnhancedAuthServiceStub {
   currentUser$ = this.currentUserSubject.asObservable();
   isLoggedIn$ = new BehaviorSubject<boolean>(false);
   profileSetupComplete$ = new BehaviorSubject<boolean>(true);
-  
-  autoLogin() { return Promise.resolve(true); }
-  login() { return Promise.resolve(true); }
+
+  autoLogin() {
+    return Promise.resolve(true);
+  }
+  login() {
+    return Promise.resolve(true);
+  }
   logout() {}
-  getToken() { return null; }
-  
+  getToken() {
+    return null;
+  }
+
   // Test helper methods
   setCurrentUser(user: any) {
     this.currentUserSubject.next(user);
@@ -38,26 +44,26 @@ class EnhancedChatServiceStub {
 class EnhancedModalServiceStub {
   private isModalOpenSubject = new BehaviorSubject<boolean>(false);
   isModalOpen$ = this.isModalOpenSubject.asObservable();
-  
+
   openModal() {
     this.isModalOpenSubject.next(true);
   }
-  
+
   closeModal() {
     this.isModalOpenSubject.next(false);
   }
-  
+
   getModalState() {
     return this.isModalOpenSubject.value;
   }
-  
+
   // Test helper methods
   setModalState(isOpen: boolean) {
     this.isModalOpenSubject.next(isOpen);
   }
 }
 
-describe('HeaderComponent', () => {
+describe("HeaderComponent", () => {
   let component: HeaderComponent;
   let fixture: ComponentFixture<HeaderComponent>;
   let authService: EnhancedAuthServiceStub;
@@ -71,15 +77,18 @@ describe('HeaderComponent', () => {
       imports: [HeaderComponent],
       providers: [
         { provide: AuthService, useClass: EnhancedAuthServiceStub },
-        { provide: SurveyEventService, useClass: EnhancedSurveyEventServiceStub },
+        {
+          provide: SurveyEventService,
+          useClass: EnhancedSurveyEventServiceStub,
+        },
         { provide: ChatService, useClass: EnhancedChatServiceStub },
         { provide: ModalService, useClass: EnhancedModalServiceStub },
         provideRouter([
-          { path: 'fyp', component: HeaderComponent },
-          { path: 'home', component: HeaderComponent }
+          { path: "fyp", component: HeaderComponent },
+          { path: "home", component: HeaderComponent },
         ]),
-        provideHttpClient(withFetch()), 
-        provideHttpClientTesting()
+        provideHttpClient(withFetch()),
+        provideHttpClientTesting(),
       ],
     }).compileComponents();
 
@@ -90,330 +99,347 @@ describe('HeaderComponent', () => {
     chatService = TestBed.inject(ChatService) as any;
     modalService = TestBed.inject(ModalService) as any;
     router = TestBed.inject(Router);
-    
+
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 
-  describe('Component Initialization', () => {
-    it('should initialize with default role values', () => {
+  describe("Component Initialization", () => {
+    it("should initialize with default role values", () => {
       expect(component.is_author).toBeFalse();
       expect(component.is_staff).toBeFalse();
     });
   });
 
-  describe('User State Management', () => {
-    it('should set roles to false when no user', () => {
+  describe("User State Management", () => {
+    it("should set roles to false when no user", () => {
       authService.setCurrentUser(null);
-      
+
       expect(component.is_author).toBeFalse();
       expect(component.is_staff).toBeFalse();
     });
 
-    it('should set roles to false for anonymous users', () => {
-      const anonymousUser = { anonymous_id: 'anon-123' };
+    it("should set roles to false for anonymous users", () => {
+      const anonymousUser = { anonymous_id: "anon-123" };
       authService.setCurrentUser(anonymousUser);
-      
+
       expect(component.is_author).toBeFalse();
       expect(component.is_staff).toBeFalse();
     });
 
-    it('should set author role when user is author', () => {
-      const authorUser = { id: 1, email: 'author@test.com', is_author: true };
+    it("should set author role when user is author", () => {
+      const authorUser = { id: 1, email: "author@test.com", is_author: true };
       authService.setCurrentUser(authorUser);
-      
+
       expect(component.is_author).toBeTrue();
       expect(component.is_staff).toBeFalse();
     });
 
-    it('should set staff role when user is staff', () => {
-      const staffUser = { id: 1, email: 'staff@test.com', is_staff: true };
+    it("should set staff role when user is staff", () => {
+      const staffUser = { id: 1, email: "staff@test.com", is_staff: true };
       authService.setCurrentUser(staffUser);
-      
+
       expect(component.is_author).toBeFalse();
       expect(component.is_staff).toBeTrue();
     });
 
-    it('should set both roles when user is both author and staff', () => {
-      const superUser = { 
-        id: 1, 
-        email: 'super@test.com', 
-        is_author: true, 
-        is_staff: true 
+    it("should set both roles when user is both author and staff", () => {
+      const superUser = {
+        id: 1,
+        email: "super@test.com",
+        is_author: true,
+        is_staff: true,
       };
       authService.setCurrentUser(superUser);
-      
+
       expect(component.is_author).toBeTrue();
       expect(component.is_staff).toBeTrue();
     });
 
-    it('should handle falsy role values correctly', () => {
-      const userWithFalsyRoles = { 
-        id: 1, 
-        email: 'user@test.com', 
-        is_author: false, 
-        is_staff: null 
+    it("should handle falsy role values correctly", () => {
+      const userWithFalsyRoles = {
+        id: 1,
+        email: "user@test.com",
+        is_author: false,
+        is_staff: null,
       };
       authService.setCurrentUser(userWithFalsyRoles);
-      
+
       expect(component.is_author).toBeFalse();
       expect(component.is_staff).toBeFalse();
     });
 
-    it('should handle truthy non-boolean role values', () => {
-      const userWithTruthyRoles = { 
-        id: 1, 
-        email: 'user@test.com', 
-        is_author: 'yes', 
-        is_staff: 1 
+    it("should handle truthy non-boolean role values", () => {
+      const userWithTruthyRoles = {
+        id: 1,
+        email: "user@test.com",
+        is_author: "yes",
+        is_staff: 1,
       };
       authService.setCurrentUser(userWithTruthyRoles);
-      
+
       expect(component.is_author).toBeTrue();
       expect(component.is_staff).toBeTrue();
     });
   });
 
-  describe('Role State Changes', () => {
-    it('should update roles when user changes', () => {
+  describe("Role State Changes", () => {
+    it("should update roles when user changes", () => {
       // Start with regular user
-      const regularUser = { id: 1, email: 'user@test.com' };
+      const regularUser = { id: 1, email: "user@test.com" };
       authService.setCurrentUser(regularUser);
-      
+
       expect(component.is_author).toBeFalse();
       expect(component.is_staff).toBeFalse();
-      
+
       // Change to author user
-      const authorUser = { id: 1, email: 'user@test.com', is_author: true };
+      const authorUser = { id: 1, email: "user@test.com", is_author: true };
       authService.setCurrentUser(authorUser);
-      
+
       expect(component.is_author).toBeTrue();
       expect(component.is_staff).toBeFalse();
-      
+
       // Change to staff user
-      const staffUser = { id: 1, email: 'user@test.com', is_staff: true };
+      const staffUser = { id: 1, email: "user@test.com", is_staff: true };
       authService.setCurrentUser(staffUser);
-      
+
       expect(component.is_author).toBeFalse();
       expect(component.is_staff).toBeTrue();
     });
 
-    it('should reset roles when user logs out', () => {
+    it("should reset roles when user logs out", () => {
       // Start with privileged user
-      const superUser = { id: 1, email: 'super@test.com', is_author: true, is_staff: true };
+      const superUser = {
+        id: 1,
+        email: "super@test.com",
+        is_author: true,
+        is_staff: true,
+      };
       authService.setCurrentUser(superUser);
-      
+
       expect(component.is_author).toBeTrue();
       expect(component.is_staff).toBeTrue();
-      
+
       // User logs out
       authService.setCurrentUser(null);
-      
+
       expect(component.is_author).toBeFalse();
       expect(component.is_staff).toBeFalse();
     });
   });
 
-  describe('Navigation Functions', () => {
-    it('should navigate to fyp page when viewFYP is called', () => {
-      spyOn(router, 'navigate');
-      
+  describe("Navigation Functions", () => {
+    it("should navigate to fyp page when viewFYP is called", () => {
+      spyOn(router, "navigate");
+
       component.viewFYP();
-      
-      expect(router.navigate).toHaveBeenCalledWith(['/fyp']);
+
+      expect(router.navigate).toHaveBeenCalledWith(["/fyp"]);
     });
   });
 
-  describe('Survey Functions', () => {
-    it('should trigger survey when abrirEncuesta is called', () => {
-      spyOn(encuestaService, 'lanzarEncuesta');
-      
+  describe("Survey Functions", () => {
+    it("should trigger survey when abrirEncuesta is called", () => {
+      spyOn(encuestaService, "lanzarEncuesta");
+
       component.openSurvey();
-      
+
       expect(encuestaService.lanzarEncuesta).toHaveBeenCalled();
     });
   });
 
-  describe('User Type Detection', () => {
-    it('should correctly identify anonymous users', () => {
-      const anonymousUser = { 
-        anonymous_id: 'anon-456',
-        some_other_property: 'value'
+  describe("User Type Detection", () => {
+    it("should correctly identify anonymous users", () => {
+      const anonymousUser = {
+        anonymous_id: "anon-456",
+        some_other_property: "value",
       };
       authService.setCurrentUser(anonymousUser);
-      
+
       // Anonymous users should have no roles
       expect(component.is_author).toBeFalse();
       expect(component.is_staff).toBeFalse();
     });
 
-    it('should correctly identify registered users without roles', () => {
-      const regularUser = { 
+    it("should correctly identify registered users without roles", () => {
+      const regularUser = {
         id: 1,
-        email: 'regular@test.com',
-        name: 'Regular User'
+        email: "regular@test.com",
+        name: "Regular User",
       };
       authService.setCurrentUser(regularUser);
-      
+
       expect(component.is_author).toBeFalse();
       expect(component.is_staff).toBeFalse();
     });
 
-    it('should handle users with mixed properties', () => {
-      const mixedUser = { 
+    it("should handle users with mixed properties", () => {
+      const mixedUser = {
         id: 1,
-        email: 'mixed@test.com',
-        anonymous_id: 'should-be-ignored', // This shouldn't matter since id exists
+        email: "mixed@test.com",
+        anonymous_id: "should-be-ignored", // This shouldn't matter since id exists
         is_author: true,
-        is_staff: false
+        is_staff: false,
       };
       authService.setCurrentUser(mixedUser);
-      
+
       // Should treat as regular user since it has id
       expect(component.is_author).toBeTrue();
       expect(component.is_staff).toBeFalse();
     });
   });
 
-  describe('Edge Cases', () => {
-    it('should handle empty user object', () => {
+  describe("Edge Cases", () => {
+    it("should handle empty user object", () => {
       const emptyUser = {};
       authService.setCurrentUser(emptyUser);
-      
+
       expect(component.is_author).toBeFalse();
       expect(component.is_staff).toBeFalse();
     });
 
-    it('should handle user with undefined role properties', () => {
-      const userWithUndefinedRoles = { 
+    it("should handle user with undefined role properties", () => {
+      const userWithUndefinedRoles = {
         id: 1,
-        email: 'test@test.com',
+        email: "test@test.com",
         is_author: undefined,
-        is_staff: undefined
+        is_staff: undefined,
       };
       authService.setCurrentUser(userWithUndefinedRoles);
-      
+
       expect(component.is_author).toBeFalse();
       expect(component.is_staff).toBeFalse();
     });
 
-    it('should handle rapid user changes', () => {
+    it("should handle rapid user changes", () => {
       // Simulate rapid user switching
       authService.setCurrentUser({ id: 1, is_author: true });
       expect(component.is_author).toBeTrue();
-      
+
       authService.setCurrentUser({ id: 2, is_staff: true });
       expect(component.is_author).toBeFalse();
       expect(component.is_staff).toBeTrue();
-      
+
       authService.setCurrentUser(null);
       expect(component.is_author).toBeFalse();
       expect(component.is_staff).toBeFalse();
     });
   });
 
-  describe('Integration Scenarios', () => {
-    it('should maintain correct state during authentication flow', () => {
+  describe("Integration Scenarios", () => {
+    it("should maintain correct state during authentication flow", () => {
       // Start logged out
       authService.setCurrentUser(null);
       expect(component.is_author).toBeFalse();
       expect(component.is_staff).toBeFalse();
-      
+
       // Login as regular user
-      authService.setCurrentUser({ id: 1, email: 'user@test.com' });
+      authService.setCurrentUser({ id: 1, email: "user@test.com" });
       expect(component.is_author).toBeFalse();
       expect(component.is_staff).toBeFalse();
-      
+
       // User gains author privileges
-      authService.setCurrentUser({ id: 1, email: 'user@test.com', is_author: true });
+      authService.setCurrentUser({
+        id: 1,
+        email: "user@test.com",
+        is_author: true,
+      });
       expect(component.is_author).toBeTrue();
       expect(component.is_staff).toBeFalse();
-      
+
       // Switch to anonymous
-      authService.setCurrentUser({ anonymous_id: 'temp-user' });
+      authService.setCurrentUser({ anonymous_id: "temp-user" });
       expect(component.is_author).toBeFalse();
       expect(component.is_staff).toBeFalse();
     });
   });
 
-  describe('Close Session Functionality', () => {
-    it('should clear sessions and logout user', async () => {
-      spyOn(chatService, 'clearSessions');
-      spyOn(authService, 'logout');
-      spyOn(router, 'navigate');
-      
+  describe("Close Session Functionality", () => {
+    it("should clear sessions and logout user", async () => {
+      spyOn(chatService, "clearSessions");
+      spyOn(authService, "logout");
+      spyOn(router, "navigate");
+
       await component.closeSession();
-      
+
       expect(chatService.clearSessions).toHaveBeenCalled();
       expect(authService.logout).toHaveBeenCalled();
-      expect(router.navigate).toHaveBeenCalledWith(['/home']);
+      expect(router.navigate).toHaveBeenCalledWith(["/home"]);
     });
 
-    it('should handle closeSession errors gracefully', async () => {
-      spyOn(chatService, 'clearSessions').and.throwError('Test error');
-      spyOn(console, 'error');
-      spyOn(router, 'navigate');
-      
+    it("should handle closeSession errors gracefully", async () => {
+      spyOn(chatService, "clearSessions").and.throwError("Test error");
+      spyOn(console, "error");
+      spyOn(router, "navigate");
+
       await component.closeSession();
-      
-      expect(console.error).toHaveBeenCalledWith('Error closing session:', jasmine.any(Error));
-      expect(router.navigate).toHaveBeenCalledWith(['/home']);
+
+      expect(console.error).toHaveBeenCalledWith(
+        "Error closing session:",
+        jasmine.any(Error)
+      );
+      expect(router.navigate).toHaveBeenCalledWith(["/home"]);
     });
 
-    it('should handle navigation errors gracefully', async () => {
-      spyOn(chatService, 'clearSessions');
-      spyOn(authService, 'logout');
-      spyOn(router, 'navigate').and.throwError('Navigation error');
-      spyOn(console, 'error');
-      
+    it("should handle navigation errors gracefully", async () => {
+      spyOn(chatService, "clearSessions");
+      spyOn(authService, "logout");
+      spyOn(router, "navigate").and.throwError("Navigation error");
+      spyOn(console, "error");
+
       await component.closeSession();
-      
+
       expect(chatService.clearSessions).toHaveBeenCalled();
       expect(authService.logout).toHaveBeenCalled();
-      expect(console.error).toHaveBeenCalledWith('Error closing session:', jasmine.any(Error));
+      expect(console.error).toHaveBeenCalledWith(
+        "Error closing session:",
+        jasmine.any(Error)
+      );
     });
   });
 
-  describe('Modal Integration', () => {
-    it('should initialize with modal state observable', () => {
+  describe("Modal Integration", () => {
+    it("should initialize with modal state observable", () => {
       expect(component.isModalOpen$).toBeDefined();
     });
 
-    it('should reflect modal state changes', (done) => {
-      component.isModalOpen$.subscribe(isOpen => {
+    it("should reflect modal state changes", (done) => {
+      component.isModalOpen$.subscribe((isOpen) => {
         expect(isOpen).toBeFalse();
         done();
       });
     });
 
-    it('should update when modal opens', (done) => {
+    it("should update when modal opens", (done) => {
       let callCount = 0;
-      component.isModalOpen$.subscribe(isOpen => {
+      component.isModalOpen$.subscribe((isOpen) => {
         callCount++;
-        if (callCount === 2) { // Second emission (after modal opens)
+        if (callCount === 2) {
+          // Second emission (after modal opens)
           expect(isOpen).toBeTrue();
           done();
         }
       });
-      
+
       modalService.openModal();
     });
 
-    it('should update when modal closes', (done) => {
+    it("should update when modal closes", (done) => {
       modalService.openModal(); // First open it
-      
+
       let callCount = 0;
-      component.isModalOpen$.subscribe(isOpen => {
+      component.isModalOpen$.subscribe((isOpen) => {
         callCount++;
-        if (callCount === 2) { // Second emission (after modal closes)
+        if (callCount === 2) {
+          // Second emission (after modal closes)
           expect(isOpen).toBeFalse();
           done();
         }
       });
-      
+
       modalService.closeModal();
     });
   });

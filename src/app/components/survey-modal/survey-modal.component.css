@@ -40,7 +40,7 @@
   color: #ffffff;
   padding: 1.5rem;
   border-radius: 20px;
-  box-shadow: 
+  box-shadow:
     0 20px 40px rgba(22, 58, 92, 0.4),
     0 0 0 1px rgba(255, 255, 255, 0.1);
   position: relative;
@@ -54,7 +54,7 @@
 
 /* Bright */
 .survey-modal::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -66,13 +66,17 @@
 
 /* Background effect */
 .survey-modal::after {
-  content: '';
+  content: "";
   position: absolute;
   top: -50%;
   right: -50%;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.05) 0%,
+    transparent 70%
+  );
   pointer-events: none;
 }
 
@@ -302,17 +306,17 @@
     width: 98% !important;
     max-width: none !important;
   }
-  
+
   .survey-modal {
     padding: 1.5rem;
     border-radius: 16px;
   }
-  
+
   .survey-modal .options {
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .survey-modal .options label {
     flex-direction: row;
     justify-content: flex-start;
@@ -320,38 +324,37 @@
     width: 100%;
   }
 }
-  
-  .survey-modal h2 {
-    font-size: 1.8rem;
-  }
-  
-  .survey-modal h3 {
-    font-size: 1.2rem;
-  }
-  
-  .survey-modal .secondary,
-  .survey-modal .primary {
-    min-width: 120px;
-    padding: 12px 20px;
-    font-size: 0.95rem;
-    margin: 4px;
-  }
-  
-  .survey-modal .question {
-    padding: 1rem;
-  }
-  
-  .survey-modal .options label {
-    padding: 10px 12px;
-  }
 
+.survey-modal h2 {
+  font-size: 1.8rem;
+}
+
+.survey-modal h3 {
+  font-size: 1.2rem;
+}
+
+.survey-modal .secondary,
+.survey-modal .primary {
+  min-width: 120px;
+  padding: 12px 20px;
+  font-size: 0.95rem;
+  margin: 4px;
+}
+
+.survey-modal .question {
+  padding: 1rem;
+}
+
+.survey-modal .options label {
+  padding: 10px 12px;
+}
 
 @media (max-width: 480px) {
   .survey-modal .buttons-container {
     flex-direction: column;
     align-items: center;
   }
-  
+
   .survey-modal .secondary,
   .survey-modal .primary {
     width: 100%;
@@ -451,7 +454,7 @@
     width: 32px;
     height: 32px;
   }
-  
+
   .close-button svg {
     width: 16px;
     height: 16px;
@@ -555,15 +558,19 @@
   display: inline-block;
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(255,255,255,0.3);
+  border: 2px solid rgba(255, 255, 255, 0.3);
   border-top: 2px solid white;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 button:disabled {
@@ -571,7 +578,8 @@ button:disabled {
   cursor: not-allowed;
 }
 
-input:disabled, textarea:disabled {
+input:disabled,
+textarea:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }

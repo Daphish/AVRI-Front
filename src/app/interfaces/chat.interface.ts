@@ -18,7 +18,7 @@ export interface Documents {
   license: string;
   repository_uri: string;
   repository_id: string;
-  status: 'L' | 'R' | 'E';
+  status: "L" | "R" | "E";
   created_at: string;
   updated_at: string;
 }

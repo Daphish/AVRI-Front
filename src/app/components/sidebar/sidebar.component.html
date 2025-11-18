@@ -69,9 +69,12 @@
           {{ currentUserInitial$ | async | uppercase }}
         </div>
         {{ currentUserName$ | async }}
-        <i class="bi bi-chevron-down dropdown-arrow" [class.rotated]="isDropdownOpen"></i>
+        <i
+          class="bi bi-chevron-down dropdown-arrow"
+          [class.rotated]="isDropdownOpen"
+        ></i>
       </button>
-      
+
       <!-- Dropdown menu -->
       <div class="dropdown-menu" *ngIf="isDropdownOpen">
         <div class="dropdown-item" (click)="viewProfile()">
@@ -90,29 +93,28 @@
     <button class="login-button" (click)="openModal()">Iniciar sesión</button>
   </div>
 </div>
- 
-    
-   <!-- Toast notification -->
-  <div *ngIf="showToast" class="toast toast-{{ toastType }}">
-    <i 
-      class="bi"
-      [ngClass]="{
-        'bi-check-circle-fill': toastType === 'success',
-        'bi-x-circle-fill': toastType === 'error'
-      }"
-    ></i>
-    <span>{{ toastMessage }}</span>
-    <i class="bi bi-x toast-close" (click)="showToast = false"></i>
-  </div>
 
-  <!-- Delete Confirmation Modal -->
+<!-- Toast notification -->
+<div *ngIf="showToast" class="toast toast-{{ toastType }}">
+  <i
+    class="bi"
+    [ngClass]="{
+      'bi-check-circle-fill': toastType === 'success',
+      'bi-x-circle-fill': toastType === 'error',
+    }"
+  ></i>
+  <span>{{ toastMessage }}</span>
+  <i class="bi bi-x toast-close" (click)="showToast = false"></i>
+</div>
+
+<!-- Delete Confirmation Modal -->
 <div *ngIf="showDeleteModal" class="modal-overlay" (click)="closeDeleteModal()">
   <div class="confirm-modal" (click)="$event.stopPropagation()">
     <div class="confirm-modal-header">
       <i class="bi bi-exclamation-triangle-fill warning-icon"></i>
       <h3>Eliminar conversación</h3>
     </div>
-    
+
     <div class="confirm-modal-body">
       <p>¿Estás seguro de que deseas eliminar esta conversación?</p>
       <div class="chat-name-highlight">
@@ -121,11 +123,9 @@
       </div>
       <p class="warning-text">Esta acción no se puede deshacer.</p>
     </div>
-    
+
     <div class="confirm-modal-footer">
-      <button class="btn-cancel" (click)="closeDeleteModal()">
-        Cancelar
-      </button>
+      <button class="btn-cancel" (click)="closeDeleteModal()">Cancelar</button>
       <button class="btn-delete" (click)="confirmDelete()">
         <i class="bi bi-trash"></i>
         Eliminar

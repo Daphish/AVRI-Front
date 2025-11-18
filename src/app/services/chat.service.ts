@@ -1,27 +1,27 @@
 // src/app/services/chat.service.ts
-import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { marked } from 'marked';
-import DOMPurify from 'dompurify';
-import { BehaviorSubject, Observable, throwError } from 'rxjs';
-import { map, tap, catchError, switchMap } from 'rxjs/operators';
+import { Injectable, inject } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
+import { marked } from "marked";
+import DOMPurify from "dompurify";
+import { BehaviorSubject, Observable, throwError } from "rxjs";
+import { map, tap, catchError, switchMap } from "rxjs/operators";
 import {
   Chat,
   Message,
   ReferenceChunk,
   RawMessage,
-} from '../interfaces/chat.interface';
-import { AuthService } from './auth.service';
-import { DocumentService } from './document.service';
-import { DocumentDetail } from './document.service';
+} from "../interfaces/chat.interface";
+import { AuthService } from "./auth.service";
+import { DocumentService } from "./document.service";
+import { DocumentDetail } from "./document.service";
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class ChatService {
   private http = inject(HttpClient);
   private authService = inject(AuthService);
   private documentService = inject(DocumentService);
-  private readonly BASE_URL = '/api/chat';
+  private readonly BASE_URL = "/api/chat";
   private sanitizer = inject(DomSanitizer);
 
   /* Showing wizard after profile */
@@ -34,22 +34,20 @@ export class ChatService {
   private messages$$ = new BehaviorSubject<Message[]>([]);
   readonly messages$ = this.messages$$.asObservable();
 
-  private idChat$$ = new BehaviorSubject<string>('');
+  private idChat$$ = new BehaviorSubject<string>("");
   readonly idChat$ = this.idChat$$.asObservable();
 
   /* --------------- sessions ---------------------- */
   cleanText(text: string): string {
     return text
-      .replace(/<think>.*?<\/think>/gs, '') // remove thinking
-      .replace(/##\d+\$\$|\\n/g, '') // remove cite and new lines
+      .replace(/<think>.*?<\/think>/gs, "") // remove thinking
+      .replace(/##\d+\$\$|\\n/g, "") // remove cite and new lines
       .trim();
   }
 
   private markdownToSafeHtml(md: string): SafeHtml {
-    const rawHtml = marked.parse(md || '') as unknown as string;
-    const withoutP = rawHtml
-      .replace(/<p>/g, '')
-      .replace(/<\/p>/g, '<br>');
+    const rawHtml = marked.parse(md || "") as unknown as string;
+    const withoutP = rawHtml.replace(/<p>/g, "").replace(/<\/p>/g, "<br>");
     const clean = DOMPurify.sanitize(withoutP);
     return this.sanitizer.bypassSecurityTrustHtml(clean);
   }
@@ -69,11 +67,11 @@ export class ChatService {
   }
 
   clearIdChat(): void {
-    this.idChat$$.next('');
+    this.idChat$$.next("");
     this.messages$$.next([]);
   }
 
-  createSession(name = 'Chat sin título'): Observable<Chat> {
+  createSession(name = "Chat sin título"): Observable<Chat> {
     return this.http
       .post<Chat>(`${this.BASE_URL}/`, { session_name: name })
       .pipe(
@@ -93,17 +91,17 @@ export class ChatService {
           this.sessions$$.value.filter((c) => c.session_id !== id)
         );
         if (this.idChat$$.value === id) {
-          this.idChat$$.next('');
+          this.idChat$$.next("");
           this.messages$$.next([]);
         }
       },
-      error: (err) => console.error('Error al borrar sesión:', err),
+      error: (err) => console.error("Error al borrar sesión:", err),
     });
   }
 
   clearSessions(): void {
     this.sessions$$.next([]);
-    this.idChat$$.next('');
+    this.idChat$$.next("");
     this.messages$$.next([]);
   }
 
@@ -125,7 +123,7 @@ export class ChatService {
         map((res) =>
           Array.isArray(res?.data) && res.data[0]?.messages
             ? res.data[0].messages
-            : res.messages ?? []
+            : (res.messages ?? [])
         ),
         map((list: any[]) =>
           list.map((m) => {
@@ -143,12 +141,12 @@ export class ChatService {
                 detailedDocs.push(...docs);
               });
 
-            const text = this.cleanText(m.content ?? m.answer ?? '');
+            const text = this.cleanText(m.content ?? m.answer ?? "");
             const html = this.markdownToSafeHtml(text);
 
             return {
-              fromUser: m.role === 'user',
-              text: this.cleanText(m.content ?? m.answer ?? ''),
+              fromUser: m.role === "user",
+              text: this.cleanText(m.content ?? m.answer ?? ""),
               html, // campo nuevo: SafeHtml listo para innerHTML | seguroHtml
               references: detailedDocs,
             } as Message & { html: SafeHtml };
@@ -161,7 +159,7 @@ export class ChatService {
   /** Sends text and adds “writing…” */
   sendMessage(sessionId: string, text: string): void {
     const userMsg: Message = { fromUser: true, text };
-    const typingMsg: Message = { fromUser: false, text: '', isLoading: true };
+    const typingMsg: Message = { fromUser: false, text: "", isLoading: true };
 
     this.messages$$.next([...this.messages$$.value, userMsg, typingMsg]);
 
@@ -172,7 +170,7 @@ export class ChatService {
       .pipe(
         map((r) => r.data),
         map((raw) => {
-          const answer = this.cleanText(raw.answer ?? raw.content ?? '');
+          const answer = this.cleanText(raw.answer ?? raw.content ?? "");
           const chunks: ReferenceChunk[] = raw.reference?.chunks ?? [];
           const uniqueRefs = chunks.filter(
             (c, i, a) =>
@@ -215,7 +213,7 @@ export class ChatService {
 
   /* --------------- preferences profile --------------- */
   getProfile(): Observable<any> {
-    return this.http.get('/api/recommender/profile/me/');
+    return this.http.get("/api/recommender/profile/me/");
   }
   submitProfile(
     interests: string[],
@@ -228,8 +226,8 @@ export class ChatService {
       },
     };
 
-    const urlCreate = '/api/recommender/profile/create/';
-    const urlUpdate = '/api/recommender/profile/me/';
+    const urlCreate = "/api/recommender/profile/create/";
+    const urlUpdate = "/api/recommender/profile/me/";
 
     return this.getProfile().pipe(
       switchMap(() =>

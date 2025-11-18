@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, forkJoin, Observable, tap } from 'rxjs';
+import { Injectable } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { BehaviorSubject, forkJoin, Observable, tap } from "rxjs";
 
 /* ------------ interfaces ------------ */
 export interface DocumentDetail {
@@ -12,7 +12,7 @@ export interface DocumentDetail {
   license: string;
   repository_uri: string;
   repository_id: string;
-  status: 'L' | 'R' | 'E';
+  status: "L" | "R" | "E";
   created_at: string;
   updated_at: string;
 }
@@ -27,9 +27,9 @@ export interface AuthoredDocument {
 }
 
 /* ================================== */
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class DocumentService {
-  private readonly api = '/api/documents';
+  private readonly api = "/api/documents";
 
   /* ---- active document ---- */
   private currentId$$ = new BehaviorSubject<string | null>(null);

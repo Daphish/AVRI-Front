@@ -5,13 +5,16 @@
 
 <div class="navbar">
   <ul class="navbar-items">
-    <li *ngIf="!(isModalOpen$ | async)"><a (click)="closeSession()" class="close-session-btn">
-      Cerrar sesión
-    </a></li>
+    <li *ngIf="!(isModalOpen$ | async)">
+      <a (click)="closeSession()" class="close-session-btn"> Cerrar sesión </a>
+    </li>
     <li><a (click)="openSurvey()">Encuesta</a></li>
     <li><a (click)="viewFYP()">Recomendaciones</a></li>
     <li><a href="#" *ngIf="is_author">Panel de autor</a></li>
-    <li><a href="http://localhost:8000/admin/login/?next=/admin/" *ngIf="is_staff">Panel de administrador</a></li>
+    <li>
+      <a href="http://localhost:8000/admin/login/?next=/admin/" *ngIf="is_staff"
+        >Panel de administrador</a
+      >
+    </li>
   </ul>
 </div>
-

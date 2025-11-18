@@ -1,13 +1,19 @@
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of } from "rxjs";
 
 export class AuthServiceStub {
   currentUser$ = new BehaviorSubject<any>(null);
   isLoggedIn$ = new BehaviorSubject<boolean>(false);
   profileSetupComplete$ = new BehaviorSubject<boolean>(true);
-  autoLogin() { return Promise.resolve(true); }
-  login() { return Promise.resolve(true); }
+  autoLogin() {
+    return Promise.resolve(true);
+  }
+  login() {
+    return Promise.resolve(true);
+  }
   logout() {}
-  getToken() { return null; }
+  getToken() {
+    return null;
+  }
 }
 
 export class ChatServiceStub {
@@ -16,14 +22,22 @@ export class ChatServiceStub {
   sessions$ = new BehaviorSubject<any[]>([]);
   pendingWizard = false;
   loadSessions() {}
-  sendMessage() { return of({}); }
-  createSession() { return of({}); }
+  sendMessage() {
+    return of({});
+  }
+  createSession() {
+    return of({});
+  }
 }
 
 export class DocumentServiceStub {
   document$ = new BehaviorSubject<any | null>(null);
-  loadDocument() { return of({}); }
-  getDocumentsByIds(ids: string[]) { return of([]); }
+  loadDocument() {
+    return of({});
+  }
+  getDocumentsByIds(ids: string[]) {
+    return of([]);
+  }
 }
 
 export class RecommendationServiceStub {

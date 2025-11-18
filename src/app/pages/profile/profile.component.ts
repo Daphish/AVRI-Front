@@ -5,27 +5,27 @@ import {
   OnDestroy,
   inject,
   DestroyRef,
-} from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Router } from '@angular/router';
-import { NgFor, NgIf } from '@angular/common';
-import { Observable, Subscription, map, take } from 'rxjs';
+} from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { Router } from "@angular/router";
+import { NgFor, NgIf } from "@angular/common";
+import { Observable, Subscription, map, take } from "rxjs";
 
-import { AuthService } from '../../services/auth.service';
-import { ChatService } from '../../services/chat.service';
-import { RecommendationService } from '../../services/recommendation.service';
-import { User } from '../../interfaces/user.interface';
+import { AuthService } from "../../services/auth.service";
+import { ChatService } from "../../services/chat.service";
+import { RecommendationService } from "../../services/recommendation.service";
+import { User } from "../../interfaces/user.interface";
 import {
   DocumentService,
   SavedDocument,
-} from '../../services/document.service';
+} from "../../services/document.service";
 
 @Component({
-  selector: 'app-profile',
+  selector: "app-profile",
   standalone: true,
-  templateUrl: './profile.component.html',
+  templateUrl: "./profile.component.html",
   imports: [NgIf, NgFor],
-  styleUrls: ['./profile.component.css'],
+  styleUrls: ["./profile.component.css"],
 })
 export class ProfileComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
@@ -43,8 +43,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   /* ---------- toast notifications ---------- */
   showToast = false;
-  toastMessage = '';
-  toastType: 'success' | 'error' | 'warning' = 'error';
+  toastMessage = "";
+  toastType: "success" | "error" | "warning" = "error";
 
   userDisplay: User | null = null;
   isActuallyAnonymous: boolean = true; // For controlling the display
@@ -55,7 +55,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   // For closing session
   isUserLoggedInAndNotAnonymous$: Observable<boolean> =
     this.authService.currentUser$.pipe(
-      map((user) => !!user && !('anonymous_id' in user))
+      map((user) => !!user && !("anonymous_id" in user))
     );
 
   constructor(private destroyRef: DestroyRef) {}
@@ -63,7 +63,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   /* ---------- Method for showing toast ---------- */
   private showToastMessage(
     message: string,
-    type: 'success' | 'error' | 'warning' = 'error'
+    type: "success" | "error" | "warning" = "error"
   ) {
     this.toastMessage = message;
     this.toastType = type;
@@ -80,45 +80,44 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.authService.currentUser$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((currentUser) => {
-        if (currentUser && !('anonymous_id' in currentUser)) {
+        if (currentUser && !("anonymous_id" in currentUser)) {
           this.isActuallyAnonymous = false;
           this.userDisplay = currentUser as User;
           this.loadProfileData();
         } else {
           this.isActuallyAnonymous = true;
           this.userDisplay = null;
-          this.preferences = ['Inicia sesión para ver y configurar tu perfil.'];
+          this.preferences = ["Inicia sesión para ver y configurar tu perfil."];
           this.documents = this.getDefaultDocumentsPlaceholder();
           this.isLoadingProfile = false;
         }
       });
 
     this.subscriptions.add(
-      this.authService.profileSetupComplete$
-        .subscribe((isComplete) => {
-          if (!this.isActuallyAnonymous) {
-            this.profileNeedsSetup = !isComplete;
-          }
-        })
+      this.authService.profileSetupComplete$.subscribe((isComplete) => {
+        if (!this.isActuallyAnonymous) {
+          this.profileNeedsSetup = !isComplete;
+        }
+      })
     );
   }
 
   private getDefaultDocumentsPlaceholder(): SavedDocument[] {
     return [
       {
-        id: 'default-doc-placeholder',
+        id: "default-doc-placeholder",
         document: {
-          id: 'default-doc-placeholder',
-          title: 'No hay documentos para mostrar.',
-          author: 'Sin autor',
-          publication_date: '0',
-          knowledge_area: 'Sin área',
-          license: 'Sin licencia',
-          repository_uri: '',
-          repository_id: 'N/A_placeholder',
-          status: 'L',
-          created_at: '0',
-          updated_at: '0',
+          id: "default-doc-placeholder",
+          title: "No hay documentos para mostrar.",
+          author: "Sin autor",
+          publication_date: "0",
+          knowledge_area: "Sin área",
+          license: "Sin licencia",
+          repository_uri: "",
+          repository_id: "N/A_placeholder",
+          status: "L",
+          created_at: "0",
+          updated_at: "0",
         },
       },
     ];
@@ -143,10 +142,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
             this.preferences =
               data.profile.interests.length > 0
                 ? data.profile.interests
-                : ['Aún no has configurado tus preferencias.'];
+                : ["Aún no has configurado tus preferencias."];
           } else {
             this.preferences = [
-              'Configura tus preferencias para mejores recomendaciones.',
+              "Configura tus preferencias para mejores recomendaciones.",
             ];
           }
         },
@@ -155,11 +154,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
           this.isLoadingProfile = false;
 
           this.preferences = [
-            'Error al cargar preferencias. Intenta configurar tu perfil.',
+            "Error al cargar preferencias. Intenta configurar tu perfil.",
           ];
           this.authService.markProfileAsCompleted(false);
           this.showToastMessage(
-            'Error al cargar tu perfil. Inténtalo de nuevo.'
+            "Error al cargar tu perfil. Inténtalo de nuevo."
           );
         },
       })
@@ -178,7 +177,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         error: () => {
           this.documents = this.getDefaultDocumentsPlaceholder();
           this.isLoadingDocuments = false;
-          this.showToastMessage('Error al cargar documentos guardados.');
+          this.showToastMessage("Error al cargar documentos guardados.");
         },
       })
     );
@@ -192,7 +191,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
           this.chatService.pendingWizard = true;
         }
       });
-      await this.router.navigate(['/home']);
+      await this.router.navigate(["/home"]);
     } finally {
       this.isNavigating = false;
     }
@@ -202,7 +201,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.isNavigating = true;
     try {
       this.chatService.pendingWizard = true;
-      await this.router.navigate(['/home']);
+      await this.router.navigate(["/home"]);
     } finally {
       this.isNavigating = false;
     }
@@ -213,10 +212,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
     try {
       this.chatService.clearSessions();
       this.authService.logout();
-      await this.router.navigate(['/home']);
-      this.showToastMessage('Sesión cerrada correctamente.', 'success');
+      await this.router.navigate(["/home"]);
+      this.showToastMessage("Sesión cerrada correctamente.", "success");
     } catch (error) {
-      this.showToastMessage('Error al cerrar sesión.');
+      this.showToastMessage("Error al cerrar sesión.");
     } finally {
       this.isLoggingOut = false;
     }

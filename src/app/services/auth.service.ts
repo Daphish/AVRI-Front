@@ -1,8 +1,8 @@
-import { Injectable, inject, PLATFORM_ID } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
-import { AnonymousUser, User } from '../interfaces/user.interface';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable, inject, PLATFORM_ID } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { BehaviorSubject, firstValueFrom, Observable } from "rxjs";
+import { AnonymousUser, User } from "../interfaces/user.interface";
+import { isPlatformBrowser } from "@angular/common";
 
 interface TokenResponse {
   token: string;
@@ -23,7 +23,7 @@ interface AnonymousResponse {
   anonymous_id: string;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class AuthService {
   private http = inject(HttpClient);
   private platformId = inject(PLATFORM_ID);
@@ -56,7 +56,7 @@ export class AuthService {
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem("authToken");
     console.log(token);
     if (!token) {
       this.logout(); // Cleans states if no token
@@ -68,13 +68,13 @@ export class AuthService {
   async login(email: string, password: string): Promise<boolean> {
     try {
       const resp = await firstValueFrom(
-        this.http.post<TokenResponse>('/api/user/token/', { email, password })
+        this.http.post<TokenResponse>("/api/user/token/", { email, password })
       );
-      localStorage.setItem('authToken', resp.token);
+      localStorage.setItem("authToken", resp.token);
       await this.fetchAndSetCurrentUser();
       return true;
     } catch (error) {
-      console.error('Error en login:', error);
+      console.error("Error en login:", error);
       this.logout();
       return false;
     }
@@ -90,19 +90,19 @@ export class AuthService {
   ): Promise<boolean> {
     try {
       const resp = await firstValueFrom(
-        this.http.post<UserResponse>('/api/user/create/', {
+        this.http.post<UserResponse>("/api/user/create/", {
           email,
           password,
           name,
           first_name,
           last_name,
-          education_level: 'N',
+          education_level: "N",
           is_author,
         })
       );
       return true;
     } catch (error) {
-      console.error('Error al registrar:', error);
+      console.error("Error al registrar:", error);
       return false;
     }
   }
@@ -110,37 +110,37 @@ export class AuthService {
   async createAnonymous(): Promise<boolean> {
     try {
       const anonData = await firstValueFrom(
-        this.http.post<AnonymousResponse>('/api/user/create-anonymous/', {})
+        this.http.post<AnonymousResponse>("/api/user/create-anonymous/", {})
       );
       const resp = await firstValueFrom(
-        this.http.post<TokenResponse>('/api/user/token-anonymous/', {
+        this.http.post<TokenResponse>("/api/user/token-anonymous/", {
           anonymous_id: anonData.anonymous_id,
         })
       );
-      localStorage.setItem('authToken', resp.token);
+      localStorage.setItem("authToken", resp.token);
       await this.fetchAndSetCurrentUser();
       return true;
     } catch (error) {
-      console.error('Error creando usuario anónimo:', error);
+      console.error("Error creando usuario anónimo:", error);
       this.logout();
       return false;
     }
   }
 
   async fetchAndSetCurrentUser(): Promise<void> {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem("authToken");
     if (!token) {
       this.logout();
       return;
     }
     try {
       const user = await firstValueFrom(
-        this.http.get<User | AnonymousUser>('/api/user/me/')
+        this.http.get<User | AnonymousUser>("/api/user/me/")
       );
       this.loggedInSource.next(true);
       this.currentUserSource.next(user);
 
-      if (user && 'anonymous_id' in user) {
+      if (user && "anonymous_id" in user) {
         this.profileSetupCompleteSource.next(false);
       } else if (user) {
         const profile = await firstValueFrom(
@@ -154,7 +154,7 @@ export class AuthService {
       }
     } catch (error) {
       console.error(
-        'Error al obtener datos del usuario actual en fetchAndSetCurrentUser:',
+        "Error al obtener datos del usuario actual en fetchAndSetCurrentUser:",
         error
       );
       this.logout();
@@ -162,20 +162,20 @@ export class AuthService {
   }
 
   logout(): void {
-    localStorage.removeItem('authToken');
+    localStorage.removeItem("authToken");
     this.currentUserSource.next(null);
     this.loggedInSource.next(false);
     this.profileSetupCompleteSource.next(null);
   }
 
   getToken(): string | null {
-    return localStorage.getItem('authToken');
+    return localStorage.getItem("authToken");
   }
 
   markProfileAsCompleted(status: boolean = true): void {
     this.profileSetupCompleteSource.next(status);
     const currentUser = this.currentUserSource.value;
-    if (currentUser && !('anonymous_id' in currentUser)) {
+    if (currentUser && !("anonymous_id" in currentUser)) {
       const updatedUser = { ...currentUser, profile_preferences_set: status };
       this.currentUserSource.next(updatedUser);
     }

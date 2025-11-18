@@ -1,25 +1,25 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Subject, takeUntil, filter } from 'rxjs';
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { Subject, takeUntil, filter } from "rxjs";
 
 import {
   DocumentService,
   DocumentDetail,
-} from '../../services/document.service';
-import { AuthService } from '../../services/auth.service';
+} from "../../services/document.service";
+import { AuthService } from "../../services/auth.service";
 
 @Component({
   standalone: true,
-  selector: 'app-document-view',
-  templateUrl: './document-view.component.html',
-  styleUrl: './document-view.component.css',
+  selector: "app-document-view",
+  templateUrl: "./document-view.component.html",
+  styleUrl: "./document-view.component.css",
   imports: [CommonModule],
 })
 export class DocumentViewComponent implements OnInit, OnDestroy {
   /* ---------- toast notifications ---------- */
   showToast = false;
-  toastMessage = '';
-  toastType: 'success' | 'error' | 'warning' = 'error';
+  toastMessage = "";
+  toastType: "success" | "error" | "warning" = "error";
 
   document: DocumentDetail | null = null;
   loading = false;
@@ -35,12 +35,15 @@ export class DocumentViewComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  constructor(private docs: DocumentService, private auth: AuthService) {}
+  constructor(
+    private docs: DocumentService,
+    private auth: AuthService
+  ) {}
 
   /* ---------- method for showing toast ---------- */
   private showToastMessage(
     message: string,
-    type: 'success' | 'error' | 'warning' = 'error'
+    type: "success" | "error" | "warning" = "error"
   ) {
     this.toastMessage = message;
     this.toastType = type;
@@ -62,11 +65,11 @@ export class DocumentViewComponent implements OnInit, OnDestroy {
         return;
       }
       // Anonymous user
-      if ('anonymous_id' in user) {
+      if ("anonymous_id" in user) {
         this.is_author = false;
       }
       // Staff/autor flags if present
-      if ('is_author' in user) this.is_author = !!user.is_author;
+      if ("is_author" in user) this.is_author = !!user.is_author;
     });
 
     this.docs.document$.pipe(takeUntil(this.destroy$)).subscribe({
@@ -75,10 +78,10 @@ export class DocumentViewComponent implements OnInit, OnDestroy {
         this.loading = false;
       },
       error: (error) => {
-        console.error('Error cargando documento:', error);
+        console.error("Error cargando documento:", error);
         this.loading = false;
         this.showToastMessage(
-          'Error al cargar el documento. Inténtalo de nuevo.'
+          "Error al cargar el documento. Inténtalo de nuevo."
         );
       },
     });
@@ -96,25 +99,25 @@ export class DocumentViewComponent implements OnInit, OnDestroy {
       if (this.document?.repository_uri) {
         // validate URL before opening
         const url = new URL(this.document.repository_uri);
-        window.open(this.document.repository_uri, '_blank');
+        window.open(this.document.repository_uri, "_blank");
       } else {
         this.showToastMessage(
-          'El documento no tiene URL de repositorio disponible.',
-          'warning'
+          "El documento no tiene URL de repositorio disponible.",
+          "warning"
         );
       }
     } catch (error) {
-      console.error('Error abriendo repositorio:', error);
+      console.error("Error abriendo repositorio:", error);
       this.showToastMessage(
-        'No se pudo abrir el enlace del repositorio.',
-        'error'
+        "No se pudo abrir el enlace del repositorio.",
+        "error"
       );
     }
   }
 
   toggleSave(): void {
     if (!this.document) {
-      this.showToastMessage('No hay documento seleccionado.', 'warning');
+      this.showToastMessage("No hay documento seleccionado.", "warning");
       return;
     }
 
@@ -127,13 +130,13 @@ export class DocumentViewComponent implements OnInit, OnDestroy {
         next: () => {
           this.saved = false;
           this.savingDocument = false;
-          this.showToastMessage('Documento eliminado de guardados.', 'success');
+          this.showToastMessage("Documento eliminado de guardados.", "success");
         },
         error: (e) => {
-          console.error('Error unsaving:', e);
+          console.error("Error unsaving:", e);
           this.savingDocument = false;
           this.showToastMessage(
-            'Error al eliminar de guardados. Inténtalo de nuevo.'
+            "Error al eliminar de guardados. Inténtalo de nuevo."
           );
         },
       });
@@ -142,13 +145,13 @@ export class DocumentViewComponent implements OnInit, OnDestroy {
         next: () => {
           this.saved = true;
           this.savingDocument = false;
-          this.showToastMessage('Documento guardado correctamente.', 'success');
+          this.showToastMessage("Documento guardado correctamente.", "success");
         },
         error: (e) => {
-          console.error('Error saving:', e);
+          console.error("Error saving:", e);
           this.savingDocument = false;
           this.showToastMessage(
-            'Error al guardar documento. Inténtalo de nuevo.'
+            "Error al guardar documento. Inténtalo de nuevo."
           );
         },
       });
@@ -157,7 +160,7 @@ export class DocumentViewComponent implements OnInit, OnDestroy {
 
   toggleClaim(): void {
     if (!this.document) {
-      this.showToastMessage('No hay documento seleccionado.', 'warning');
+      this.showToastMessage("No hay documento seleccionado.", "warning");
       return;
     }
 
@@ -169,13 +172,13 @@ export class DocumentViewComponent implements OnInit, OnDestroy {
         next: () => {
           this.claimed = false;
           this.savingDocument = false;
-          this.showToastMessage('Documento liberado correctamente.', 'success');
+          this.showToastMessage("Documento liberado correctamente.", "success");
         },
         error: (e) => {
-          console.error('Error un-claiming:', e);
+          console.error("Error un-claiming:", e);
           this.savingDocument = false;
           this.showToastMessage(
-            'Error al liberar documento. Inténtalo de nuevo.'
+            "Error al liberar documento. Inténtalo de nuevo."
           );
         },
       });
@@ -185,15 +188,15 @@ export class DocumentViewComponent implements OnInit, OnDestroy {
           this.claimed = true;
           this.savingDocument = false;
           this.showToastMessage(
-            'Documento reclamado correctamente.',
-            'success'
+            "Documento reclamado correctamente.",
+            "success"
           );
         },
         error: (e) => {
-          console.error('Error claiming:', e);
+          console.error("Error claiming:", e);
           this.savingDocument = false;
           this.showToastMessage(
-            'Error al reclamar documento. Inténtalo de nuevo.'
+            "Error al reclamar documento. Inténtalo de nuevo."
           );
         },
       });
