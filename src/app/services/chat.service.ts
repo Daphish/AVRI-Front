@@ -42,6 +42,7 @@ export class ChatService {
     return text
       .replace(/<think>.*?<\/think>/gs, "") // remove thinking
       .replace(/##\d+\$\$|\\n/g, "") // remove cite and new lines
+      .replace(/\[ID:\d+\]/g, "") // hide cite
       .trim();
   }
 
