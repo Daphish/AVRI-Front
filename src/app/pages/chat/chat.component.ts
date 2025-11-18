@@ -1,15 +1,15 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { NgFor, NgIf, NgClass, NgTemplateOutlet } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { Component, OnInit, ViewChild, ElementRef } from "@angular/core";
+import { NgFor, NgIf, NgClass, NgTemplateOutlet } from "@angular/common";
+import { FormsModule } from "@angular/forms";
+import { Router } from "@angular/router";
+import { firstValueFrom } from "rxjs";
 
-import { ChatService } from '../../services/chat.service';
-import { DocumentService } from '../../services/document.service';
-import { Documents, Message } from '../../interfaces/chat.interface';
+import { ChatService } from "../../services/chat.service";
+import { DocumentService } from "../../services/document.service";
+import { Documents, Message } from "../../interfaces/chat.interface";
 
-import { HttpClient } from '@angular/common/http';
-import { AuthService } from '../../services/auth.service';
+import { HttpClient } from "@angular/common/http";
+import { AuthService } from "../../services/auth.service";
 
 /** Only type por wizard lists */
 interface SelectItem {
@@ -18,25 +18,25 @@ interface SelectItem {
 }
 
 @Component({
-  selector: 'app-chat',
+  selector: "app-chat",
   standalone: true,
   imports: [NgIf, NgFor, NgClass, FormsModule],
-  templateUrl: './chat.component.html',
-  styleUrl: './chat.component.css',
+  templateUrl: "./chat.component.html",
+  styleUrl: "./chat.component.css",
 })
 export class ChatComponent implements OnInit {
-  @ViewChild('msgContainer') msgContainer!: ElementRef<HTMLDivElement>;
-  @ViewChild('chatInput') chatInput!: ElementRef<HTMLTextAreaElement>;
+  @ViewChild("msgContainer") msgContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild("chatInput") chatInput!: ElementRef<HTMLTextAreaElement>;
 
   /* ---------- toast notifications ---------- */
   showToast = false;
-  toastMessage = '';
-  toastType: 'success' | 'error' | 'warning' = 'error';
+  toastMessage = "";
+  toastType: "success" | "error" | "warning" = "error";
 
   /* ---------- chat state ---------- */
-  sessionId = '';
+  sessionId = "";
   messages: Message[] = [];
-  newText = '';
+  newText = "";
   isSending = false;
 
   /* ---------- wizard (profiler) ---------- */
@@ -45,46 +45,46 @@ export class ChatComponent implements OnInit {
   savingPrefs = false;
 
   topics: SelectItem[] = [
-    'Ingeniería',
-    'Ciencias Sociales',
-    'Ciencias Naturales',
-    'Humanidades',
-    'Arquitectura',
-    'Administración',
-    'Psicología',
-    'Comunicación',
-    'Lenguas',
-    'Química',
-    'Biología',
-    'Derecho',
-    'Física',
-    'Matemáticas',
-    'Medicina',
-    'Artes',
-    'Economía',
-    'Educación',
-    'Historia',
+    "Ingeniería",
+    "Ciencias Sociales",
+    "Ciencias Naturales",
+    "Humanidades",
+    "Arquitectura",
+    "Administración",
+    "Psicología",
+    "Comunicación",
+    "Lenguas",
+    "Química",
+    "Biología",
+    "Derecho",
+    "Física",
+    "Matemáticas",
+    "Medicina",
+    "Artes",
+    "Economía",
+    "Educación",
+    "Historia",
   ].map((label) => ({ label, selected: false }));
 
   keywords: SelectItem[] = [
-    'Minería de datos',
-    'Inteligencia Artificial',
-    'Sistemas Operativos',
-    'Algoritmos',
-    'Compiladores',
-    'Redes',
-    'Bases de Datos',
-    'Visión por Computador',
-    'Aprendizaje Automático',
-    'Ciberseguridad',
+    "Minería de datos",
+    "Inteligencia Artificial",
+    "Sistemas Operativos",
+    "Algoritmos",
+    "Compiladores",
+    "Redes",
+    "Bases de Datos",
+    "Visión por Computador",
+    "Aprendizaje Automático",
+    "Ciberseguridad",
   ].map((label) => ({ label, selected: false }));
 
   documents: SelectItem[] = [
-    'Manual de laboratorio',
-    'Tesis Doctoral',
-    'Artículo de revista',
-    'Reporte técnico',
-    'Capítulo de libro',
+    "Manual de laboratorio",
+    "Tesis Doctoral",
+    "Artículo de revista",
+    "Reporte técnico",
+    "Capítulo de libro",
   ].map((label) => ({ label, selected: false }));
 
   constructor(
@@ -125,8 +125,8 @@ export class ChatComponent implements OnInit {
     return this.step === 1
       ? this.topics
       : this.step === 2
-      ? this.keywords
-      : this.documents;
+        ? this.keywords
+        : this.documents;
   }
 
   toggle(opt: SelectItem) {
@@ -150,7 +150,7 @@ export class ChatComponent implements OnInit {
   /* ---------- method for showing toast ---------- */
   private showToastMessage(
     message: string,
-    type: 'success' | 'error' | 'warning' = 'error'
+    type: "success" | "error" | "warning" = "error"
   ) {
     this.toastMessage = message;
     this.toastType = type;
@@ -177,20 +177,20 @@ export class ChatComponent implements OnInit {
       };
       try {
         await firstValueFrom(
-          this.http.put('/api/recommender/profile/me/', payload)
+          this.http.put("/api/recommender/profile/me/", payload)
         );
       } catch {
         await firstValueFrom(
-          this.http.post('/api/recommender/profile/create/', payload)
+          this.http.post("/api/recommender/profile/create/", payload)
         );
       }
       this.auth.markProfileAsCompleted(true);
       this.showWizard = false;
-      this.showToastMessage('Preferencias guardadas correctamente', 'success');
+      this.showToastMessage("Preferencias guardadas correctamente", "success");
     } catch (e) {
       console.error(e);
       this.showToastMessage(
-        'Hubo un error al enviar las respuestas. Inténtalo de nuevo.'
+        "Hubo un error al enviar las respuestas. Inténtalo de nuevo."
       );
     } finally {
       this.savingPrefs = false;
@@ -211,12 +211,12 @@ export class ChatComponent implements OnInit {
 
       await this.chatService.sendMessage(this.sessionId, text);
 
-      this.newText = '';
+      this.newText = "";
       this.showWizard = false;
     } catch (error) {
-      console.error('Error enviando mensaje:', error);
+      console.error("Error enviando mensaje:", error);
       this.showToastMessage(
-        'Hubo un error al enviar el mensaje. Inténtalo de nuevo.'
+        "Hubo un error al enviar el mensaje. Inténtalo de nuevo."
       );
     } finally {
       this.isSending = false;
@@ -226,11 +226,11 @@ export class ChatComponent implements OnInit {
   openDocument(document: Documents): void {
     try {
       this.docService.setCurrentDocument(document);
-      this.router.navigate(['/document']);
+      this.router.navigate(["/document"]);
     } catch (error) {
-      console.error('Error abriendo documento:', error);
+      console.error("Error abriendo documento:", error);
       this.showToastMessage(
-        'No se pudo abrir el documento. Inténtalo de nuevo.'
+        "No se pudo abrir el documento. Inténtalo de nuevo."
       );
     }
   }
@@ -254,34 +254,34 @@ export class ChatComponent implements OnInit {
   /* ---------------- auto-resize textarea ---------------- */
   autoResize(): void {
     if (!this.chatInput) return;
-    
+
     const textarea = this.chatInput.nativeElement;
     const messagesContainer = this.msgContainer.nativeElement;
-    
+
     // Reset height to auto to get the correct scrollHeight
-    textarea.style.height = 'auto';
-    
+    textarea.style.height = "auto";
+
     // Calculate the maximum height (half of messages container)
     const maxHeight = messagesContainer.clientHeight * 0.5;
     const minHeight = 40; // Minimum height for the textarea
     const scrollHeight = textarea.scrollHeight;
-    
+
     // Set the height based on content, but respect max and min constraints
     const newHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
-    
+
     textarea.style.height = `${newHeight}px`;
-    
+
     // If content exceeds max height, enable scroll
     if (scrollHeight > maxHeight) {
-      textarea.style.overflowY = 'auto';
+      textarea.style.overflowY = "auto";
     } else {
-      textarea.style.overflowY = 'hidden';
+      textarea.style.overflowY = "hidden";
     }
   }
 
   onEnterKey(event: Event): void {
     const keyboardEvent = event as KeyboardEvent;
-    if (keyboardEvent.key === 'Enter' && !keyboardEvent.shiftKey) {
+    if (keyboardEvent.key === "Enter" && !keyboardEvent.shiftKey) {
       event.preventDefault();
       this.send();
     }

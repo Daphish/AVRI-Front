@@ -19,8 +19,7 @@
   <img alt="Last commit" src="https://img.shields.io/github/last-commit/Daphish/AVRI-Front">
 </p>
 
-
-# AVRI-Front 
+# AVRI-Front
 
 Interfaces for the **Virtual Assistant of the Institutional Repository**
 

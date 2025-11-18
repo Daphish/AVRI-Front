@@ -25,8 +25,8 @@
             step === 1
               ? "Selecciona 5 temas de interés"
               : step === 2
-              ? "Selecciona 5 palabras clave"
-              : "Elige documentos que te interesen"
+                ? "Selecciona 5 palabras clave"
+                : "Elige documentos que te interesen"
           }}
         </h3>
 
@@ -43,7 +43,9 @@
         </div>
 
         <div class="wizard-nav">
-          <button (click)="prev()" [disabled]="step === 1 || savingPrefs">&laquo;</button>
+          <button (click)="prev()" [disabled]="step === 1 || savingPrefs">
+            &laquo;
+          </button>
           <span>{{ step }}/3</span>
           <button (click)="next()" [disabled]="!canContinue() || savingPrefs">
             {{ step < 3 ? "&raquo;" : "✓" }}
@@ -120,7 +122,7 @@
                 [ngClass]="{
                   blue: ref.status === 'L',
                   red: ref.status === 'R',
-                  yellow: ref.status === 'E'
+                  yellow: ref.status === 'E',
                 }"
                 (click)="openDocument(ref)"
                 title="Click to view document details"

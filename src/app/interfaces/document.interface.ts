@@ -3,7 +3,7 @@ export interface Document {
   title: string;
   repository_uri: string;
   repository_id: string;
-  status: 'L' | 'R' | 'E';
+  status: "L" | "R" | "E";
 }
 
 export interface DocumentDetail extends Document {

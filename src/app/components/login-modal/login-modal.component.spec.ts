@@ -1,23 +1,32 @@
-import { ComponentFixture, TestBed, fakeAsync, tick, flush, discardPeriodicTasks } from '@angular/core/testing';
-import { LoginModalComponent } from './login-modal.component';
-import { provideHttpClient, withFetch } from '@angular/common/http';           
-import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { AuthService } from '../../services/auth.service';
-import { ChatService } from '../../services/chat.service';
+import {
+  ComponentFixture,
+  TestBed,
+  fakeAsync,
+  tick,
+  flush,
+  discardPeriodicTasks,
+} from "@angular/core/testing";
+import { LoginModalComponent } from "./login-modal.component";
+import { provideHttpClient, withFetch } from "@angular/common/http";
+import { provideHttpClientTesting } from "@angular/common/http/testing";
+import { AuthService } from "../../services/auth.service";
+import { ChatService } from "../../services/chat.service";
 
 // Enhanced service stubs for behavior testing
 class EnhancedAuthServiceStub {
   private shouldSucceed = true;
-  
-  login(email: string, password: string) { 
+
+  login(email: string, password: string) {
     return Promise.resolve(this.shouldSucceed);
   }
-  createAnonymous() { 
+  createAnonymous() {
     return Promise.resolve(this.shouldSucceed);
   }
   logout() {}
-  getToken() { return 'mock-token'; }
-  
+  getToken() {
+    return "mock-token";
+  }
+
   // Test helper methods
   setLoginResult(success: boolean) {
     this.shouldSucceed = success;
@@ -29,7 +38,7 @@ class EnhancedChatServiceStub {
   clearSessions() {}
 }
 
-describe('LoginModalComponent', () => {
+describe("LoginModalComponent", () => {
   let component: LoginModalComponent;
   let fixture: ComponentFixture<LoginModalComponent>;
   let authService: EnhancedAuthServiceStub;
@@ -46,8 +55,8 @@ describe('LoginModalComponent', () => {
       providers: [
         { provide: AuthService, useClass: EnhancedAuthServiceStub },
         { provide: ChatService, useClass: EnhancedChatServiceStub },
-        provideHttpClient(withFetch()),          
-        provideHttpClientTesting(), 
+        provideHttpClient(withFetch()),
+        provideHttpClientTesting(),
       ],
     }).compileComponents();
 
@@ -62,382 +71,387 @@ describe('LoginModalComponent', () => {
     fixture.destroy();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 
-  describe('Component Initialization', () => {
-    it('should initialize with default values', () => {
-      expect(component.user).toBe('');
-      expect(component.password).toBe('');
+  describe("Component Initialization", () => {
+    it("should initialize with default values", () => {
+      expect(component.user).toBe("");
+      expect(component.password).toBe("");
       expect(component.showToast).toBeFalse();
       expect(component.emailTouched).toBeFalse();
     });
   });
 
-  describe('Modal Controls', () => {
-    it('should emit closeModalEvent when closeModal is called', () => {
-      spyOn(component.closeModalEvent, 'emit');
-      
+  describe("Modal Controls", () => {
+    it("should emit closeModalEvent when closeModal is called", () => {
+      spyOn(component.closeModalEvent, "emit");
+
       component.closeModal();
-      
+
       expect(component.closeModalEvent.emit).toHaveBeenCalled();
     });
   });
 
-  describe('Login Functionality', () => {
+  describe("Login Functionality", () => {
     beforeEach(() => {
-      component.user = 'test@example.com';
-      component.password = 'password123';
+      component.user = "test@example.com";
+      component.password = "password123";
     });
 
-    it('should call authService.login with correct credentials', fakeAsync(() => {
-      spyOn(authService, 'login').and.returnValue(Promise.resolve(true));
-      spyOn(chatService, 'loadSessions');
-      spyOn(component, 'closeModal');
-      
+    it("should call authService.login with correct credentials", fakeAsync(() => {
+      spyOn(authService, "login").and.returnValue(Promise.resolve(true));
+      spyOn(chatService, "loadSessions");
+      spyOn(component, "closeModal");
+
       component.startSession();
       tick();
-      
-      expect(authService.login).toHaveBeenCalledWith('test@example.com', 'password123');
+
+      expect(authService.login).toHaveBeenCalledWith(
+        "test@example.com",
+        "password123"
+      );
       endTimers();
     }));
 
-    it('should handle successful login', fakeAsync(() => {
+    it("should handle successful login", fakeAsync(() => {
       authService.setLoginResult(true);
-      spyOn(chatService, 'loadSessions');
-      spyOn(component, 'closeModal');
-      
+      spyOn(chatService, "loadSessions");
+      spyOn(component, "closeModal");
+
       component.startSession();
       tick();
-      
+
       expect(chatService.loadSessions).toHaveBeenCalled();
       expect(component.closeModal).toHaveBeenCalled();
-      expect(component.toastType).toBe('success');
+      expect(component.toastType).toBe("success");
 
       endTimers();
     }));
 
-    it('should handle login failure', fakeAsync(() => {
+    it("should handle login failure", fakeAsync(() => {
       authService.setLoginResult(false);
-      spyOn(chatService, 'loadSessions');
-      spyOn(component, 'closeModal');
-      
+      spyOn(chatService, "loadSessions");
+      spyOn(component, "closeModal");
+
       component.startSession();
       tick();
-      
+
       expect(chatService.loadSessions).not.toHaveBeenCalled();
       expect(component.closeModal).not.toHaveBeenCalled();
       expect(component.showToast).toBeTrue();
-      expect(component.toastType).toBe('error');
+      expect(component.toastType).toBe("error");
 
       endTimers();
     }));
 
-    it('should auto-hide toast after 4 seconds on login failure', fakeAsync(() => {
+    it("should auto-hide toast after 4 seconds on login failure", fakeAsync(() => {
       authService.setLoginResult(false);
-      
+
       component.startSession();
       tick(); // Wait for login promise to resolve
-      
+
       expect(component.showToast).toBeTrue();
-      
+
       tick(4000); // Wait for toast auto-hide timeout
-      
+
       expect(component.showToast).toBeFalse();
 
       endTimers();
     }));
   });
 
-  describe('Anonymous User Functionality', () => {
-    it('should call authService.createAnonymous', fakeAsync(() => {
-      spyOn(authService, 'createAnonymous').and.returnValue(Promise.resolve(true));
-      spyOn(component, 'closeModal');
-      
+  describe("Anonymous User Functionality", () => {
+    it("should call authService.createAnonymous", fakeAsync(() => {
+      spyOn(authService, "createAnonymous").and.returnValue(
+        Promise.resolve(true)
+      );
+      spyOn(component, "closeModal");
+
       component.continueAsGuest();
       tick();
-      
+
       expect(authService.createAnonymous).toHaveBeenCalled();
 
       endTimers();
     }));
 
-    it('should handle successful anonymous creation', fakeAsync(() => {
+    it("should handle successful anonymous creation", fakeAsync(() => {
       authService.setLoginResult(true);
-      spyOn(component, 'closeModal');
-      
+      spyOn(component, "closeModal");
+
       component.continueAsGuest();
       tick();
-      
+
       expect(component.closeModal).toHaveBeenCalled();
-      expect(component.toastType).toBe('success');
+      expect(component.toastType).toBe("success");
 
       endTimers();
     }));
 
-    it('should handle anonymous creation failure', fakeAsync(() => {
+    it("should handle anonymous creation failure", fakeAsync(() => {
       authService.setLoginResult(false);
-      spyOn(component, 'closeModal');
-      
+      spyOn(component, "closeModal");
+
       component.continueAsGuest();
       tick();
-      
+
       expect(component.closeModal).not.toHaveBeenCalled();
       expect(component.showToast).toBeTrue();
-      expect(component.toastType).toBe('error');
+      expect(component.toastType).toBe("error");
 
       endTimers();
     }));
 
-    it('should auto-hide toast after 4 seconds on anonymous creation failure', fakeAsync(() => {
+    it("should auto-hide toast after 4 seconds on anonymous creation failure", fakeAsync(() => {
       authService.setLoginResult(false);
-      
+
       component.continueAsGuest();
       tick(); // Wait for createAnonymous promise to resolve
-      
+
       expect(component.showToast).toBeTrue();
-      
+
       tick(4000); // Wait for toast auto-hide timeout
-      
+
       expect(component.showToast).toBeFalse();
 
       endTimers();
     }));
   });
 
-  describe('Form Validation', () => {
-    it('should accept valid email formats', () => {
+  describe("Form Validation", () => {
+    it("should accept valid email formats", () => {
       const validEmails = [
-        'user@example.com',
-        'test.email@domain.org',
-        'user+tag@example.co.uk',
-        'user123@test-domain.com'
+        "user@example.com",
+        "test.email@domain.org",
+        "user+tag@example.co.uk",
+        "user123@test-domain.com",
       ];
-      
-      validEmails.forEach(email => {
+
+      validEmails.forEach((email) => {
         component.user = email;
         expect(component.isEmailValid()).toBeTrue();
         expect(component.user).toBe(email);
       });
     });
 
-    it('should reject invalid email formats', () => {
+    it("should reject invalid email formats", () => {
       const invalidEmails = [
-        'notanemail',
-        'missing@domain',
-        '@nodomain.com',
-        'no@domain',
-        'spaces in@email.com',
-        'double@@domain.com',
-        'nodomain@.com'
+        "notanemail",
+        "missing@domain",
+        "@nodomain.com",
+        "no@domain",
+        "spaces in@email.com",
+        "double@@domain.com",
+        "nodomain@.com",
       ];
-      
-      invalidEmails.forEach(email => {
+
+      invalidEmails.forEach((email) => {
         component.user = email;
         expect(component.isEmailValid()).toBeFalse();
       });
     });
 
-    it('should show email error when touched and invalid', () => {
-      component.user = 'invalidemail';
+    it("should show email error when touched and invalid", () => {
+      component.user = "invalidemail";
       component.emailTouched = false;
       expect(component.showEmailError()).toBeFalse();
-      
+
       component.emailTouched = true;
       expect(component.showEmailError()).toBeTrue();
     });
 
-    it('should not show error for valid email', () => {
-      component.user = 'valid@email.com';
+    it("should not show error for valid email", () => {
+      component.user = "valid@email.com";
       component.emailTouched = true;
       expect(component.showEmailError()).toBeFalse();
     });
 
-    it('should mark email as touched on blur', () => {
+    it("should mark email as touched on blur", () => {
       component.emailTouched = false;
       component.onEmailBlur();
       expect(component.emailTouched).toBeTrue();
     });
 
-    it('should mark email as touched on input when user starts typing', () => {
+    it("should mark email as touched on input when user starts typing", () => {
       component.emailTouched = false;
-      component.user = '';
+      component.user = "";
       component.onEmailInput();
       expect(component.emailTouched).toBeFalse(); // Still false because no text
-      
-      component.user = 'a';
+
+      component.user = "a";
       component.onEmailInput();
       expect(component.emailTouched).toBeTrue(); // Now true because has text
     });
 
-    it('should disable login button when email is invalid', () => {
-      component.user = 'invalid';
-      component.password = 'password123';
+    it("should disable login button when email is invalid", () => {
+      component.user = "invalid";
+      component.password = "password123";
       expect(component.canSubmitLogin()).toBeFalse();
     });
 
-    it('should enable login button when all fields are valid', () => {
-      component.user = 'valid@email.com';
-      component.password = 'password123';
+    it("should enable login button when all fields are valid", () => {
+      component.user = "valid@email.com";
+      component.password = "password123";
       expect(component.canSubmitLogin()).toBeTrue();
     });
 
-    it('should disable register button when email is invalid', () => {
-      component.name = 'John';
-      component.firstName = 'Doe';
-      component.lastName = 'Smith';
-      component.user = 'invalid';
-      component.password = 'password123';
+    it("should disable register button when email is invalid", () => {
+      component.name = "John";
+      component.firstName = "Doe";
+      component.lastName = "Smith";
+      component.user = "invalid";
+      component.password = "password123";
       expect(component.canSubmitRegister()).toBeFalse();
     });
 
-    it('should disable register button when any required field is empty', () => {
-      component.name = '';
-      component.firstName = 'Doe';
-      component.lastName = 'Smith';
-      component.user = 'valid@email.com';
-      component.password = 'password123';
+    it("should disable register button when any required field is empty", () => {
+      component.name = "";
+      component.firstName = "Doe";
+      component.lastName = "Smith";
+      component.user = "valid@email.com";
+      component.password = "password123";
       expect(component.canSubmitRegister()).toBeFalse();
     });
 
-    it('should enable register button when all fields are valid', () => {
-      component.name = 'John';
-      component.firstName = 'Doe';
-      component.lastName = 'Smith';
-      component.user = 'valid@email.com';
-      component.password = 'password123';
+    it("should enable register button when all fields are valid", () => {
+      component.name = "John";
+      component.firstName = "Doe";
+      component.lastName = "Smith";
+      component.user = "valid@email.com";
+      component.password = "password123";
       expect(component.canSubmitRegister()).toBeTrue();
     });
 
-    it('should reset email validation state when toggling register modal', () => {
+    it("should reset email validation state when toggling register modal", () => {
       component.emailTouched = true;
-      component.user = 'test@email.com';
+      component.user = "test@email.com";
       component.toggleRegisterModal();
       expect(component.emailTouched).toBeFalse();
-      expect(component.user).toBe('');
+      expect(component.user).toBe("");
     });
 
-    it('should handle empty credentials gracefully', fakeAsync(() => {
-      component.user = '';
-      component.password = '';
-      
+    it("should handle empty credentials gracefully", fakeAsync(() => {
+      component.user = "";
+      component.password = "";
+
       // Should not be able to submit with empty credentials
       expect(component.canSubmitLogin()).toBeFalse();
 
       endTimers();
     }));
 
-    it('should trim whitespace in email validation', () => {
-      component.user = '  valid@email.com  ';
+    it("should trim whitespace in email validation", () => {
+      component.user = "  valid@email.com  ";
       expect(component.isEmailValid()).toBeTrue();
     });
   });
 
-  describe('Toast Display', () => {
-    it('should show toast state correctly', () => {
+  describe("Toast Display", () => {
+    it("should show toast state correctly", () => {
       component.showToast = true;
       expect(component.showToast).toBeTrue();
-      
+
       component.showToast = false;
       expect(component.showToast).toBeFalse();
     });
 
-    it('should show success toast on successful login', fakeAsync(() => {
+    it("should show success toast on successful login", fakeAsync(() => {
       authService.setLoginResult(true);
-      spyOn(component, 'closeModal');
-      
+      spyOn(component, "closeModal");
+
       component.startSession();
       tick();
-      
+
       expect(component.showToast).toBeTrue();
-      expect(component.toastType).toBe('success');
+      expect(component.toastType).toBe("success");
 
       endTimers();
     }));
   });
 
-  describe('Integration Scenarios', () => {
-    it('should handle rapid successive login attempts', fakeAsync(() => {
-      component.user = 'test@example.com';
-      component.password = 'password';
-      
+  describe("Integration Scenarios", () => {
+    it("should handle rapid successive login attempts", fakeAsync(() => {
+      component.user = "test@example.com";
+      component.password = "password";
+
       // First attempt fails
       authService.setLoginResult(false);
       component.startSession();
       tick();
       expect(component.showToast).toBeTrue();
-      expect(component.toastType).toBe('error');
-      
+      expect(component.toastType).toBe("error");
+
       // Second attempt succeeds immediately
       authService.setLoginResult(true);
-      spyOn(component, 'closeModal');
+      spyOn(component, "closeModal");
       component.startSession();
       tick();
-      
+
       expect(component.closeModal).toHaveBeenCalled();
-      expect(component.toastType).toBe('success');
+      expect(component.toastType).toBe("success");
 
       endTimers();
     }));
 
-    it('should handle switching between login and guest modes', fakeAsync(() => {
+    it("should handle switching between login and guest modes", fakeAsync(() => {
       // Try login first (fails)
-      component.user = 'test@example.com';
-      component.password = 'password';
+      component.user = "test@example.com";
+      component.password = "password";
       authService.setLoginResult(false);
       component.startSession();
       tick();
       expect(component.showToast).toBeTrue();
-      expect(component.toastType).toBe('error');
-      
+      expect(component.toastType).toBe("error");
+
       // Then try guest mode (succeeds)
       authService.setLoginResult(true);
-      spyOn(component, 'closeModal');
+      spyOn(component, "closeModal");
       component.continueAsGuest();
       tick();
-      
+
       expect(component.closeModal).toHaveBeenCalled();
 
       endTimers();
     }));
   });
 
-  describe('UI State Management', () => {
-    it('should maintain form values during error states', fakeAsync(() => {
-      component.user = 'test@example.com';
-      component.password = 'mypassword';
-      
+  describe("UI State Management", () => {
+    it("should maintain form values during error states", fakeAsync(() => {
+      component.user = "test@example.com";
+      component.password = "mypassword";
+
       authService.setLoginResult(false);
       component.startSession();
       tick();
-      
+
       // Form values should be preserved even after error
-      expect(component.user).toBe('test@example.com');
-      expect(component.password).toBe('mypassword');
+      expect(component.user).toBe("test@example.com");
+      expect(component.password).toBe("mypassword");
       expect(component.showToast).toBeTrue();
-      expect(component.toastType).toBe('error');
+      expect(component.toastType).toBe("error");
 
       endTimers();
     }));
 
-    it('should handle concurrent toast timeouts correctly', fakeAsync(() => {
+    it("should handle concurrent toast timeouts correctly", fakeAsync(() => {
       // Trigger first toast
       authService.setLoginResult(false);
       component.startSession();
       tick();
       expect(component.showToast).toBeTrue();
-      
+
       // Trigger second toast before first timeout
       tick(2000);
       component.continueAsGuest();
       tick();
       expect(component.showToast).toBeTrue();
-      
+
       // First timeout should complete
       tick(2000);
       expect(component.showToast).toBeTrue();
-      
+
       // Second timeout should complete
       tick(4000);
       expect(component.showToast).toBeFalse();
@@ -446,8 +460,8 @@ describe('LoginModalComponent', () => {
     }));
   });
 
-  it('coverage: multiple failures only clear toast after the last timer expires', fakeAsync(() => {
-  (authService as any).setLoginResult(false);
+  it("coverage: multiple failures only clear toast after the last timer expires", fakeAsync(() => {
+    (authService as any).setLoginResult(false);
 
     // First failed attempt
     component.startSession();
@@ -471,7 +485,7 @@ describe('LoginModalComponent', () => {
     endTimers();
   }));
 
-  it('coverage: closeModal does not change toast flag', fakeAsync(() => {
+  it("coverage: closeModal does not change toast flag", fakeAsync(() => {
     (authService as any).setLoginResult(false);
     component.startSession();
     tick();
@@ -483,22 +497,22 @@ describe('LoginModalComponent', () => {
     endTimers();
   }));
 
-  describe('CAPTCHA Functionality', () => {
+  describe("CAPTCHA Functionality", () => {
     beforeEach(() => {
       component.register = true;
       component.generateMathQuestion();
     });
 
-    it('should generate math questions with numbers 1-10', () => {
+    it("should generate math questions with numbers 1-10", () => {
       // Test multiple generations to ensure randomness
       const questions = [];
       for (let i = 0; i < 10; i++) {
         component.generateMathQuestion();
         questions.push(component.mathQuestion);
       }
-      
+
       // All questions should follow the pattern "X + Y = ?"
-      questions.forEach(question => {
+      questions.forEach((question) => {
         expect(question).toMatch(/^\d+ \+ \d+ = \?$/);
         const numbers = question.match(/\d+/g);
         expect(numbers).toHaveSize(2);
@@ -511,7 +525,7 @@ describe('LoginModalComponent', () => {
       });
     });
 
-    it('should calculate correct answer for math question', () => {
+    it("should calculate correct answer for math question", () => {
       component.generateMathQuestion();
       const question = component.mathQuestion;
       const numbers = question.match(/\d+/g);
@@ -521,129 +535,128 @@ describe('LoginModalComponent', () => {
       }
     });
 
-    it('should validate correct answers', () => {
+    it("should validate correct answers", () => {
       component.userAnswer = component.mathAnswer;
       component.validateCaptcha();
-      
+
       expect(component.captchaSolved).toBeTrue();
     });
 
-    it('should reject incorrect answers', () => {
+    it("should reject incorrect answers", () => {
       component.userAnswer = component.mathAnswer + 1; // Wrong answer
       component.validateCaptcha();
-      
+
       expect(component.captchaSolved).toBeFalse();
     });
 
-    it('should show error message for incorrect answers', () => {
-      spyOn(component as any, 'showToastMessage');
+    it("should show error message for incorrect answers", () => {
+      spyOn(component as any, "showToastMessage");
       component.userAnswer = component.mathAnswer + 1;
       component.validateCaptcha();
-      
+
       expect((component as any).showToastMessage).toHaveBeenCalledWith(
-        'Respuesta incorrecta. Inténtalo de nuevo.',
-        'error'
+        "Respuesta incorrecta. Inténtalo de nuevo.",
+        "error"
       );
     });
 
-    it('should not show error for correct answers', () => {
-      spyOn(component as any, 'showToastMessage');
+    it("should not show error for correct answers", () => {
+      spyOn(component as any, "showToastMessage");
       component.userAnswer = component.mathAnswer;
       component.validateCaptcha();
-      
+
       expect((component as any).showToastMessage).not.toHaveBeenCalled();
     });
 
-    it('should block registration until CAPTCHA is solved', () => {
-      component.name = 'John';
-      component.firstName = 'Doe';
-      component.lastName = 'Smith';
-      component.user = 'valid@email.com';
-      component.password = 'password123';
+    it("should block registration until CAPTCHA is solved", () => {
+      component.name = "John";
+      component.firstName = "Doe";
+      component.lastName = "Smith";
+      component.user = "valid@email.com";
+      component.password = "password123";
       component.captchaSolved = false;
-      
+
       expect(component.canSubmitRegister()).toBeFalse();
-      
+
       component.captchaSolved = true;
       expect(component.canSubmitRegister()).toBeTrue();
     });
 
-    it('should generate new question on refresh', () => {
+    it("should generate new question on refresh", () => {
       const originalQuestion = component.mathQuestion;
       const originalAnswer = component.mathAnswer;
-      
+
       component.refreshCaptcha();
-      
+
       expect(component.mathQuestion).not.toBe(originalQuestion);
       expect(component.mathAnswer).not.toBe(originalAnswer);
       expect(component.userAnswer).toBe(0);
       expect(component.captchaSolved).toBeFalse();
     });
 
-    it('should reset CAPTCHA when switching to login mode', () => {
+    it("should reset CAPTCHA when switching to login mode", () => {
       component.register = true;
       component.generateMathQuestion();
       component.captchaSolved = true;
-      
+
       component.toggleRegisterModal(); // Switch to login
-      
-      expect(component.mathQuestion).toBe('');
+
+      expect(component.mathQuestion).toBe("");
       expect(component.mathAnswer).toBe(0);
       expect(component.userAnswer).toBe(0);
       expect(component.captchaSolved).toBeFalse();
     });
 
-    it('should generate CAPTCHA when switching to register mode', () => {
+    it("should generate CAPTCHA when switching to register mode", () => {
       component.register = false;
       component.resetCaptcha();
-      
+
       component.toggleRegisterModal(); // Switch to register
-      
-      expect(component.mathQuestion).not.toBe('');
+
+      expect(component.mathQuestion).not.toBe("");
       expect(component.mathAnswer).toBeGreaterThan(0);
       expect(component.userAnswer).toBe(0);
       expect(component.captchaSolved).toBeFalse();
     });
 
-    it('should handle multiple CAPTCHA attempts', () => {
+    it("should handle multiple CAPTCHA attempts", () => {
       // First attempt - wrong answer
       component.userAnswer = component.mathAnswer + 1;
       component.validateCaptcha();
       expect(component.captchaSolved).toBeFalse();
-      
+
       // Second attempt - correct answer
       component.userAnswer = component.mathAnswer;
       component.validateCaptcha();
       expect(component.captchaSolved).toBeTrue();
     });
 
-    it('should maintain CAPTCHA state during form validation', () => {
-      component.name = 'John';
-      component.firstName = 'Doe';
-      component.lastName = 'Smith';
-      component.user = 'valid@email.com';
-      component.password = 'password123';
-      
+    it("should maintain CAPTCHA state during form validation", () => {
+      component.name = "John";
+      component.firstName = "Doe";
+      component.lastName = "Smith";
+      component.user = "valid@email.com";
+      component.password = "password123";
+
       // Form valid but CAPTCHA not solved
       expect(component.canSubmitRegister()).toBeFalse();
-      
+
       // Solve CAPTCHA
       component.userAnswer = component.mathAnswer;
       component.validateCaptcha();
       expect(component.canSubmitRegister()).toBeTrue();
     });
 
-    it('should handle CAPTCHA refresh after solving', () => {
+    it("should handle CAPTCHA refresh after solving", () => {
       // Solve CAPTCHA first
       component.userAnswer = component.mathAnswer;
       component.validateCaptcha();
       expect(component.captchaSolved).toBeTrue();
-      
+
       // Refresh should reset everything
       component.refreshCaptcha();
       expect(component.captchaSolved).toBeFalse();
       expect(component.userAnswer).toBe(0);
     });
   });
-
 });

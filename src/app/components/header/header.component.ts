@@ -1,18 +1,18 @@
-import { Component } from '@angular/core';
-import { NgIf, AsyncPipe } from '@angular/common';
-import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
-import { AuthService } from '../../services/auth.service';
-import { SurveyEventService } from '../../services/evento-encuesta.service';
-import { ChatService } from '../../services/chat.service';
-import { ModalService } from '../../services/modal.service';
+import { Component } from "@angular/core";
+import { NgIf, AsyncPipe } from "@angular/common";
+import { Router } from "@angular/router";
+import { Observable } from "rxjs";
+import { AuthService } from "../../services/auth.service";
+import { SurveyEventService } from "../../services/evento-encuesta.service";
+import { ChatService } from "../../services/chat.service";
+import { ModalService } from "../../services/modal.service";
 
 @Component({
-  selector: 'app-header',
+  selector: "app-header",
   standalone: true,
   imports: [NgIf, AsyncPipe],
-  templateUrl: './header.component.html',
-  styleUrl: './header.component.css',
+  templateUrl: "./header.component.html",
+  styleUrl: "./header.component.css",
 })
 export class HeaderComponent {
   is_author = false;
@@ -37,18 +37,18 @@ export class HeaderComponent {
         return;
       }
       // Anonymous user
-      if ('anonymous_id' in user) {
+      if ("anonymous_id" in user) {
         this.is_author = false;
         this.is_staff = false;
       }
       // Staff/autor flags if present
-      if ('is_staff' in user) this.is_staff = !!user.is_staff;
-      if ('is_author' in user) this.is_author = !!user.is_author;
+      if ("is_staff" in user) this.is_staff = !!user.is_staff;
+      if ("is_author" in user) this.is_author = !!user.is_author;
     });
   }
 
   viewFYP() {
-    this.router.navigate(['/fyp']);
+    this.router.navigate(["/fyp"]);
   }
 
   openSurvey() {
@@ -59,9 +59,9 @@ export class HeaderComponent {
     try {
       this.chatService.clearSessions();
       this.auth.logout();
-      await this.router.navigate(['/home']);
+      await this.router.navigate(["/home"]);
     } catch (error) {
-      console.error('Error closing session:', error);
+      console.error("Error closing session:", error);
     }
   }
 }

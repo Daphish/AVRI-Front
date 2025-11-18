@@ -1,7 +1,7 @@
 <div class="recommendations-container">
   <div class="recommendation-title">Recomendaciones para ti</div>
 
-   <!-- Loading Spinner -->
+  <!-- Loading Spinner -->
   <div *ngIf="isLoadingRecommendations" class="loading-container">
     <div class="loading-spinner">
       <div class="spinner-large"></div>
@@ -15,7 +15,11 @@
       <i class="bi bi-exclamation-triangle error-icon"></i>
       <h3>Algo salió mal</h3>
       <p class="error-message">{{ errorMessage }}</p>
-      <button class="retry-button" (click)="retryLoadRecommendations()" [disabled]="isLoadingRecommendations">
+      <button
+        class="retry-button"
+        (click)="retryLoadRecommendations()"
+        [disabled]="isLoadingRecommendations"
+      >
         <div *ngIf="isLoadingRecommendations" class="loading-content">
           <div class="spinner"></div>
           <span>Reintentando...</span>
@@ -24,7 +28,6 @@
       </button>
     </div>
   </div>
-
 
   <!-- Content with recommendations -->
   <div *ngIf="!isLoadingRecommendations && !hasError">
@@ -36,7 +39,7 @@
         [ngClass]="{
           blue: doc.status === 'L',
           red: doc.status === 'R',
-          yellow: doc.status === 'E'
+          yellow: doc.status === 'E',
         }"
         (click)="openDocument(doc)"
         title="Click to view document details"
@@ -46,7 +49,7 @@
           class="doc-author"
           [ngClass]="{
             'blue-icon': doc.status === 'L' || doc.status === 'E',
-            'red-icon': doc.status === 'R'
+            'red-icon': doc.status === 'R',
           }"
         >
           {{ doc.author }}
@@ -55,7 +58,7 @@
           class="doc-icons"
           [ngClass]="{
             'blue-icon': doc.status === 'L' || doc.status === 'E',
-            'red-icon': doc.status === 'R'
+            'red-icon': doc.status === 'R',
           }"
         >
           <i class="bi bi-file-earmark-text"></i>
@@ -64,19 +67,25 @@
       </div>
     </div>
 
-
-  <!-- No recommendations message -->
-  <div *ngIf="recommendedDocsBack.length === 0 && recommendedDocs.length === 0" class="no-recommendations-container">
+    <!-- No recommendations message -->
+    <div
+      *ngIf="recommendedDocsBack.length === 0 && recommendedDocs.length === 0"
+      class="no-recommendations-container"
+    >
       <div class="no-recommendations-content">
         <i class="bi bi-search no-recommendations-icon"></i>
         <h3>No hay recomendaciones disponibles</h3>
-        <p>Intenta explorar más contenido para obtener recomendaciones personalizadas.</p>
+        <p>
+          Intenta explorar más contenido para obtener recomendaciones
+          personalizadas.
+        </p>
       </div>
     </div>
-  
-  <!-- Toast notification -->
-  <div *ngIf="showToast" class="toast toast-{{toastType}}">
-    <span>{{ toastMessage }}</span>
-    <i class="bi bi-x" (click)="showToast = false"></i>
+
+    <!-- Toast notification -->
+    <div *ngIf="showToast" class="toast toast-{{ toastType }}">
+      <span>{{ toastMessage }}</span>
+      <i class="bi bi-x" (click)="showToast = false"></i>
+    </div>
   </div>
 </div>

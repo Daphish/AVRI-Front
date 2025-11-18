@@ -1,7 +1,7 @@
-import { Pipe, PipeTransform } from '@angular/core';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { Pipe, PipeTransform } from "@angular/core";
+import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 
-@Pipe({ name: 'seguroHtml' })
+@Pipe({ name: "seguroHtml" })
 export class SeguroHtmlPipe implements PipeTransform {
   constructor(private sanitizer: DomSanitizer) {}
 
